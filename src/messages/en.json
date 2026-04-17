@@ -1,0 +1,26 @@
+﻿{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "howItWorks": "How It Works",
+    "testimonials": "Testimonials",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "contact": "Contact",
+    "bookTrial": "Book Free Trial"
+  },
+  "hero": {
+    "headline": "Learn Quran, Arabic & Islamic Studies with a Trusted Teacher",
+    "subheadline": "Personalized 1-on-1 online lessons for kids, adults, and new Muslims. Taught with patience, passion, and professional care.",
+    "cta": "Book Your Free Trial",
+    "watchIntro": "Watch Introduction"
+  },
+  "common": {
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "bookNow": "Book Now",
+    "readMore": "Read More",
+    "viewAll": "View All"
+  }
+}

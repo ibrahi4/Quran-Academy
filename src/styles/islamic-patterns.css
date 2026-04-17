@@ -1,0 +1,28 @@
+/* ===== ISLAMIC PATTERN STYLES ===== */
+
+/* Subtle Background Pattern */
+.bg-islamic-subtle {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='40,8 46,26 64,20 50,34 64,48 46,42 40,60 34,42 16,48 30,34 16,20 34,26' fill='none' stroke='%230D4F4F' stroke-width='0.3' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* Gold Pattern */
+.bg-islamic-gold {
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='40,8 46,26 64,20 50,34 64,48 46,42 40,60 34,42 16,48 30,34 16,20 34,26' fill='none' stroke='%23C8A96E' stroke-width='0.3' opacity='0.08'/%3E%3C/svg%3E");
+}
+
+/* Geometric Border Top */
+.border-islamic-top {
+  border-top: 3px solid transparent;
+  border-image: repeating-linear-gradient(
+      90deg,
+      #c8a96e 0px,
+      #c8a96e 10px,
+      transparent 10px,
+      transparent 15px,
+      #0d4f4f 15px,
+      #0d4f4f 25px,
+      transparent 25px,
+      transparent 30px
+    )
+    3;
+}
