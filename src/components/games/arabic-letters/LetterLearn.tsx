@@ -1,9 +1,10 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Volume2, Play, Eye, EyeOff, ArrowRight, BookOpen, Sun, Moon } from "lucide-react";
+import { Volume2, Play, Eye, EyeOff, ArrowRight, Sun, Moon, Pause } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import useArabicAudio from "@/hooks/useArabicAudio";
 import type { ArabicLetterFull } from "@/config/games";
 
 interface LetterLearnProps {
@@ -21,34 +22,18 @@ const TASHKEEL_CONFIG = [
 ];
 
 export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
   const [activeTashkeel, setActiveTashkeel] = useState<TashkeelKey | null>(null);
   const [showForms, setShowForms] = useState(false);
-
-  const speak = (text: string, rate: number = 0.6) => {
-    if (!("speechSynthesis" in window)) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "ar-SA";
-    utterance.rate = rate;
-    utterance.pitch = 1.0;
-    const voices = window.speechSynthesis.getVoices();
-    const arabicVoice = voices.find((v: SpeechSynthesisVoice) => v.lang.startsWith("ar"));
-    if (arabicVoice) utterance.voice = arabicVoice;
-    setIsPlaying(true);
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
-    window.speechSynthesis.speak(utterance);
-  };
+  const { speak, stop, isPlaying } = useArabicAudio();
 
   const playLetter = () => {
     setActiveTashkeel(null);
-    speak(letter.letter, 0.5);
+    speak(letter.letter, true);
   };
 
   const playTashkeel = (key: TashkeelKey) => {
     setActiveTashkeel(key);
-    speak(letter.tashkeel[key], 0.5);
+    speak(letter.tashkeel[key], true);
     setTimeout(() => setActiveTashkeel(null), 2000);
   };
 
@@ -65,17 +50,14 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       <div className="max-w-xl mx-auto px-4 py-8 md:py-12">
 
-        {/* === Letter Hero Card === */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden mb-8"
         >
-          {/* Top colored band */}
           <div className="bg-gradient-to-r from-primary via-secondary to-primary h-2" />
 
           <div className="p-8 md:p-10 text-center">
-            {/* Letter Circle */}
             <div
               className="relative w-44 h-44 md:w-56 md:h-56 mx-auto mb-6 cursor-pointer group"
               onClick={playLetter}
@@ -86,17 +68,14 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
                   {activeTashkeel ? letter.tashkeel[activeTashkeel] : letter.letter}
                 </span>
               </div>
-              {/* Sound indicator */}
               <div className="absolute bottom-0 right-0 bg-white rounded-full p-2.5 shadow-lg border border-gray-200 group-hover:scale-110 transition-transform">
                 <Volume2 className={"w-5 h-5 " + (isPlaying ? "text-primary animate-pulse" : "text-gray-400 group-hover:text-primary")} />
               </div>
             </div>
 
-            {/* Letter Name */}
             <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-1">{letter.name}</h2>
             <p className="text-base text-gray-400 mb-4">{letter.nameEn}</p>
 
-            {/* Group Badge */}
             <div className={"inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold " +
               (letter.group === "sun" ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-indigo-50 text-indigo-700 border border-indigo-200")}>
               <GroupIcon className="w-4 h-4" />
@@ -105,7 +84,6 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
           </div>
         </motion.div>
 
-        {/* === Play Button === */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -113,18 +91,17 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
           className="mb-8"
         >
           <button
-            onClick={playLetter}
+            onClick={() => { isPlaying ? stop() : playLetter(); }}
             className={"w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-bold text-lg transition-all duration-300 " +
               (isPlaying
                 ? "bg-amber-500 text-white shadow-lg shadow-amber-200"
                 : "bg-primary text-white shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:bg-primary/90")}
           >
-            {isPlaying ? <Volume2 className="w-6 h-6 animate-pulse" /> : <Play className="w-6 h-6" />}
+            {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
             <span>{isPlaying ? "Playing..." : "Listen to Letter"}</span>
           </button>
         </motion.div>
 
-        {/* === Tashkeel Grid === */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -156,7 +133,6 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
           </div>
         </motion.div>
 
-        {/* === Example Word === */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -167,7 +143,7 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
             Example Word
           </h3>
           <button
-            onClick={() => speak(letter.example.word, 0.6)}
+            onClick={() => speak(letter.example.word, true)}
             className="w-full bg-white border-2 border-gray-100 rounded-2xl p-6 text-center hover:border-primary/30 hover:shadow-lg transition-all duration-200 active:scale-[0.99] group"
           >
             <span className="text-5xl font-bold font-arabic text-primary block mb-2">{letter.example.word}</span>
@@ -180,7 +156,6 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
           </button>
         </motion.div>
 
-        {/* === Letter Forms (Collapsible) === */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -209,7 +184,7 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
-                    onClick={() => speak(form.form, 0.5)}
+                    onClick={() => speak(form.form, true)}
                     className="bg-white rounded-2xl p-4 text-center border border-gray-100 hover:border-primary/30 hover:shadow-md transition-all active:scale-[0.97]"
                   >
                     <span className="text-2xl md:text-3xl font-arabic font-bold text-gray-800 block mb-1">{form.form}</span>
@@ -222,7 +197,6 @@ export default function LetterLearn({ letter, onStartQuiz }: LetterLearnProps) {
           </AnimatePresence>
         </motion.div>
 
-        {/* === Start Quiz CTA === */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

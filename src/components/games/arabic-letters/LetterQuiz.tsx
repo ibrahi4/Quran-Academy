@@ -4,6 +4,7 @@ import React, { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Volume2, CheckCircle, XCircle, Zap } from "lucide-react";
 import ProgressBar from "../shared/ProgressBar";
+import useArabicAudio from "@/hooks/useArabicAudio";
 
 interface Letter {
   id: number;
@@ -44,6 +45,7 @@ interface Question {
 export default function LetterQuiz({ currentLetter, allLetters, onScoreUpdate, onComplete }: LetterQuizProps) {
   const TOTAL_QUESTIONS = 6;
   const POINTS_PER_QUESTION = 20;
+  const { speak } = useArabicAudio();
 
   const questions = useMemo(() => {
     const qs: Question[] = [];
@@ -51,7 +53,7 @@ export default function LetterQuiz({ currentLetter, allLetters, onScoreUpdate, o
 
     qs.push({
       type: "identify-letter",
-      prompt: `\u0623\u064A\u0646 \u062D\u0631\u0641 "${currentLetter.name}"?`,
+      prompt: `\u0623\u064A\u0646 \u062D\u0631\u0641 "${currentLetter.name}"\u061F`,
       options: shuffleArray([
         { text: currentLetter.letter, isCorrect: true },
         ...wrongLetters.slice(0, 3).map((l) => ({ text: l.letter, isCorrect: false })),
@@ -60,7 +62,7 @@ export default function LetterQuiz({ currentLetter, allLetters, onScoreUpdate, o
 
     qs.push({
       type: "identify-name",
-      prompt: "\u0645\u0627 \u0627\u0633\u0645 \u0647\u0630\u0627 \u0627\u0644\u062D\u0631\u0641?",
+      prompt: "\u0645\u0627 \u0627\u0633\u0645 \u0647\u0630\u0627 \u0627\u0644\u062D\u0631\u0641\u061F",
       displayLetter: currentLetter.letter,
       options: shuffleArray([
         { text: currentLetter.name, isCorrect: true },
@@ -70,7 +72,7 @@ export default function LetterQuiz({ currentLetter, allLetters, onScoreUpdate, o
 
     qs.push({
       type: "identify-sound",
-      prompt: `\u0645\u0627 \u0635\u0648\u062A \u062D\u0631\u0641 "${currentLetter.letter}"?`,
+      prompt: `\u0645\u0627 \u0635\u0648\u062A \u062D\u0631\u0641 "${currentLetter.letter}"\u061F`,
       displayLetter: currentLetter.letter,
       options: shuffleArray([
         { text: currentLetter.sound.toUpperCase(), isCorrect: true },
@@ -91,7 +93,7 @@ export default function LetterQuiz({ currentLetter, allLetters, onScoreUpdate, o
     const wrongLetters3 = getRandomLetters(allLetters, currentLetter, 3);
     qs.push({
       type: "identify-name",
-      prompt: `"${currentLetter.letter}" - \u0645\u0627 \u0627\u0633\u0645\u0647?`,
+      prompt: `"${currentLetter.letter}" - \u0645\u0627 \u0627\u0633\u0645\u0647\u061F`,
       displayLetter: currentLetter.letter,
       options: shuffleArray([
         { text: currentLetter.nameEn, isCorrect: true },
@@ -101,7 +103,7 @@ export default function LetterQuiz({ currentLetter, allLetters, onScoreUpdate, o
 
     qs.push({
       type: "odd-one-out",
-      prompt: `"${currentLetter.letter}" \u0647\u0644 \u0647\u0648 \u062D\u0631\u0641...?`,
+      prompt: `"${currentLetter.letter}" \u0647\u0644 \u0647\u0648 \u062D\u0631\u0641...\u061F`,
       displayLetter: currentLetter.letter,
       options: shuffleArray([
         { text: currentLetter.group === "sun" ? "\u2600\uFE0F \u0634\u0645\u0633\u064A" : "\uD83C\uDF19 \u0642\u0645\u0631\u064A", isCorrect: true },
@@ -167,12 +169,7 @@ export default function LetterQuiz({ currentLetter, allLetters, onScoreUpdate, o
   );
 
   const playLetterSound = () => {
-    if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(currentLetter.letter);
-      utterance.lang = "ar-SA";
-      utterance.rate = 0.7;
-      speechSynthesis.speak(utterance);
-    }
+    speak(currentLetter.letter, true);
   };
 
   return (
