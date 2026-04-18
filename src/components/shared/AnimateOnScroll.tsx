@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { useIntersectionObserver } from "../../hooks/useIntersectionObserver";
 import { cn } from "../../lib/utils";
-
+import { Variants } from "framer-motion";
 type AnimationType =
   | "fadeUp"
   | "fadeDown"
@@ -71,7 +71,7 @@ export default function AnimateOnScroll({
       <motion.div
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
-        variants={animations[animation]}
+         variants={animations[animation] as Variants}
         transition={{
           duration,
           delay,

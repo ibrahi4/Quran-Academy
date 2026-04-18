@@ -1,4 +1,4 @@
-﻿{
+{
   "nav": {
     "home": "Home",
     "about": "About",
@@ -8,7 +8,8 @@
     "pricing": "Pricing",
     "blog": "Blog",
     "contact": "Contact",
-    "bookTrial": "Book Free Trial"
+    "bookTrial": "Book Free Trial",
+    "games": "Games"
   },
   "hero": {
     "headline": "Learn Quran, Arabic & Islamic Studies with a Trusted Teacher",
@@ -22,5 +23,1517 @@
     "bookNow": "Book Now",
     "readMore": "Read More",
     "viewAll": "View All"
+  },
+  "faq": {
+    "hero": {
+      "badge": "Got Questions?",
+      "title": "Frequently Asked Questions",
+      "subtitle": "Find answers to the most common questions about our programs.",
+      "searchPlaceholder": "Search for a question..."
+    },
+    "categories": {
+      "all": "All Questions",
+      "general": "General",
+      "lessons": "Lessons",
+      "pricing": "Pricing & Plans",
+      "scheduling": "Scheduling",
+      "curriculum": "Curriculum",
+      "technical": "Technical"
+    },
+    "general": {
+      "count": "4",
+      "items": {
+        "0": {
+          "q": "Who is Ibrahim Abdelnasser?",
+          "a": "A certified Quran and Arabic teacher with over 10 years of experience."
+        },
+        "1": {
+          "q": "What subjects do you teach?",
+          "a": "Quran Recitation, Tajweed, Memorization, Arabic, and Islamic Studies."
+        },
+        "2": {
+          "q": "Who are your lessons suitable for?",
+          "a": "Everyone — kids, adults, new Muslims, and non-Arabic speakers."
+        },
+        "3": {
+          "q": "What makes your teaching different?",
+          "a": "Traditional scholarship combined with modern, personalized methods."
+        }
+      }
+    },
+    "lessons": {
+      "count": "4",
+      "items": {
+        "0": {
+          "q": "How are lessons conducted?",
+          "a": "Online via Zoom or Google Meet."
+        },
+        "1": {
+          "q": "How long is each lesson?",
+          "a": "30 or 60 minutes depending on the plan."
+        },
+        "2": {
+          "q": "Do you give homework?",
+          "a": "Yes! Practice exercises after each lesson."
+        },
+        "3": {
+          "q": "Can I take a trial lesson?",
+          "a": "Yes! FREE 30-minute trial with zero obligation."
+        }
+      }
+    },
+    "pricing": {
+      "count": "4",
+      "items": {
+        "0": {
+          "q": "How much do lessons cost?",
+          "a": "Flexible monthly packages at affordable rates."
+        },
+        "1": {
+          "q": "Family discounts?",
+          "a": "Yes! Special rates for families."
+        },
+        "2": {
+          "q": "Payment methods?",
+          "a": "PayPal, bank transfer, Wise, and more."
+        },
+        "3": {
+          "q": "Refund policy?",
+          "a": "Full refund if not satisfied after the first week."
+        }
+      }
+    },
+    "scheduling": {
+      "count": "3",
+      "items": {
+        "0": {
+          "q": "Available hours?",
+          "a": "7 days a week, flexible across all time zones."
+        },
+        "1": {
+          "q": "Can I reschedule?",
+          "a": "Yes, with 12 hours notice."
+        },
+        "2": {
+          "q": "Technical issues?",
+          "a": "Missed time is made up at no cost."
+        }
+      }
+    },
+    "curriculum": {
+      "count": "3",
+      "items": {
+        "0": {
+          "q": "Specific curriculum?",
+          "a": "Yes! Structured and tailored curricula."
+        },
+        "1": {
+          "q": "Progress tracking?",
+          "a": "Detailed records and monthly reports."
+        },
+        "2": {
+          "q": "Quran competitions?",
+          "a": "Yes! Experience with competitions."
+        }
+      }
+    },
+    "technical": {
+      "count": "3",
+      "items": {
+        "0": {
+          "q": "What do I need?",
+          "a": "Device with camera/mic, internet, Zoom or Meet."
+        },
+        "1": {
+          "q": "Record lessons?",
+          "a": "Not by default for privacy."
+        },
+        "2": {
+          "q": "Information safe?",
+          "a": "Strictly confidential."
+        }
+      }
+    },
+    "cta": {
+      "title": "Still Have Questions?",
+      "subtitle": "Don''t hesitate to reach out.",
+      "whatsapp": "Chat on WhatsApp",
+      "contact": "Send a Message"
+    }
+  },
+  "howItWorks": {
+    "hero": {
+      "badge": "Simple & Easy",
+      "title": "How It Works",
+      "subtitle": "Follow these simple steps to begin your learning journey."
+    },
+    "steps": {
+      "badge": "Your Journey",
+      "title": "6 Simple Steps to Start Learning",
+      "subtitle": "From first click to achieving your goals.",
+      "items": {
+        "0": {
+          "title": "Book Your Free Trial",
+          "description": "Fill out the form or send a WhatsApp message."
+        },
+        "1": {
+          "title": "Free Consultation",
+          "description": "We discuss your level, goals, and preferences."
+        },
+        "2": {
+          "title": "Personalized Plan",
+          "description": "A customized curriculum for your needs."
+        },
+        "3": {
+          "title": "Start Lessons",
+          "description": "Regular sessions via Zoom or Google Meet."
+        },
+        "4": {
+          "title": "Track Progress",
+          "description": "Feedback, homework, and monthly reports."
+        },
+        "5": {
+          "title": "Achieve Goals",
+          "description": "Celebrate your learning milestones."
+        }
+      }
+    },
+    "requirements": {
+      "badge": "Before You Start",
+      "title": "What You Will Need",
+      "subtitle": "A few simple things to get started.",
+      "items": {
+        "0": {
+          "title": "A Device",
+          "description": "Laptop, tablet, or smartphone."
+        },
+        "1": {
+          "title": "Stable Internet",
+          "description": "Reliable connection for video calls."
+        },
+        "2": {
+          "title": "Headphones",
+          "description": "Better audio quality."
+        },
+        "3": {
+          "title": "30-60 Minutes",
+          "description": "Quiet time with minimal distractions."
+        }
+      }
+    },
+    "platforms": {
+      "badge": "Platforms",
+      "title": "Where We Meet",
+      "subtitle": "Choose your preferred platform.",
+      "items": {
+        "0": {
+          "name": "Zoom",
+          "description": "Primary platform with excellent tools."
+        },
+        "1": {
+          "name": "Google Meet",
+          "description": "Simple, works from browser."
+        }
+      },
+      "features": {
+        "0": {
+          "title": "Secure & Private",
+          "description": "Encrypted sessions."
+        },
+        "1": {
+          "title": "Interactive Tools",
+          "description": "Screen sharing and whiteboard."
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Begin?",
+      "subtitle": "Book your free trial today.",
+      "button": "Book Your Free Trial Now"
+    }
+  },
+  "testimonials": {
+    "hero": {
+      "badge": "Student Reviews",
+      "title": "What Our Students Say",
+      "subtitle": "Hear from students and parents worldwide.",
+      "reviewCount": "500+ Happy Students"
+    },
+    "filters": {
+      "all": "All Reviews",
+      "parents": "Parents",
+      "adults": "Adults",
+      "newMuslims": "New Muslims",
+      "kids": "Kids"
+    },
+    "noResults": "No testimonials found for this category.",
+    "stats": {
+      "items": {
+        "0": {
+          "value": "500+",
+          "label": "Happy Students"
+        },
+        "1": {
+          "value": "15+",
+          "label": "Countries"
+        },
+        "2": {
+          "value": "4.9/5",
+          "label": "Average Rating"
+        },
+        "3": {
+          "value": "98%",
+          "label": "Satisfaction Rate"
+        }
+      }
+    },
+    "list": {
+      "count": "9",
+      "items": {
+        "0": {
+          "name": "Sarah Johnson",
+          "role": "Parent of 2",
+          "country": "USA",
+          "category": "parents",
+          "rating": "5",
+          "text": "My children have been learning with Ibrahim for over a year. His patience is unmatched!",
+          "course": "Quran & Tajweed"
+        },
+        "1": {
+          "name": "Ahmed Al-Rashid",
+          "role": "Adult Learner",
+          "country": "UK",
+          "category": "adults",
+          "rating": "5",
+          "text": "Memorized 10 Juz in 18 months. Brilliant methodology.",
+          "course": "Quran Memorization"
+        },
+        "2": {
+          "name": "Emily Roberts",
+          "role": "New Muslim",
+          "country": "Canada",
+          "category": "newMuslims",
+          "rating": "5",
+          "text": "Made learning Islam easy and comfortable. Forever grateful!",
+          "course": "Islamic Studies"
+        },
+        "3": {
+          "name": "Fatima Hassan",
+          "role": "Mother of 3",
+          "country": "Australia",
+          "category": "parents",
+          "rating": "5",
+          "text": "All three kids look forward to lessons every week.",
+          "course": "Kids Program"
+        },
+        "4": {
+          "name": "James Mitchell",
+          "role": "Convert",
+          "country": "Germany",
+          "category": "newMuslims",
+          "rating": "5",
+          "text": "Learned Arabic from zero. Now I read Quran independently!",
+          "course": "Arabic Language"
+        },
+        "5": {
+          "name": "Aisha Mohamed",
+          "role": "Student",
+          "country": "Malaysia",
+          "category": "adults",
+          "rating": "5",
+          "text": "Won first place in Quran competition thanks to Ibrahim!",
+          "course": "Tajweed"
+        },
+        "6": {
+          "name": "Omar Yusuf",
+          "role": "Age 12",
+          "country": "Sweden",
+          "category": "kids",
+          "rating": "5",
+          "text": "I love my Quran lessons! Memorized Juz Amma!",
+          "course": "Quran Memorization"
+        },
+        "7": {
+          "name": "Lisa Anderson",
+          "role": "Parent",
+          "country": "Netherlands",
+          "category": "parents",
+          "rating": "5",
+          "text": "Monthly progress reports are fantastic. A gifted teacher.",
+          "course": "Quran & Arabic"
+        },
+        "8": {
+          "name": "Muhammad Ibrahim",
+          "role": "Retired",
+          "country": "USA",
+          "category": "adults",
+          "rating": "5",
+          "text": "At 65, I read Quran fluently now. Never too late!",
+          "course": "Quran Recitation"
+        }
+      }
+    },
+    "video": {
+      "badge": "Video Reviews",
+      "title": "Watch Student Stories",
+      "subtitle": "Real experiences and journeys.",
+      "count": "3",
+      "items": {
+        "0": {
+          "name": "Sarah & Family",
+          "course": "Quran for Kids",
+          "thumbnail": "/testimonials/video-1.jpg"
+        },
+        "1": {
+          "name": "Ahmed Al-Rashid",
+          "course": "Hifz Journey",
+          "thumbnail": "/testimonials/video-2.jpg"
+        },
+        "2": {
+          "name": "Emily Roberts",
+          "course": "New Muslim Journey",
+          "thumbnail": "/testimonials/video-3.jpg"
+        }
+      }
+    },
+    "cta": {
+      "title": "Join Our Growing Family",
+      "subtitle": "Start your free trial today.",
+      "button": "Start Your Free Trial"
+    }
+  },
+  "serviceDetails": {
+    "quran-recitation": {
+      "badge": "Quran Recitation",
+      "title": "Master Beautiful Quran Recitation",
+      "subtitle": "Learn to recite the Quran with proper pronunciation, fluency, and confidence.",
+      "cta": "Start Learning Now",
+      "viewPricing": "View Pricing",
+      "stats": {
+        "0": {
+          "value": "200+",
+          "label": "Students Taught"
+        },
+        "1": {
+          "value": "4.9",
+          "label": "Rating"
+        },
+        "2": {
+          "value": "10+",
+          "label": "Years Experience"
+        },
+        "3": {
+          "value": "100%",
+          "label": "Personalized"
+        }
+      },
+      "features": {
+        "badge": "What You Will Learn",
+        "title": "Comprehensive Recitation Program",
+        "subtitle": "A structured approach to mastering recitation.",
+        "count": "6",
+        "items": {
+          "0": {
+            "title": "Arabic Alphabet Mastery",
+            "description": "Learn all Arabic letters with their forms and sounds."
+          },
+          "1": {
+            "title": "Proper Pronunciation",
+            "description": "Master Makharij of every letter."
+          },
+          "2": {
+            "title": "Fluent Reading",
+            "description": "Smooth recitation with proper pausing rules."
+          },
+          "3": {
+            "title": "Verse by Verse",
+            "description": "Systematic progression through surahs."
+          },
+          "4": {
+            "title": "Recitation Styles",
+            "description": "Tahqiq, Tadwir, and Hadr speeds."
+          },
+          "5": {
+            "title": "Daily Practice Plan",
+            "description": "Structured homework and daily routines."
+          }
+        }
+      },
+      "curriculum": {
+        "badge": "Curriculum",
+        "title": "Your Learning Path",
+        "subtitle": "From beginner to advanced recitation.",
+        "count": "3",
+        "levels": {
+          "0": {
+            "title": "Beginner",
+            "description": "Foundation in Arabic reading.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Arabic alphabet and forms",
+              "1": "Short vowels (Harakat)",
+              "2": "Connecting letters",
+              "3": "Short surahs from Juz Amma"
+            }
+          },
+          "1": {
+            "title": "Intermediate",
+            "description": "Fluency and basic Tajweed.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Long vowels and Sukoon",
+              "1": "Tanween and Shaddah",
+              "2": "Basic Tajweed application",
+              "3": "Longer surahs with confidence"
+            }
+          },
+          "2": {
+            "title": "Advanced",
+            "description": "Perfection and Ijazah prep.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Advanced Tajweed rules",
+              "1": "Recitation with Maqamat",
+              "2": "Full Quran review",
+              "3": "Ijazah preparation"
+            }
+          }
+        }
+      },
+      "audience": {
+        "badge": "Who Is This For?",
+        "title": "Perfect For You If...",
+        "subtitle": "For learners at every stage.",
+        "count": "6",
+        "items": {
+          "0": {
+            "title": "Complete Beginners",
+            "description": "Start from zero."
+          },
+          "1": {
+            "title": "Non-Arabic Speakers",
+            "description": "Read Quran regardless of language."
+          },
+          "2": {
+            "title": "Rusty Readers",
+            "description": "Refresh your skills."
+          },
+          "3": {
+            "title": "Kids (Age 5+)",
+            "description": "Fun engaging lessons."
+          },
+          "4": {
+            "title": "New Muslims",
+            "description": "Welcoming supportive environment."
+          },
+          "5": {
+            "title": "Advanced Reciters",
+            "description": "Polish and get Ijazah."
+          }
+        }
+      },
+      "serviceCta": {
+        "title": "Start Your Quran Recitation Journey",
+        "subtitle": "Book a free trial and experience personalized teaching.",
+        "bookTrial": "Book Free Trial",
+        "whatsapp": "Chat on WhatsApp"
+      }
+    },
+    "tajweed": {
+      "badge": "Tajweed Course",
+      "title": "Perfect Your Tajweed",
+      "subtitle": "Master the science of Quran recitation with a certified teacher.",
+      "cta": "Start Learning Now",
+      "viewPricing": "View Pricing",
+      "stats": {
+        "0": {
+          "value": "150+",
+          "label": "Students"
+        },
+        "1": {
+          "value": "5.0",
+          "label": "Rating"
+        },
+        "2": {
+          "value": "Ijazah",
+          "label": "Certified"
+        },
+        "3": {
+          "value": "Hafs",
+          "label": "An Asim"
+        }
+      },
+      "features": {
+        "badge": "What You Will Learn",
+        "title": "Complete Tajweed Mastery",
+        "subtitle": "Every rule explained and perfected.",
+        "count": "6",
+        "items": {
+          "0": {
+            "title": "Articulation Points",
+            "description": "Master Makharij al-Huroof."
+          },
+          "1": {
+            "title": "Letter Characteristics",
+            "description": "Learn Sifaat al-Huroof."
+          },
+          "2": {
+            "title": "Noon & Meem Rules",
+            "description": "Ikhfa, Idgham, Iqlab, Izhar."
+          },
+          "3": {
+            "title": "Madd Rules",
+            "description": "All elongation rules with correct timing."
+          },
+          "4": {
+            "title": "Stopping & Starting",
+            "description": "Waqf and Ibtida rules."
+          },
+          "5": {
+            "title": "Practical Application",
+            "description": "Apply rules during live recitation."
+          }
+        }
+      },
+      "curriculum": {
+        "badge": "Curriculum",
+        "title": "Tajweed Learning Path",
+        "subtitle": "From foundation to Ijazah.",
+        "count": "3",
+        "levels": {
+          "0": {
+            "title": "Foundation",
+            "description": "Essential concepts.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Introduction to Tajweed",
+              "1": "Heavy and light letters",
+              "2": "Noon Sakinah rules",
+              "3": "Meem Sakinah rules"
+            }
+          },
+          "1": {
+            "title": "Intermediate",
+            "description": "Deeper understanding.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "All Madd types",
+              "1": "Lam rules",
+              "2": "Qalqalah levels",
+              "3": "Ra and Lam Jalalah rules"
+            }
+          },
+          "2": {
+            "title": "Advanced & Ijazah",
+            "description": "Perfection level.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Advanced Makharij",
+              "1": "Hamzah al-Wasl",
+              "2": "Rasm Uthmani",
+              "3": "Full review for Ijazah"
+            }
+          }
+        }
+      },
+      "audience": {
+        "badge": "Who Is This For?",
+        "title": "This Course Is For",
+        "subtitle": "Anyone wanting correct recitation.",
+        "count": "4",
+        "items": {
+          "0": {
+            "title": "Quran Readers",
+            "description": "Apply Tajweed correctly."
+          },
+          "1": {
+            "title": "Hifz Students",
+            "description": "Ensure perfect recitation."
+          },
+          "2": {
+            "title": "Competition Prep",
+            "description": "Preparing for competitions."
+          },
+          "3": {
+            "title": "Ijazah Seekers",
+            "description": "Earn certified Ijazah."
+          }
+        }
+      },
+      "serviceCta": {
+        "title": "Perfect Your Recitation Today",
+        "subtitle": "Learn from a teacher with connected chain to the Prophet.",
+        "bookTrial": "Book Free Trial",
+        "whatsapp": "Chat on WhatsApp"
+      }
+    },
+    "arabic-language": {
+      "badge": "Arabic Language",
+      "title": "Learn Arabic with Confidence",
+      "subtitle": "From alphabet to fluency — reading, writing, grammar, and conversation.",
+      "cta": "Start Learning Now",
+      "viewPricing": "View Pricing",
+      "stats": {
+        "0": {
+          "value": "180+",
+          "label": "Students"
+        },
+        "1": {
+          "value": "4.9",
+          "label": "Rating"
+        },
+        "2": {
+          "value": "A1-C1",
+          "label": "All Levels"
+        },
+        "3": {
+          "value": "MSA",
+          "label": "& Quranic"
+        }
+      },
+      "features": {
+        "badge": "What You Will Learn",
+        "title": "Complete Arabic Program",
+        "subtitle": "All skills covered.",
+        "count": "6",
+        "items": {
+          "0": {
+            "title": "Reading & Writing",
+            "description": "Master Arabic script."
+          },
+          "1": {
+            "title": "Grammar (Nahw)",
+            "description": "Sentence structure and conjugation."
+          },
+          "2": {
+            "title": "Morphology (Sarf)",
+            "description": "Word patterns and root systems."
+          },
+          "3": {
+            "title": "Vocabulary",
+            "description": "Practical and Quranic terms."
+          },
+          "4": {
+            "title": "Conversation",
+            "description": "Real-life speaking practice."
+          },
+          "5": {
+            "title": "Quranic Arabic",
+            "description": "Understand the Quran in Arabic."
+          }
+        }
+      },
+      "curriculum": {
+        "badge": "Curriculum",
+        "title": "Arabic Learning Path",
+        "subtitle": "Structured progression.",
+        "count": "3",
+        "levels": {
+          "0": {
+            "title": "Beginner (A1-A2)",
+            "description": "Build foundation.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Alphabet and writing",
+              "1": "Basic vocabulary",
+              "2": "Simple sentences",
+              "3": "Self-introduction"
+            }
+          },
+          "1": {
+            "title": "Intermediate (B1-B2)",
+            "description": "Develop fluency.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Grammar and verbs",
+              "1": "Reading comprehension",
+              "2": "Paragraph writing",
+              "3": "Conversation practice"
+            }
+          },
+          "2": {
+            "title": "Advanced (C1)",
+            "description": "Academic mastery.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Advanced Nahw & Sarf",
+              "1": "Literature and rhetoric",
+              "2": "Quranic Arabic analysis",
+              "3": "Formal writing"
+            }
+          }
+        }
+      },
+      "audience": {
+        "badge": "Who Is This For?",
+        "title": "Perfect For",
+        "subtitle": "Anyone who dreams of Arabic.",
+        "count": "4",
+        "items": {
+          "0": {
+            "title": "Complete Beginners",
+            "description": "Start from zero."
+          },
+          "1": {
+            "title": "Quran Students",
+            "description": "Understand what you recite."
+          },
+          "2": {
+            "title": "Travel & Culture",
+            "description": "Visit Arab countries."
+          },
+          "3": {
+            "title": "Academic",
+            "description": "Islamic sciences study."
+          }
+        }
+      },
+      "serviceCta": {
+        "title": "Start Speaking Arabic",
+        "subtitle": "Personalized lessons for your goals.",
+        "bookTrial": "Book Free Trial",
+        "whatsapp": "Chat on WhatsApp"
+      }
+    },
+    "islamic-studies": {
+      "badge": "Islamic Studies",
+      "title": "Deepen Your Islamic Knowledge",
+      "subtitle": "Aqeedah, Fiqh, Seerah, Hadith, and daily practices.",
+      "cta": "Start Learning Now",
+      "viewPricing": "View Pricing",
+      "stats": {
+        "0": {
+          "value": "120+",
+          "label": "Students"
+        },
+        "1": {
+          "value": "4.9",
+          "label": "Rating"
+        },
+        "2": {
+          "value": "All Ages",
+          "label": "Welcome"
+        },
+        "3": {
+          "value": "Authentic",
+          "label": "Sources"
+        }
+      },
+      "features": {
+        "badge": "What You Will Learn",
+        "title": "Comprehensive Islamic Education",
+        "subtitle": "From Quran and Sunnah.",
+        "count": "6",
+        "items": {
+          "0": {
+            "title": "Aqeedah",
+            "description": "Tawheed and pillars of Iman."
+          },
+          "1": {
+            "title": "Fiqh",
+            "description": "Worship, purification, prayer."
+          },
+          "2": {
+            "title": "Seerah",
+            "description": "Prophet''s life and lessons."
+          },
+          "3": {
+            "title": "Hadith",
+            "description": "Authentic traditions with application."
+          },
+          "4": {
+            "title": "Daily Adhkar",
+            "description": "Supplications and remembrances."
+          },
+          "5": {
+            "title": "Islamic Ethics",
+            "description": "Character based on Islamic values."
+          }
+        }
+      },
+      "curriculum": {
+        "badge": "Curriculum",
+        "title": "Islamic Studies Path",
+        "subtitle": "Step by step.",
+        "count": "3",
+        "levels": {
+          "0": {
+            "title": "Essentials",
+            "description": "Core knowledge.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Five Pillars",
+              "1": "Basic Aqeedah",
+              "2": "How to pray",
+              "3": "Essential Duas"
+            }
+          },
+          "1": {
+            "title": "Intermediate",
+            "description": "Deeper understanding.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Detailed Fiqh",
+              "1": "Prophet''s Seerah",
+              "2": "Hadith collections",
+              "3": "Islamic history"
+            }
+          },
+          "2": {
+            "title": "Advanced",
+            "description": "Scholarly level.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Comparative Fiqh",
+              "1": "Hadith authentication",
+              "2": "Tafseer principles",
+              "3": "Contemporary issues"
+            }
+          }
+        }
+      },
+      "audience": {
+        "badge": "Who Is This For?",
+        "title": "Designed For",
+        "subtitle": "Muslims seeking authentic knowledge.",
+        "count": "4",
+        "items": {
+          "0": {
+            "title": "New Muslims",
+            "description": "Learn essentials welcomingly."
+          },
+          "1": {
+            "title": "Born Muslims",
+            "description": "Deepen your knowledge."
+          },
+          "2": {
+            "title": "Parents",
+            "description": "Authentic education for kids."
+          },
+          "3": {
+            "title": "Knowledge Seekers",
+            "description": "From authentic sources."
+          }
+        }
+      },
+      "serviceCta": {
+        "title": "Begin Your Islamic Education",
+        "subtitle": "Learn from qualified sources.",
+        "bookTrial": "Book Free Trial",
+        "whatsapp": "Chat on WhatsApp"
+      }
+    },
+    "kids-program": {
+      "badge": "Kids Program",
+      "title": "Quran & Arabic for Kids",
+      "subtitle": "Fun, engaging education for children aged 5+.",
+      "cta": "Enroll Your Child",
+      "viewPricing": "View Pricing",
+      "stats": {
+        "0": {
+          "value": "150+",
+          "label": "Kids Taught"
+        },
+        "1": {
+          "value": "5+",
+          "label": "Age Group"
+        },
+        "2": {
+          "value": "Fun",
+          "label": "& Interactive"
+        },
+        "3": {
+          "value": "Safe",
+          "label": "Environment"
+        }
+      },
+      "features": {
+        "badge": "Program Highlights",
+        "title": "What Your Child Will Learn",
+        "subtitle": "Complete Islamic education for kids.",
+        "count": "6",
+        "items": {
+          "0": {
+            "title": "Quran Reading",
+            "description": "From Nooraniyah to independent reading."
+          },
+          "1": {
+            "title": "Memorization",
+            "description": "Structured Hifz from Juz Amma."
+          },
+          "2": {
+            "title": "Basic Tajweed",
+            "description": "Age-appropriate rules."
+          },
+          "3": {
+            "title": "Arabic for Kids",
+            "description": "Alphabet, vocabulary, conversation."
+          },
+          "4": {
+            "title": "Islamic Manners",
+            "description": "Stories, Duas, etiquette."
+          },
+          "5": {
+            "title": "Reward System",
+            "description": "Stars, certificates, fun activities."
+          }
+        }
+      },
+      "curriculum": {
+        "badge": "Curriculum",
+        "title": "Kids Learning Path",
+        "subtitle": "Age-appropriate progression.",
+        "count": "3",
+        "levels": {
+          "0": {
+            "title": "Ages 5-7",
+            "description": "Playful introduction.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Nooraniyah Qaida",
+              "1": "Short Surahs with audio",
+              "2": "Arabic alphabet games",
+              "3": "Basic Islamic manners"
+            }
+          },
+          "1": {
+            "title": "Ages 8-10",
+            "description": "Building skills.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Independent reading",
+              "1": "Juz Amma memorization",
+              "2": "Vocabulary building",
+              "3": "Stories of Prophets"
+            }
+          },
+          "2": {
+            "title": "Ages 11-14",
+            "description": "Advanced growth.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Tajweed application",
+              "1": "Extended Hifz",
+              "2": "Grammar basics",
+              "3": "Fiqh for youth"
+            }
+          }
+        }
+      },
+      "audience": {
+        "badge": "Who Is This For?",
+        "title": "Perfect For",
+        "subtitle": "Designed for children and parents.",
+        "count": "4",
+        "items": {
+          "0": {
+            "title": "Muslim Families Abroad",
+            "description": "Islamic education from home."
+          },
+          "1": {
+            "title": "Busy Parents",
+            "description": "Convenient online lessons."
+          },
+          "2": {
+            "title": "Homeschooling",
+            "description": "Add professional Quran & Arabic."
+          },
+          "3": {
+            "title": "Gifted Children",
+            "description": "Accelerated programs."
+          }
+        }
+      },
+      "serviceCta": {
+        "title": "Give Your Child the Gift of Quran",
+        "subtitle": "Fun, safe, professional education.",
+        "bookTrial": "Book Free Trial",
+        "whatsapp": "Chat on WhatsApp"
+      }
+    },
+    "new-muslims": {
+      "badge": "New Muslims Program",
+      "title": "Welcome to Islam",
+      "subtitle": "A warm, patient program for new Muslims.",
+      "cta": "Start Your Journey",
+      "viewPricing": "View Pricing",
+      "stats": {
+        "0": {
+          "value": "80+",
+          "label": "New Muslims"
+        },
+        "1": {
+          "value": "100%",
+          "label": "Supportive"
+        },
+        "2": {
+          "value": "Step by",
+          "label": "Step"
+        },
+        "3": {
+          "value": "No Prior",
+          "label": "Knowledge Needed"
+        }
+      },
+      "features": {
+        "badge": "What You Will Learn",
+        "title": "Your Complete Islamic Foundation",
+        "subtitle": "Everything to practice Islam with confidence.",
+        "count": "6",
+        "items": {
+          "0": {
+            "title": "Shahada & Beliefs",
+            "description": "Core Islamic beliefs."
+          },
+          "1": {
+            "title": "How to Pray",
+            "description": "Five daily prayers step by step."
+          },
+          "2": {
+            "title": "Quran from Zero",
+            "description": "Read Arabic and recite Quran."
+          },
+          "3": {
+            "title": "Essential Fiqh",
+            "description": "Purification, prayer, fasting."
+          },
+          "4": {
+            "title": "Daily Life",
+            "description": "Islamic etiquette and living."
+          },
+          "5": {
+            "title": "Community & Support",
+            "description": "Finding community and staying strong."
+          }
+        }
+      },
+      "curriculum": {
+        "badge": "Curriculum",
+        "title": "New Muslim Learning Path",
+        "subtitle": "Gentle step-by-step journey.",
+        "count": "3",
+        "levels": {
+          "0": {
+            "title": "First Steps",
+            "description": "Essential first weeks.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Understanding Shahada",
+              "1": "Learning to pray",
+              "2": "Basic Arabic for prayer",
+              "3": "Essential daily Duas"
+            }
+          },
+          "1": {
+            "title": "Building Foundation",
+            "description": "Expanding knowledge.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Reading from Qaida",
+              "1": "Fasting and Ramadan",
+              "2": "Stories of Prophets",
+              "3": "Islamic manners"
+            }
+          },
+          "2": {
+            "title": "Growing Stronger",
+            "description": "Deepening connection.",
+            "topicsCount": "4",
+            "topics": {
+              "0": "Independent recitation",
+              "1": "Understanding recitation",
+              "2": "Seerah of Prophet",
+              "3": "Dealing with challenges"
+            }
+          }
+        }
+      },
+      "audience": {
+        "badge": "Who Is This For?",
+        "title": "This Program Is For",
+        "subtitle": "A safe space for everyone.",
+        "count": "4",
+        "items": {
+          "0": {
+            "title": "New Converts",
+            "description": "Learn basics step by step."
+          },
+          "1": {
+            "title": "Exploring Islam",
+            "description": "Learn from a knowledgeable teacher."
+          },
+          "2": {
+            "title": "Returning Muslims",
+            "description": "Reconnect with your faith."
+          },
+          "3": {
+            "title": "Interfaith Couples",
+            "description": "Understand Islam better."
+          }
+        }
+      },
+      "serviceCta": {
+        "title": "Begin Your Beautiful Journey",
+        "subtitle": "You are not alone. Patience and care.",
+        "bookTrial": "Book Free Trial",
+        "whatsapp": "Chat on WhatsApp"
+      }
+    }
+  },
+  "blog": {
+    "hero": {
+      "badge": "Our Blog",
+      "title": "Knowledge & Insights",
+      "subtitle": "Articles, tips, and guides for your learning journey.",
+      "searchPlaceholder": "Search articles..."
+    },
+    "categories": {
+      "all": "All Articles",
+      "quran": "Quran",
+      "tajweed": "Tajweed",
+      "arabic": "Arabic",
+      "islamic": "Islamic Studies",
+      "tips": "Tips & Guides"
+    },
+    "noResults": "No articles found.",
+    "backToBlog": "Back to Blog",
+    "shareArticle": "Share this article",
+    "startLearning": "Start Learning Today",
+    "posts": {
+      "count": "6",
+      "items": {
+        "0": {
+          "slug": "how-to-start-learning-quran",
+          "title": "How to Start Learning Quran as a Complete Beginner",
+          "excerpt": "A comprehensive guide for anyone starting their Quran journey from scratch.",
+          "category": "quran",
+          "date": "Jan 15, 2025",
+          "readTime": "8 min read",
+          "author": "Ibrahim Abdelnasser"
+        },
+        "1": {
+          "slug": "tajweed-tips-for-beginners",
+          "title": "10 Essential Tajweed Tips Every Beginner Should Know",
+          "excerpt": "Practical tips to immediately improve your recitation quality.",
+          "category": "tajweed",
+          "date": "Feb 3, 2025",
+          "readTime": "6 min read",
+          "author": "Ibrahim Abdelnasser"
+        },
+        "2": {
+          "slug": "benefits-of-memorizing-quran",
+          "title": "The Incredible Benefits of Memorizing the Quran",
+          "excerpt": "Discover the spiritual, mental, and worldly benefits of Hifz.",
+          "category": "quran",
+          "date": "Feb 20, 2025",
+          "readTime": "7 min read",
+          "author": "Ibrahim Abdelnasser"
+        },
+        "3": {
+          "slug": "arabic-language-learning-guide",
+          "title": "The Ultimate Guide to Learning Arabic for Non-Speakers",
+          "excerpt": "Everything you need to know about learning Arabic from zero.",
+          "category": "arabic",
+          "date": "Mar 8, 2025",
+          "readTime": "10 min read",
+          "author": "Ibrahim Abdelnasser"
+        },
+        "4": {
+          "slug": "new-muslim-first-steps",
+          "title": "First Steps After Accepting Islam: A Practical Guide",
+          "excerpt": "A warm guide for new Muslims covering essential first steps.",
+          "category": "islamic",
+          "date": "Mar 25, 2025",
+          "readTime": "9 min read",
+          "author": "Ibrahim Abdelnasser"
+        },
+        "5": {
+          "slug": "teaching-quran-to-kids",
+          "title": "How to Make Quran Learning Fun for Kids",
+          "excerpt": "Proven strategies to help children love learning Quran.",
+          "category": "tips",
+          "date": "Apr 10, 2025",
+          "readTime": "7 min read",
+          "author": "Ibrahim Abdelnasser"
+        }
+      }
+    },
+    "cta": {
+      "title": "Ready to Start Your Journey?",
+      "subtitle": "Experience personalized learning with a dedicated teacher.",
+      "button": "Book Your Free Trial"
+    }
+  },
+  "blogPosts": {
+    "how-to-start-learning-quran": {
+      "title": "How to Start Learning Quran as a Complete Beginner",
+      "category": "Quran",
+      "author": "Ibrahim Abdelnasser",
+      "date": "January 15, 2025",
+      "readTime": "8 min read",
+      "introduction": "Learning the Quran is one of the most rewarding journeys a Muslim can embark on. This guide walks you through everything you need to get started.",
+      "sectionsCount": "5",
+      "sections": {
+        "0": {
+          "heading": "Start with the Arabic Alphabet",
+          "content": "Learn all 28 letters, their forms and sounds. The Nooraniyah Qaida is an excellent systematic resource for beginners."
+        },
+        "1": {
+          "heading": "Learn Basic Vowels and Pronunciation",
+          "content": "Master Fatha, Kasra, Damma, Sukoon, and Shaddah. Practice daily with simple words before moving to Quranic text."
+        },
+        "2": {
+          "heading": "Find a Qualified Teacher",
+          "content": "Nothing replaces a qualified teacher who can correct your pronunciation in real-time and guide your progress."
+        },
+        "3": {
+          "heading": "Set a Consistent Schedule",
+          "content": "15-20 minutes daily is better than 3 hours once a week. Consistency is key to progress."
+        },
+        "4": {
+          "heading": "Be Patient and Make Dua",
+          "content": "The one who struggles while reading gets double reward. Trust the process and make dua regularly."
+        }
+      },
+      "conclusionTitle": "Conclusion",
+      "conclusion": "With the right teacher, consistent practice, and sincere intention, you can go from complete beginner to confident reciter. Take that first step today."
+    },
+    "tajweed-tips-for-beginners": {
+      "title": "10 Essential Tajweed Tips Every Beginner Should Know",
+      "category": "Tajweed",
+      "author": "Ibrahim Abdelnasser",
+      "date": "February 3, 2025",
+      "readTime": "6 min read",
+      "introduction": "Tajweed is the science of reciting the Quran correctly. With the right approach, it becomes natural and enjoyable.",
+      "sectionsCount": "5",
+      "sections": {
+        "0": {
+          "heading": "Master the Makharij",
+          "content": "Every Arabic letter has a specific origin point. Learning where each comes from is the foundation of correct recitation."
+        },
+        "1": {
+          "heading": "Heavy and Light Letters",
+          "content": "Heavy letters include Sad, Dad, Taa, Dhaa, Ghayn, Kha, and Qaf. Getting this right dramatically improves recitation."
+        },
+        "2": {
+          "heading": "Noon Sakinah Rules",
+          "content": "Ikhfa, Idgham, Iqlab, Izhar — these determine how noon interacts with following letters."
+        },
+        "3": {
+          "heading": "Madd Rules",
+          "content": "Natural Madd is 2 counts, others can be 4 or 6. Correct timing is essential for beautiful recitation."
+        },
+        "4": {
+          "heading": "Listen and Repeat",
+          "content": "Listen to renowned reciters and imitate their recitation. Repeat the same passage before attempting it yourself."
+        }
+      },
+      "conclusionTitle": "Keep Practicing",
+      "conclusion": "Focus on one rule at a time, practice until natural, then move to the next. Patience and dedication lead to beautiful recitation."
+    },
+    "benefits-of-memorizing-quran": {
+      "title": "The Incredible Benefits of Memorizing the Quran",
+      "category": "Quran",
+      "author": "Ibrahim Abdelnasser",
+      "date": "February 20, 2025",
+      "readTime": "7 min read",
+      "introduction": "Hifz offers incredible benefits for your mind, heart, and daily life beyond spiritual rewards.",
+      "sectionsCount": "5",
+      "sections": {
+        "0": {
+          "heading": "Spiritual Elevation",
+          "content": "The Hafiz holds special status and will rise in ranks in Paradise with each memorized verse."
+        },
+        "1": {
+          "heading": "Improved Memory",
+          "content": "Memorizing large texts strengthens neural pathways and improves cognitive function."
+        },
+        "2": {
+          "heading": "Inner Peace",
+          "content": "Regular Quran engagement brings remarkable peace and stress relief."
+        },
+        "3": {
+          "heading": "Stronger Salah",
+          "content": "Memorized portions make prayers more meaningful and focused."
+        },
+        "4": {
+          "heading": "Lasting Legacy",
+          "content": "Teaching what you memorized creates continuous reward (Sadaqah Jariyah)."
+        }
+      },
+      "conclusionTitle": "Start Your Hifz Journey",
+      "conclusion": "Every verse committed to heart is an investment in your Akhirah. Start now, one ayah at a time."
+    },
+    "arabic-language-learning-guide": {
+      "title": "The Ultimate Guide to Learning Arabic",
+      "category": "Arabic",
+      "author": "Ibrahim Abdelnasser",
+      "date": "March 8, 2025",
+      "readTime": "10 min read",
+      "introduction": "Arabic opens incredible doors — understanding the Quran, communication, and Islamic studies.",
+      "sectionsCount": "5",
+      "sections": {
+        "0": {
+          "heading": "Choose the Right Type",
+          "content": "MSA for formal, Quranic for religious texts, Colloquial for conversation. Choose based on your goals."
+        },
+        "1": {
+          "heading": "Master the Script",
+          "content": "Learn to read and write right-to-left. Practice each letter in all its forms."
+        },
+        "2": {
+          "heading": "Build Vocabulary",
+          "content": "Focus on high-frequency words first. The 100 most common words cover significant portions of text."
+        },
+        "3": {
+          "heading": "Understand Root Systems",
+          "content": "Arabic words come from 3-letter roots. Understanding roots accelerates vocabulary dramatically."
+        },
+        "4": {
+          "heading": "Immerse Daily",
+          "content": "Arabic podcasts, videos, simple texts. Even 15 minutes daily makes a huge difference."
+        }
+      },
+      "conclusionTitle": "Your Journey Awaits",
+      "conclusion": "With the right method, good teacher, and daily practice, remarkable progress is achievable."
+    },
+    "new-muslim-first-steps": {
+      "title": "First Steps After Accepting Islam",
+      "category": "Islamic Studies",
+      "author": "Ibrahim Abdelnasser",
+      "date": "March 25, 2025",
+      "readTime": "9 min read",
+      "introduction": "Congratulations on accepting Islam! This guide helps you navigate your first days with confidence.",
+      "sectionsCount": "5",
+      "sections": {
+        "0": {
+          "heading": "Understand Your Shahada",
+          "content": "Reflect on the profound meaning of La ilaha illa Allah, Muhammad Rasool Allah."
+        },
+        "1": {
+          "heading": "Learn to Pray",
+          "content": "Start step by step. It is okay to use transliteration while learning Arabic."
+        },
+        "2": {
+          "heading": "Take It Step by Step",
+          "content": "Islam was revealed over 23 years. Focus on essentials first and add gradually."
+        },
+        "3": {
+          "heading": "Find Your Community",
+          "content": "Connect with local mosque and Muslim friends who understand your journey."
+        },
+        "4": {
+          "heading": "Be Patient",
+          "content": "Show the best of Islamic character. Your relationship with Allah is the foundation."
+        }
+      },
+      "conclusionTitle": "You Are Not Alone",
+      "conclusion": "The entire Ummah is your family. Do not hesitate to ask questions and seek guidance."
+    },
+    "teaching-quran-to-kids": {
+      "title": "How to Make Quran Learning Fun for Kids",
+      "category": "Tips & Guides",
+      "author": "Ibrahim Abdelnasser",
+      "date": "April 10, 2025",
+      "readTime": "7 min read",
+      "introduction": "Teaching Quran to children requires creativity, patience, and the right approach.",
+      "sectionsCount": "5",
+      "sections": {
+        "0": {
+          "heading": "Keep Sessions Short",
+          "content": "Ages 5-7: 15-20 minutes. Ages 8-12: 30 minutes. Break into small engaging segments."
+        },
+        "1": {
+          "heading": "Use Rewards",
+          "content": "Star charts, point systems, celebrating milestones. Small rewards create big motivation."
+        },
+        "2": {
+          "heading": "Make It Interactive",
+          "content": "Flashcards, apps, games, tracing letters. More senses involved means better retention."
+        },
+        "3": {
+          "heading": "Be a Role Model",
+          "content": "When kids see you reciting regularly, they develop the same love naturally."
+        },
+        "4": {
+          "heading": "Choose the Right Teacher",
+          "content": "A teacher specializing in kids knows how to maintain engagement and adjust methods."
+        }
+      },
+      "conclusionTitle": "Plant the Seed Early",
+      "conclusion": "The goal is not just memorization — it is a lifelong love for the Word of Allah."
+    }
+  },
+  "games": {
+    "hero": {
+      "badge": "Educational Games",
+      "title": "Learn Arabic & Quran Through Play!",
+      "subtitle": "Fun, interactive educational games designed for kids to learn Arabic letters, Tajweed, and Quran reading.",
+      "games": "Games",
+      "levels": "Levels",
+      "stars": "Stars"
+    },
+    "allGames": {
+      "title": "Choose Your Adventure",
+      "subtitle": "Pick a game and start your fun learning journey!"
+    },
+    "arabic-letters": {
+      "title": "Arabic Letters",
+      "description": "Learn all 28 Arabic letters with fun animations, sounds, and interactive exercises!"
+    },
+    "tajweed": {
+      "title": "Tajweed Rules",
+      "description": "Master Quran recitation rules through colorful, engaging challenges!"
+    },
+    "noor-albayan": {
+      "title": "Noor Al-Bayan",
+      "description": "Progressive reading method from letters to words to sentences!"
+    },
+    "word-pronunciation": {
+      "title": "Word Pronunciation",
+      "description": "Listen, learn, and practice pronouncing Arabic and Quranic words!"
+    },
+    "word-writing": {
+      "title": "Word Writing",
+      "description": "Trace and write Arabic letters and words with guided practice!"
+    },
+    "progress": "Progress",
+    "play": "Play Now",
+    "features": {
+      "title": "Why Kids Love Our Games",
+      "subtitle": "Designed by educators, loved by children",
+      "items": {
+        "0": {
+          "icon": "🎨",
+          "title": "Colorful & Fun",
+          "description": "Beautiful animations and cartoon characters keep kids engaged."
+        },
+        "1": {
+          "icon": "🔊",
+          "title": "Audio Learning",
+          "description": "Native Arabic pronunciation for every letter and word."
+        },
+        "2": {
+          "icon": "⭐",
+          "title": "Rewards System",
+          "description": "Stars, badges, and celebrations motivate continued learning."
+        },
+        "3": {
+          "icon": "📈",
+          "title": "Track Progress",
+          "description": "Parents can monitor their child's learning journey."
+        }
+      }
+    },
+    "levelComplete": {
+      "perfect": "Perfect! Amazing!",
+      "great": "Great Job!",
+      "good": "Good Try!",
+      "score": "Score",
+      "correct": "Correct",
+      "nextLevel": "Next Level",
+      "retry": "Try Again",
+      "home": "Home"
+    }
   }
 }

@@ -1,33 +1,25 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useLocale as useNextIntlLocale } from "next-intl";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
 export function useLocale() {
+  const locale = useNextIntlLocale() as "en" | "ar";
   const pathname = usePathname();
   const router = useRouter();
 
-  const currentLocale = pathname.startsWith("/ar") ? "ar" : "en";
-  const isRTL = currentLocale === "ar";
+  const isRTL = locale === "ar";
 
-  const switchLocale = (locale: "en" | "ar") => {
-    if (locale === currentLocale) return;
-
-    let newPath: string;
-
-    if (locale === "ar") {
-      newPath = `/ar${pathname}`;
-    } else {
-      newPath = pathname.replace(/^\/ar/, "") || "/";
-    }
-
-    router.push(newPath);
+  const switchLocale = (newLocale: "en" | "ar") => {
+    if (newLocale === locale) return;
+    router.replace(pathname, { locale: newLocale });
   };
 
   return {
-    locale: currentLocale,
+    locale,
     isRTL,
     switchLocale,
-    isEnglish: currentLocale === "en",
-    isArabic: currentLocale === "ar",
+    isEnglish: locale === "en",
+    isArabic: locale === "ar",
   };
 }

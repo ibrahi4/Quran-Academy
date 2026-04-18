@@ -14,8 +14,8 @@
     ],
   },
   { label: "How It Works", href: "/how-it-works" },
+  { label: "Games", href: "/games", isNew: true },
   { label: "Testimonials", href: "/testimonials" },
-  { label: "Pricing", href: "/pricing" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/contact" },
 ];

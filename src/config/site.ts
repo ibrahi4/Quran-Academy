@@ -7,7 +7,7 @@
   ogImage: "https://ibrahimabdelnasser.com/og-image.jpg",
   author: "Ibrahim Abdelnasser",
   contact: {
-    email: "info@ibrahimabdelnasser.com",
+    email: "ibrahimabdelnasser.com",
     whatsapp: "+201XXXXXXXXX",
     whatsappLink: "https://wa.me/201XXXXXXXXX",
   },

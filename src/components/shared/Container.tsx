@@ -1,21 +1,14 @@
-
-import { cn } from "../../lib/utils";
+﻿import React from "react";
 
 interface ContainerProps {
   children: React.ReactNode;
   className?: string;
-  as?: React.ElementType;
 }
 
-export default function Container({
-  children,
-  className,
-  as: Component = "div",
-}: ContainerProps) {
+export default function Container({ children, className = "" }: ContainerProps) {
   return (
-    <Component className={cn("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8", className)}>
+    <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ${className}`}>
       {children}
-    </Component>
+    </div>
   );
 }
-
