@@ -1535,5 +1535,402 @@
       "retry": "Try Again",
       "home": "Home"
     }
+  },
+  "footer": {
+  "cta": {
+    "title": "Ready to Start Your Journey?",
+    "subtitle": "Book a free trial lesson and experience the difference.",
+    "bookTrial": "Book Free Trial",
+    "whatsapp": "WhatsApp"
+  },
+  "about": "Helping students worldwide connect with the Quran, Arabic language, and Islamic knowledge through personalized online education.",
+  "quickLinks": "Quick Links",
+  "services": "Services",
+  "contact": "Contact",
+  "location": "Online — Worldwide from Egypt",
+  "verse": "And say: My Lord, increase me in knowledge",
+  "verseRef": "Quran 20:114",
+  "copyright": "Ibrahim Abdelnasser. All rights reserved.",
+  "builtWith": "Built with",
+  "forUmmah": "for the Ummah",
+  "links": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "testimonials": "Testimonials",
+    "blog": "Blog",
+    "faq": "FAQ",
+    "contact": "Contact"
+  },
+  "serviceLinks": {
+    "quranRecitation": "Quran Recitation",
+    "tajweed": "Tajweed",
+    "arabicLanguage": "Arabic Language",
+    "islamicStudies": "Islamic Studies",
+    "kidsProgram": "Kids Program",
+    "newMuslims": "New Muslims"
+  },
+  "chatWhatsApp": "Chat on WhatsApp"
+},"about": {
+  "sectionTitle": "Meet Your Teacher",
+  "sectionSubtitle": "Dedicated to making Quran and Arabic accessible to everyone, everywhere.",
+  "story1": "Assalamu Alaikum! I am Ibrahim Abdelnasser, a passionate Quran, Arabic, and Islamic Studies teacher with over a decade of experience helping non-Arabic speakers connect with the beauty of the Quran.",
+  "story2": "I believe every Muslim deserves access to quality Quran education, regardless of their language or background. My approach combines traditional Islamic scholarship with modern teaching methods, creating an experience that is both authentic and engaging.",
+  "credentials": {
+    "0": "Al-Azhar Educated",
+    "1": "Ijazah Certified",
+    "2": "10+ Years Teaching",
+    "3": "Fluent English",
+    "4": "Patient & Supportive",
+    "5": "Trusted by 500+ Families"
+  },
+  "readStory": "Read My Full Story",
+  "bookTrial": "Book a Free Trial",
+  "yearsOfExcellence": "Years of Excellence",
+  "hadithQuote": "The best of you are those who learn the Quran and teach it",
+  "teacherName": "Ibrahim Abdelnasser",
+  "teacherRole": "Quran & Arabic Teacher",
+  "photoPlaceholder": "Replace with professional photo"
+},
+"ctaBanner": {
+  "headline": "Ready to Begin Your",
+  "headlineHighlight": "Quran Journey",
+  "subtitle": "Take the first step today. Book a free 30-minute trial lesson and experience the difference personalized teaching makes.",
+  "trustPoints": {
+    "0": "No payment required",
+    "1": "30-minute free session",
+    "2": "Personalized assessment"
+  },
+  "bookTrial": "Book My Free Trial",
+  "chatWhatsApp": "Chat on WhatsApp",
+  "socialProof": "Joined by 500+ students worldwide"
+},
+"faqPreview": {
+  "title": "Frequently Asked Questions",
+  "subtitle": "Everything you need to know before getting started with your learning journey.",
+  "viewAll": "View All FAQs",
+  "stillHaveQuestions": "Still have questions?",
+  "hereToHelp": "I am here to help",
+  "contactDirectly": "Contact me directly →",
+  "items": {
+    "0": {
+      "question": "Do I need any prior knowledge to start?",
+      "answer": "Not at all! I welcome complete beginners. Whether you have never read Arabic or are looking to improve existing skills, I will create a personalized plan that starts exactly where you are."
+    },
+    "1": {
+      "question": "How do the online lessons work?",
+      "answer": "Lessons are conducted via Zoom or Google Meet. All you need is a stable internet connection and a device with a camera and microphone. I share my screen and use interactive tools to make learning engaging and effective."
+    },
+    "2": {
+      "question": "What ages do you teach?",
+      "answer": "I teach students of all ages — from children as young as 5 to adults of any age. I have specialized methods for kids that make learning fun and engaging, and structured approaches for adults."
+    },
+    "3": {
+      "question": "What is included in the free trial?",
+      "answer": "The free trial is a 30-minute session where we assess your current level, discuss your goals, and I create a suggested learning plan for you. It is completely free with no obligation to continue."
+    },
+    "4": {
+      "question": "Can I reschedule a lesson?",
+      "answer": "Yes! I understand that life can be busy. You can reschedule with at least 24 hours notice at no extra charge. I am flexible with scheduling across different time zones."
+    },
+    "5": {
+      "question": "Do you provide learning materials?",
+      "answer": "Yes! I provide all necessary digital materials, worksheets, and resources for every lesson. You do not need to purchase any textbooks to get started."
+    }
   }
+},
+"heroSection": {
+  "badge": "Now accepting new students for 2025",
+  "headlinePrefix": "Learn",
+  "headlineSuffix": "with a Trusted Teacher",
+  "rotatingWords": {
+    "0": "Quran Recitation",
+    "1": "Tajweed Mastery",
+    "2": "Arabic Language",
+    "3": "Islamic Studies"
+  },
+  "subtitle": "Personalized 1-on-1 online lessons for kids, adults, and new Muslims. Taught with patience, passion, and over a decade of professional experience.",
+  "bookTrial": "Book Your Free Trial",
+  "watchIntro": "Watch Introduction",
+  "trustBadges": {
+    "0": "Certified Teacher",
+    "1": "1-on-1 Lessons",
+    "2": "All Levels Welcome"
+  },
+  "teacherName": "Ibrahim Abdelnasser",
+  "teacherSubtitle": "Quran, Arabic & Islamic Studies",
+  "students": "Students",
+  "years": "Years",
+  "countries": "Countries",
+  "rating": "4.9",
+  "reviews": "500+ Reviews",
+  "liveTitle": "Live 1-on-1 Lessons",
+  "livePlatforms": "via Zoom & Google Meet",
+  "worldwide": "Worldwide",
+  "worldwideDetail": "USA, UK, EU +"
+},
+"howItWorksHome": {
+  "title": "How It Works",
+  "subtitle": "Getting started is simple. Four easy steps to begin your learning journey.",
+  "steps": {
+    "0": {
+      "title": "Book a Free Trial",
+      "description": "Schedule a free 30-minute introductory session. No payment, no commitment — just a friendly conversation to understand your goals."
+    },
+    "1": {
+      "title": "Get Your Personalized Plan",
+      "description": "After assessing your level and goals, I create a customized learning roadmap designed specifically for you or your child."
+    },
+    "2": {
+      "title": "Start Learning",
+      "description": "Begin your journey with structured, engaging 1-on-1 sessions via Zoom or Google Meet. Learn at your own pace with expert guidance."
+    },
+    "3": {
+      "title": "Track Your Progress",
+      "description": "Receive regular progress reports, assessments, and feedback. Watch yourself grow in confidence and skill with every session."
+    }
+  },
+  "cta": "Get Started — It's Free",
+  "ctaNote": "No credit card required • 30-minute free session"
+},
+"quranVerse": {
+  "verse": "﴿ اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ ۝ خَلَقَ الْإِنسَانَ مِنْ عَلَقٍ ۝ اقْرَأْ وَرَبُّكَ الْأَكْرَمُ ﴾",
+  "translation": "Read in the name of your Lord who created. Created man from a clinging substance. Read, and your Lord is the Most Generous.",
+  "reference": "Surah Al-Alaq (96:1-3)"
+},
+"servicesOverview": {
+  "title": "What I Teach",
+  "subtitle": "Comprehensive Islamic education tailored to your goals, level, and pace. Every lesson is personalized for you.",
+  "services": {
+    "0": {
+      "title": "Quran Recitation & Memorization",
+      "description": "Master beautiful Quran recitation and build a strong Hifz journey with expert guidance.",
+      "features": { "0": "Reading from scratch", "1": "Memorization (Hifz)", "2": "Beautiful recitation" }
+    },
+    "1": {
+      "title": "Tajweed Mastery",
+      "description": "Perfect your pronunciation with detailed Tajweed rules explained clearly in English.",
+      "features": { "0": "All Tajweed rules", "1": "Practical application", "2": "Pronunciation mastery" }
+    },
+    "2": {
+      "title": "Arabic Language",
+      "description": "From alphabet to fluency. Learn Arabic reading, writing, grammar, and conversation.",
+      "features": { "0": "Alphabet to fluency", "1": "Grammar fundamentals", "2": "Quranic Arabic" }
+    },
+    "3": {
+      "title": "Islamic Studies",
+      "description": "Understand your faith deeply through clear, authentic, and engaging Islamic education.",
+      "features": { "0": "Core beliefs (Aqeedah)", "1": "Worship guidance (Fiqh)", "2": "Prophet's life (Seerah)" }
+    },
+    "4": {
+      "title": "Kids & Teens Program",
+      "description": "Fun, interactive, and age-appropriate lessons designed specially for young learners.",
+      "features": { "0": "Ages 5-17", "1": "Interactive methods", "2": "Progress reports" }
+    },
+    "5": {
+      "title": "New Muslims / Reverts",
+      "description": "A gentle, supportive introduction to Islam, Quran, and prayer at your own pace.",
+      "features": { "0": "Basics of Islam", "1": "Prayer step-by-step", "2": "Safe learning space" }
+    }
+  },
+  "learnMore": "Learn More",
+  "viewAll": "View All Services"
+},
+"testimonialsHome": {
+  "title": "What My Students Say",
+  "subtitle": "Real stories from real students and parents around the world.",
+  "readAll": "Read All Testimonials",
+  "items": {
+    "0": {
+      "name": "Sarah Mitchell",
+      "country": "Texas, USA",
+      "flag": "🇺🇸",
+      "role": "Mother of 2",
+      "rating": "5",
+      "text": "My son now reads Quran confidently after just 3 months with Ustadh Ibrahim. His patience with kids is truly remarkable. Both my children look forward to their weekly sessions — something I never thought would happen!",
+      "highlight": "3 months to confident Quran reading"
+    },
+    "1": {
+      "name": "James Abdullah",
+      "country": "London, UK",
+      "flag": "🇬🇧",
+      "role": "Revert / New Muslim",
+      "rating": "5",
+      "text": "As a new Muslim, I was incredibly nervous about learning Arabic and Quran. Ibrahim made me feel completely at ease from the very first session. He is patient, knowledgeable, and genuinely cares about his students. I cannot recommend him highly enough.",
+      "highlight": "Perfect for new Muslims"
+    },
+    "2": {
+      "name": "Fatima van der Berg",
+      "country": "Amsterdam, Netherlands",
+      "flag": "🇳🇱",
+      "role": "Adult Student",
+      "rating": "5",
+      "text": "The Tajweed lessons have completely transformed my Quran recitation. Ibrahim has a gift for explaining complex rules in a simple, clear way. After 6 months, my family says my recitation sounds completely different — in the best way!",
+      "highlight": "Complete Tajweed transformation"
+    },
+    "3": {
+      "name": "Ahmed Hassan",
+      "country": "Toronto, Canada",
+      "flag": "🇨🇦",
+      "role": "Adult Learner",
+      "rating": "5",
+      "text": "I tried many online teachers before finding Ibrahim, and the difference is night and day. His structured approach, clear explanations, and genuine dedication make every session valuable. He is truly the best Quran teacher I have ever had.",
+      "highlight": "Best teacher after trying many"
+    },
+    "4": {
+      "name": "Emily Roberts",
+      "country": "Sydney, Australia",
+      "flag": "🇦🇺",
+      "role": "Mother of 3",
+      "rating": "5",
+      "text": "All three of my daughters study with Ustadh Ibrahim. He adapts his teaching style for each child based on their age and personality. The progress reports he sends are detailed and helpful. A truly professional and caring teacher.",
+      "highlight": "Personalized for each child"
+    },
+    "5": {
+      "name": "Omar Schneider",
+      "country": "Berlin, Germany",
+      "flag": "🇩🇪",
+      "role": "University Student",
+      "rating": "5",
+      "text": "Learning Arabic with Ibrahim has been an amazing experience. He makes the language accessible and fun. I went from knowing zero Arabic to being able to read and understand basic Quranic verses in just a few months.",
+      "highlight": "Zero to reading in months"
+    }
+  }
+},
+"trustBar": {
+  "stats": {
+    "0": { "label": "Students Worldwide", "description": "From over 15 countries" },
+    "1": { "label": "Years Experience", "description": "Dedicated to teaching" },
+    "2": { "label": "Countries Served", "description": "USA, UK, Europe & more" },
+    "3": { "label": "Student Rating", "description": "Based on 200+ reviews" }
+  }
+},
+"whyChooseMe": {
+  "title": "Why Learn with Ibrahim?",
+  "subtitle": "What sets my teaching apart and why hundreds of students worldwide choose to learn with me.",
+  "reasons": {
+    "0": { "title": "Certified & Qualified", "description": "Al-Azhar educated with Ijazah certification in Quran recitation and a strong academic background in Islamic sciences." },
+    "1": { "title": "Fluent English", "description": "Clear, professional English communication ensures smooth and effective learning for non-Arabic speakers." },
+    "2": { "title": "Personalized Approach", "description": "Every student gets a customized curriculum tailored to their level, goals, pace, and learning style." },
+    "3": { "title": "Patient & Supportive", "description": "A warm, encouraging teaching style that makes students feel comfortable and motivated to learn." },
+    "4": { "title": "Flexible Scheduling", "description": "Lessons available across all major time zones. Find a time that fits your busy schedule perfectly." },
+    "5": { "title": "All Ages Welcome", "description": "Specialized methods for kids, teens, and adults. From age 5 to 65, everyone is welcome." },
+    "6": { "title": "Global Experience", "description": "Over 10 years teaching students from 15+ countries across USA, UK, Canada, Europe, and beyond." },
+    "7": { "title": "Trusted by Families", "description": "500+ students and families trust Ibrahim for their Islamic education. Read their stories in our testimonials." }
+  }
+},"aboutPage": {
+  "hero": {
+    "badge": "About Your Teacher",
+    "title": "Meet",
+    "titleHighlight": "Ibrahim Abdelnasser",
+    "subtitle": "A passionate, certified Quran and Arabic teacher dedicated to helping students worldwide connect with the beauty of Islamic knowledge."
+  },
+  "story": {
+    "title": "My Story",
+    "paragraphs": {
+      "0": "Assalamu Alaikum! I am Ibrahim Abdelnasser, and I am deeply passionate about helping people around the world connect with the Holy Quran and the Arabic language.",
+      "1": "My journey began over a decade ago when I realized that millions of Muslims worldwide struggle to read and understand the Quran simply because they do not speak Arabic. This inspired me to dedicate my life to bridging this gap through patient, personalized, and professional online education.",
+      "2": "Having studied in the Al-Azhar tradition and obtained my Ijazah in Quran recitation, I combine traditional Islamic scholarship with modern teaching techniques. I teach in clear, fluent English, making complex concepts accessible to everyone regardless of their background.",
+      "3": "Over the years, I have had the honor of teaching more than 500 students from over 15 countries. Each student has a unique story, and I consider it a privilege to be part of their learning journey."
+    },
+    "hadith": "The best of you are those who learn the Quran and teach it.",
+    "hadithSource": "Prophet Muhammad (Sahih Bukhari)",
+    "yearsTeaching": "Years Teaching",
+    "teacherTitle": "Quran, Arabic and Islamic Studies Teacher",
+    "photoPlaceholder": "Replace with professional photo"
+  },
+  "qualifications": {
+    "title": "Qualifications and Expertise",
+    "subtitle": "The knowledge, certifications, and experience behind every lesson.",
+    "items": {
+      "0": { "title": "Islamic Education", "description": "Formal education in Islamic Sciences and Quranic Studies from Al-Azhar tradition." },
+      "1": { "title": "Ijazah Certified", "description": "Certified Ijazah in Quran recitation with an authentic chain of narration (Sanad)." },
+      "2": { "title": "Tajweed Expertise", "description": "Deep expertise in all Tajweed rules with years of practical teaching experience." },
+      "3": { "title": "Fluent English", "description": "Professional-level English communication for effective teaching of non-Arabic speakers." },
+      "4": { "title": "10+ Years Experience", "description": "Over a decade of dedicated teaching experience with students of all ages and levels." },
+      "5": { "title": "15+ Countries", "description": "Experience teaching students from diverse cultural backgrounds across multiple continents." }
+    }
+  },
+  "values": {
+    "title": "My Teaching Philosophy",
+    "subtitle": "The core values and principles that guide every lesson I teach.",
+    "items": {
+      "0": { "title": "Patience", "description": "Every student learns at their own pace. I never rush — I guide with calm encouragement." },
+      "1": { "title": "Authenticity", "description": "All teachings are rooted in authentic Islamic scholarship and traditional methodology." },
+      "2": { "title": "Personalization", "description": "No two students are the same. Every curriculum is tailored to individual needs and goals." },
+      "3": { "title": "Excellence", "description": "I am committed to delivering the highest quality education in every single session." }
+    }
+  },
+  "timeline": {
+    "title": "My Journey",
+    "subtitle": "Key milestones in my teaching career.",
+    "items": {
+      "0": { "year": "2014", "title": "Started Teaching Journey", "description": "Began teaching Quran and Arabic to local students while completing Islamic studies education." },
+      "1": { "year": "2016", "title": "Obtained Ijazah", "description": "Received Ijazah certification in Quran recitation with a complete chain of narration." },
+      "2": { "year": "2018", "title": "Went Global", "description": "Started teaching international students online, reaching learners in the USA, UK, and Europe." },
+      "3": { "year": "2020", "title": "500+ Students Milestone", "description": "Reached the milestone of teaching over 500 students from more than 15 countries worldwide." },
+      "4": { "year": "2023", "title": "Expanded Programs", "description": "Launched specialized programs for kids, new Muslims, and family packages." },
+      "5": { "year": "2025", "title": "Continuing the Mission", "description": "Continuing to grow and help more students connect with the Quran and Arabic language." }
+    }
+  },
+  "cta": {
+    "title": "Ready to Start Learning?",
+    "subtitle": "Book a free trial lesson and let us create a personalized plan for your goals.",
+    "bookTrial": "Book Free Trial",
+    "viewServices": "View Services"
+  }
+},"servicesPage": {
+  "hero": {
+    "badge": "Our Programs",
+    "title": "Programs Designed for",
+    "titleHighlight": "Your Success",
+    "subtitle": "Whether you are a beginner, a parent, or a new Muslim — we have the perfect program tailored for your needs."
+  },
+  "bestFor": "Best for:",
+  "whatYouLearn": "What You Will Learn",
+  "bookTrial": "Book Free Trial",
+  "services": {
+    "0": {
+      "title": "Quran Recitation and Memorization",
+      "description": "Master beautiful Quran recitation and build a strong Hifz journey with expert guidance and proven memorization techniques.",
+      "bestFor": "Beginners to advanced — anyone wanting to read or memorize Quran",
+      "features": { "0": "Learn to read Quran from scratch", "1": "Memorization (Hifz) with proven techniques", "2": "Beautiful recitation with proper melody", "3": "Regular revision sessions", "4": "Personalized memorization schedule", "5": "Daily practice guidance" }
+    },
+    "1": {
+      "title": "Tajweed Mastery",
+      "description": "Perfect your Quran pronunciation with detailed Tajweed rules explained clearly in English. From basic to advanced levels.",
+      "bestFor": "Those who can read Quran but want perfect pronunciation",
+      "features": { "0": "Complete Tajweed rules in English", "1": "Makharij al-Huroof (articulation points)", "2": "Sifaat al-Huroof (letter characteristics)", "3": "Practical application on Quran verses", "4": "Common mistakes correction", "5": "Preparation for Ijazah" }
+    },
+    "2": {
+      "title": "Arabic Language",
+      "description": "From alphabet to fluency. Learn Arabic reading, writing, grammar, and Quranic understanding in a structured way.",
+      "bestFor": "Complete beginners to intermediate learners",
+      "features": { "0": "Arabic alphabet and reading skills", "1": "Grammar (Nahw) fundamentals", "2": "Morphology (Sarf) basics", "3": "Vocabulary building", "4": "Quranic Arabic understanding", "5": "Conversational Arabic basics" }
+    },
+    "3": {
+      "title": "Islamic Studies",
+      "description": "Understand your faith deeply through authentic, engaging Islamic education covering all essential topics.",
+      "bestFor": "Anyone wanting deeper understanding of Islam",
+      "features": { "0": "Core beliefs (Aqeedah)", "1": "Practical worship guidance (Fiqh)", "2": "Prophet Muhammad life (Seerah)", "3": "Quran explanation (Tafseer basics)", "4": "Islamic ethics and character", "5": "Daily life as a Muslim" }
+    },
+    "4": {
+      "title": "Kids and Teens Program",
+      "description": "Fun, interactive, and age-appropriate lessons designed specially for young learners aged 5-17.",
+      "bestFor": "Children ages 5-12 and teenagers 13-17",
+      "features": { "0": "Age-appropriate teaching methods", "1": "Interactive and engaging sessions", "2": "Quran reading and memorization for kids", "3": "Arabic basics for young learners", "4": "Islamic values and stories", "5": "Regular progress reports for parents" }
+    },
+    "5": {
+      "title": "New Muslims / Reverts Program",
+      "description": "A warm, supportive introduction to Islam, Quran, and prayer designed specifically for those new to the faith.",
+      "bestFor": "New Muslims, reverts, and those curious about Islam",
+      "features": { "0": "Basics of Islamic faith and beliefs", "1": "How to pray step by step", "2": "Introduction to Quran reading", "3": "Essential Arabic words and phrases", "4": "Safe space for all questions", "5": "No judgment — complete support" }
+    }
+  },
+  "cta": {
+    "title": "Not Sure Which Program?",
+    "subtitle": "Book a free trial and I will help you find the perfect program.",
+    "button": "Book Free Consultation"
+  }
+}
 }

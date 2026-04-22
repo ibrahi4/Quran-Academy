@@ -1,22 +1,31 @@
-﻿"use client";
+"use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { Play, ArrowRight, BookOpen, Users, Globe, Star, CheckCircle2, Sparkles } from "lucide-react";
+import { Play, ArrowRight, ArrowLeft, BookOpen, Users, Globe, Star, CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/shared/Container";
-
-const rotatingWords = ["Quran Recitation", "Tajweed Mastery", "Arabic Language", "Islamic Studies"];
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "@/hooks/useLocale";
 
 export default function HeroSection() {
   const [currentWord, setCurrentWord] = useState(0);
+  const t = useTranslations("heroSection");
+  const { isRTL } = useLocale();
+
+  const rotatingWords = [
+    t("rotatingWords.0"),
+    t("rotatingWords.1"),
+    t("rotatingWords.2"),
+    t("rotatingWords.3"),
+  ];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentWord((prev) => (prev + 1) % rotatingWords.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [rotatingWords.length]);
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
@@ -52,22 +61,21 @@ export default function HeroSection() {
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
               </span>
               <span className="text-white/90 text-sm font-medium">
-                Now accepting new students for 2025
+                {t("badge")}
               </span>
             </div>
 
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
-              Learn{" "}
+              {t("headlinePrefix")}{" "}
               <span className="text-accent">{rotatingWords[currentWord]}</span>
               <br />
-              <span className="text-white/95">with a Trusted Teacher</span>
+              <span className="text-white/95">{t("headlineSuffix")}</span>
             </h1>
 
             {/* Subheadline */}
             <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-xl mb-8">
-              Personalized 1-on-1 online lessons for kids, adults, and new Muslims.
-              Taught with patience, passion, and over a decade of professional experience.
+              {t("subtitle")}
             </p>
 
             {/* CTAs */}
@@ -77,25 +85,25 @@ export default function HeroSection() {
                   size="lg"
                   className="rounded-xl px-8 py-6 text-base font-bold shadow-2xl bg-accent hover:bg-accent/90 text-gray-900"
                 >
-                  Book Your Free Trial
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  {t("bookTrial")}
+                  {isRTL ? <ArrowLeft className="w-4 h-4 ms-2" /> : <ArrowRight className="w-4 h-4 ms-2" />}
                 </Button>
               </Link>
 
               <button className="group flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl text-white/90 font-semibold border border-white/15 hover:bg-white/10 transition-all duration-300">
                 <span className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 group-hover:bg-white/20 transition-all">
-                  <Play className="w-4 h-4 fill-white text-white ml-0.5" />
+                  <Play className="w-4 h-4 fill-white text-white ms-0.5" />
                 </span>
-                Watch Introduction
+                {t("watchIntro")}
               </button>
             </div>
 
             {/* Trust Badges */}
             <div className="flex flex-wrap gap-4">
               {[
-                { text: "Certified Teacher", icon: CheckCircle2 },
-                { text: "1-on-1 Lessons", icon: Users },
-                { text: "All Levels Welcome", icon: Sparkles },
+                { text: t("trustBadges.0"), icon: CheckCircle2 },
+                { text: t("trustBadges.1"), icon: Users },
+                { text: t("trustBadges.2"), icon: Sparkles },
               ].map((badge, i) => (
                 <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
                   <badge.icon className="w-4 h-4 text-green-400/80" />
@@ -114,60 +122,60 @@ export default function HeroSection() {
                   <div className="w-24 h-24 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center mb-6">
                     <BookOpen className="w-12 h-12 text-white/80" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-1">Ibrahim Abdelnasser</h3>
-                  <p className="text-white/60 text-sm font-medium mb-6">Quran, Arabic & Islamic Studies</p>
+                  <h3 className="text-2xl font-bold text-white mb-1">{t("teacherName")}</h3>
+                  <p className="text-white/60 text-sm font-medium mb-6">{t("teacherSubtitle")}</p>
                   <div className="flex items-center gap-6">
                     <div className="text-center">
                       <p className="text-xl font-bold text-white">500+</p>
-                      <p className="text-xs text-white/50">Students</p>
+                      <p className="text-xs text-white/50">{t("students")}</p>
                     </div>
                     <div className="w-px h-8 bg-white/10" />
                     <div className="text-center">
                       <p className="text-xl font-bold text-white">10+</p>
-                      <p className="text-xs text-white/50">Years</p>
+                      <p className="text-xs text-white/50">{t("years")}</p>
                     </div>
                     <div className="w-px h-8 bg-white/10" />
                     <div className="text-center">
                       <p className="text-xl font-bold text-white">15+</p>
-                      <p className="text-xs text-white/50">Countries</p>
+                      <p className="text-xs text-white/50">{t("countries")}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               {/* Floating: Rating */}
-              <div className="absolute -top-4 -right-6 bg-white rounded-2xl shadow-xl p-4 border border-gray-100">
+              <div className={`absolute -top-4 ${isRTL ? "-left-6" : "-right-6"} bg-white rounded-2xl shadow-xl p-4 border border-gray-100`}>
                 <div className="flex items-center gap-2">
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <span className="text-sm font-bold text-gray-900">4.9</span>
+                  <span className="text-sm font-bold text-gray-900">{t("rating")}</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">500+ Reviews</p>
+                <p className="text-xs text-gray-500 mt-1">{t("reviews")}</p>
               </div>
 
               {/* Floating: Live */}
-              <div className="absolute -bottom-4 -left-6 bg-white rounded-2xl shadow-xl p-4 border border-gray-100">
+              <div className={`absolute -bottom-4 ${isRTL ? "-right-6" : "-left-6"} bg-white rounded-2xl shadow-xl p-4 border border-gray-100`}>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
                     <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Live 1-on-1 Lessons</p>
-                    <p className="text-xs text-gray-500">via Zoom & Google Meet</p>
+                    <p className="text-sm font-bold text-gray-900">{t("liveTitle")}</p>
+                    <p className="text-xs text-gray-500">{t("livePlatforms")}</p>
                   </div>
                 </div>
               </div>
 
               {/* Floating: Globe */}
-              <div className="absolute top-1/2 -left-16 bg-white rounded-2xl shadow-xl p-3 border border-gray-100">
+              <div className={`absolute top-1/2 ${isRTL ? "-right-16" : "-left-16"} bg-white rounded-2xl shadow-xl p-3 border border-gray-100`}>
                 <div className="flex items-center gap-2">
                   <Globe className="w-5 h-5 text-primary" />
                   <div>
-                    <p className="text-xs font-bold text-gray-900">Worldwide</p>
-                    <p className="text-[10px] text-gray-500">USA, UK, EU +</p>
+                    <p className="text-xs font-bold text-gray-900">{t("worldwide")}</p>
+                    <p className="text-[10px] text-gray-500">{t("worldwideDetail")}</p>
                   </div>
                 </div>
               </div>

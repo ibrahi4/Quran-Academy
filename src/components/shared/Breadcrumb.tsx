@@ -1,6 +1,9 @@
-import Link from "next/link";
-import { ChevronRight, Home } from "lucide-react";
+"use client";
+
+import { Link } from "@/i18n/navigation";
+import { ChevronRight, ChevronLeft, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/hooks/useLocale";
 
 interface BreadcrumbItem {
   label: string;
@@ -13,6 +16,9 @@ interface BreadcrumbProps {
 }
 
 export default function Breadcrumb({ items, className }: BreadcrumbProps) {
+  const { isRTL } = useLocale();
+  const Chevron = isRTL ? ChevronLeft : ChevronRight;
+
   return (
     <nav
       aria-label="Breadcrumb"
@@ -27,7 +33,7 @@ export default function Breadcrumb({ items, className }: BreadcrumbProps) {
 
       {items.map((item, index) => (
         <div key={index} className="flex items-center gap-2">
-          <ChevronRight className="w-3.5 h-3.5 text-gray-300" />
+          <Chevron className="w-3.5 h-3.5 text-gray-300" />
           {item.href && index < items.length - 1 ? (
             <Link
               href={item.href}

@@ -1,60 +1,172 @@
 "use client";
 
-import React from "react";
-import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { Laptop, Wifi, Headphones, Clock } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeft,
+  Award,
+  BookOpen,
+  CheckCircle2,
+  GraduationCap,
+  Heart,
+  Shield,
+  MessageCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import Container from "@/components/shared/Container";
+import SectionHeader from "@/components/shared/SectionHeader";
+import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "@/hooks/useLocale";
 
-const icons = [Laptop, Wifi, Headphones, Clock];
+const credentialIcons = [GraduationCap, Award, BookOpen, MessageCircle, Heart, Shield];
 
-export default function WhatYouNeed() {
-  const t = useTranslations("howItWorks.requirements");
+export default function AboutPreview() {
+  const { ref, isInView } = useIntersectionObserver({ threshold: 0.1 });
+  const t = useTranslations("about");
+  const { isRTL } = useLocale();
 
   return (
-    <section className="py-20 md:py-28 bg-white relative">
+    <section ref={ref} className="section-padding bg-white relative overflow-hidden">
       <Container>
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-16"
-        >
-          <span className="inline-block px-4 py-1.5 bg-accent/10 text-accent-foreground text-sm font-semibold rounded-full mb-4">
-            {t("badge")}
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            {t("title")}
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            {t("subtitle")}
-          </p>
-        </motion.div>
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          {/* ===== LEFT: Visual ===== */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, ease: [0.25, 0.1, 0.25, 1] }}
+            className="relative"
+          >
+            {/* Main Image Container */}
+            <div className="relative">
+              {/* Background Decoration */}
+              <div
+                className="absolute -top-4 -left-4 w-full h-full rounded-3xl"
+                style={{
+                  background: "linear-gradient(135deg, #0D4F4F 0%, #1A6B5A 100%)",
+                  opacity: 0.1,
+                }}
+              />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-          {icons.map((Icon, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="group text-center"
-            >
-              <div className="bg-sand-50 rounded-3xl p-8 border border-sand-200 hover:border-primary/20 hover:shadow-premium transition-all duration-500">
-                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5 group-hover:bg-primary/15 transition-colors duration-300">
-                  <Icon className="w-8 h-8 text-primary" />
+              {/* Image Placeholder */}
+              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary/10 via-primary/5 to-sand-100 aspect-[4/5] border border-sand-200/50 shadow-premium">
+                {/* Replace with actual photo */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
+                  <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                    <span className="text-5xl font-bold text-primary font-arabic">{"\u0625"}</span>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-800 mb-1">{t("teacherName")}</h4>
+                  <p className="text-sm text-gray-500 mb-4">{t("teacherRole")}</p>
+                  <p className="text-xs text-gray-400 italic text-center">
+                    {t("photoPlaceholder")}
+                  </p>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {t(`items.${index}.title`)}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {t(`items.${index}.description`)}
-                </p>
+
+                {/* Decorative Corner */}
+                <div className="absolute top-0 right-0 w-24 h-24">
+                  <svg viewBox="0 0 100 100" className="w-full h-full text-accent/20">
+                    <polygon points="100,0 100,100 0,0" fill="currentColor" />
+                  </svg>
+                </div>
               </div>
-            </motion.div>
-          ))}
+
+              {/* Floating Experience Badge */}
+              <motion.div
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -bottom-4 -right-4 md:-right-8 bg-white rounded-2xl shadow-premium-hover p-5 border border-sand-200/50"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-hero-gradient flex items-center justify-center">
+                    <Award className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-gray-900">10+</p>
+                    <p className="text-sm text-gray-500">{t("yearsOfExcellence")}</p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Floating Quran Verse */}
+              <motion.div
+                animate={{ y: [0, 6, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-premium p-4 border border-sand-200/50 max-w-[200px]"
+              >
+                <p className="text-accent font-arabic text-right text-sm leading-loose">
+                  {"\uFD3E"} {"\u062E\u064E\u064A\u0652\u0631\u064F\u0643\u064F\u0645\u0652 \u0645\u064E\u0646\u0652 \u062A\u064E\u0639\u064E\u0644\u0651\u064E\u0645\u064E \u0627\u0644\u0652\u0642\u064F\u0631\u0652\u0622\u0646\u064E \u0648\u064E\u0639\u064E\u0644\u0651\u064E\u0645\u064E\u0647\u064F"} {"\uFD3F"}
+                </p>
+                <p className="text-[10px] text-gray-400 mt-1 italic">
+                  &quot;{t("hadithQuote")}&quot;
+                </p>
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* ===== RIGHT: Content ===== */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+          >
+            <SectionHeader
+              title={t("sectionTitle")}
+              subtitle={t("sectionSubtitle")}
+              centered={false}
+            />
+
+            {/* Story */}
+            <div className="space-y-4 mb-8">
+              <p className="text-gray-600 leading-relaxed text-lg">
+                {t("story1")}
+              </p>
+              <p className="text-gray-600 leading-relaxed">
+                {t("story2")}
+              </p>
+            </div>
+
+            {/* Credentials Grid */}
+            <div className="grid grid-cols-2 gap-3 mb-8">
+              {credentialIcons.map((Icon, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ delay: 0.4 + index * 0.1, duration: 0.5 }}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-sand-50 hover:bg-sand-100 transition-colors"
+                >
+                  <Icon className="w-5 h-5 text-primary flex-shrink-0" />
+                  <span className="text-sm font-medium text-gray-700">
+                    {t(`credentials.${index}`)}
+                  </span>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link href="/about">
+                <Button
+                  size="lg"
+                  className="rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold px-6 shadow-lg shadow-primary/20"
+                >
+                  {t("readStory")}
+                  {isRTL ? <ArrowLeft className="w-4 h-4 ml-2" /> : <ArrowRight className="w-4 h-4 ml-2" />}
+                </Button>
+              </Link>
+              <Link href="/book-trial">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-xl border-primary/20 text-primary hover:bg-primary/5 font-semibold px-6"
+                >
+                  {t("bookTrial")}
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </Container>
     </section>

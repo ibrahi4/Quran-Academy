@@ -1,11 +1,13 @@
-﻿"use client";
+"use client";
 
 import React, { useRef, useState, useEffect } from "react";
 import Container from "@/components/shared/Container";
+import { useTranslations } from "next-intl";
 
 export default function QuranVerse() {
   const ref = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
+  const t = useTranslations("quranVerse");
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -51,18 +53,17 @@ export default function QuranVerse() {
             className="text-2xl md:text-3xl lg:text-4xl leading-[2] mb-6 text-primary/90"
             style={{ fontFamily: "var(--font-quran, var(--font-arabic, serif))" }}
           >
-            ﴿ اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ ۝ خَلَقَ الْإِنسَانَ مِنْ عَلَقٍ ۝ اقْرَأْ وَرَبُّكَ الْأَكْرَمُ ﴾
+            {t("verse")}
           </p>
 
-          {/* English Translation */}
+          {/* Translation */}
           <p className="text-lg md:text-xl text-gray-600 italic leading-relaxed mb-4">
-            &ldquo;Read in the name of your Lord who created. Created man from a clinging substance.
-            Read, and your Lord is the Most Generous.&rdquo;
+            &ldquo;{t("translation")}&rdquo;
           </p>
 
           {/* Reference */}
           <p className="text-sm text-accent font-semibold tracking-wide">
-            — Surah Al-Alaq (96:1-3)
+            � {t("reference")}
           </p>
 
           {/* Decorative Bottom */}

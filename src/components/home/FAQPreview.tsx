@@ -1,42 +1,19 @@
-﻿"use client";
+"use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import Link from "next/link";
-import { ChevronDown, ArrowRight, MessageCircle } from "lucide-react";
+import { ChevronDown, ArrowRight, ArrowLeft, MessageCircle } from "lucide-react";
 import Container from "@/components/shared/Container";
 import SectionHeader from "@/components/shared/SectionHeader";
-
-const faqs = [
-  {
-    question: "Do I need any prior knowledge to start?",
-    answer: "Not at all! I welcome complete beginners. Whether you have never read Arabic or are looking to improve existing skills, I will create a personalized plan that starts exactly where you are.",
-  },
-  {
-    question: "How do the online lessons work?",
-    answer: "Lessons are conducted via Zoom or Google Meet. All you need is a stable internet connection and a device with a camera and microphone. I share my screen and use interactive tools to make learning engaging and effective.",
-  },
-  {
-    question: "What ages do you teach?",
-    answer: "I teach students of all ages — from children as young as 5 to adults of any age. I have specialized methods for kids that make learning fun and engaging, and structured approaches for adults.",
-  },
-  {
-    question: "What is included in the free trial?",
-    answer: "The free trial is a 30-minute session where we assess your current level, discuss your goals, and I create a suggested learning plan for you. It is completely free with no obligation to continue.",
-  },
-  {
-    question: "Can I reschedule a lesson?",
-    answer: "Yes! I understand that life can be busy. You can reschedule with at least 24 hours notice at no extra charge. I am flexible with scheduling across different time zones.",
-  },
-  {
-    question: "Do you provide learning materials?",
-    answer: "Yes! I provide all necessary digital materials, worksheets, and resources for every lesson. You do not need to purchase any textbooks to get started.",
-  },
-];
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "@/hooks/useLocale";
 
 export default function FAQPreview() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const sectionRef = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
+  const t = useTranslations("faqPreview");
+  const { isRTL } = useLocale();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -52,6 +29,8 @@ export default function FAQPreview() {
     return () => observer.disconnect();
   }, []);
 
+  const faqCount = 6;
+
   return (
     <section ref={sectionRef} className="section-padding bg-white relative overflow-hidden">
       <Container>
@@ -59,16 +38,16 @@ export default function FAQPreview() {
           {/* Left: Header + CTA */}
           <div className="lg:col-span-2">
             <SectionHeader
-              title="Frequently Asked Questions"
-              subtitle="Everything you need to know before getting started with your learning journey."
+              title={t("title")}
+              subtitle={t("subtitle")}
               centered={false}
             />
 
             <div className="space-y-4 mt-8">
               <Link href="/faq">
                 <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary/5 text-primary font-semibold hover:bg-primary/10 transition-all duration-300 group">
-                  View All FAQs
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  {t("viewAll")}
+                  {isRTL ? <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
                 </div>
               </Link>
 
@@ -78,15 +57,15 @@ export default function FAQPreview() {
                     <MessageCircle className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">Still have questions?</p>
-                    <p className="text-xs text-gray-500">I am here to help</p>
+                    <p className="font-semibold text-gray-900 text-sm">{t("stillHaveQuestions")}</p>
+                    <p className="text-xs text-gray-500">{t("hereToHelp")}</p>
                   </div>
                 </div>
                 <Link
                   href="/contact"
                   className="text-sm text-primary font-semibold hover:underline"
                 >
-                  Contact me directly →
+                  {t("contactDirectly")}
                 </Link>
               </div>
             </div>
@@ -94,7 +73,7 @@ export default function FAQPreview() {
 
           {/* Right: FAQ Accordion */}
           <div className="lg:col-span-3 space-y-3">
-            {faqs.map((faq, index) => (
+            {Array.from({ length: faqCount }, (_, index) => (
               <div
                 key={index}
                 className={`rounded-2xl border overflow-hidden transition-all duration-500 ${
@@ -108,14 +87,14 @@ export default function FAQPreview() {
               >
                 <button
                   onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                  className="w-full flex items-center justify-between p-5 md:p-6 text-left"
+                  className={`w-full flex items-center justify-between p-5 md:p-6 ${isRTL ? "text-right" : "text-left"}`}
                 >
                   <span
-                    className={`font-semibold pr-4 transition-colors ${
+                    className={`font-semibold ${isRTL ? "pl-4" : "pr-4"} transition-colors ${
                       openIndex === index ? "text-primary" : "text-gray-900"
                     }`}
                   >
-                    {faq.question}
+                    {t(`items.${index}.question`)}
                   </span>
                   <div
                     className={`flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-300 ${
@@ -136,7 +115,7 @@ export default function FAQPreview() {
                   <div className="px-5 md:px-6 pb-5 md:pb-6">
                     <div className="h-px bg-sand-200/50 mb-4" />
                     <p className="text-gray-600 leading-relaxed">
-                      {faq.answer}
+                      {t(`items.${index}.answer`)}
                     </p>
                   </div>
                 </div>

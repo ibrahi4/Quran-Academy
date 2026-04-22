@@ -1,31 +1,37 @@
-﻿import React from "react";
-import Link from "next/link";
-import { Mail, Phone, MapPin,ArrowUpRight, Heart } from "lucide-react";
+"use client";
+
+import React from "react";
+import { useTranslations } from "next-intl";
+import { Mail, Phone, MapPin, ArrowUpRight, Heart } from "lucide-react";
 import { siteConfig } from "@/config/site";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "@/hooks/useLocale";
 import Container from "@/components/shared/Container";
 import Logo from "@/components/shared/Logo";
 
-const quickLinks = [
-  { label: "Home", href: "/" },
-  { label: "About", href: "/about" },
-  { label: "Services", href: "/services" },
-  { label: "Testimonials", href: "/testimonials" },
-
-  { label: "Blog", href: "/blog" },
-  { label: "FAQ", href: "/faq" },
-  { label: "Contact", href: "/contact" },
+const quickLinkKeys = [
+  { key: "home", href: "/" },
+  { key: "about", href: "/about" },
+  { key: "services", href: "/services" },
+  { key: "testimonials", href: "/testimonials" },
+  { key: "blog", href: "/blog" },
+  { key: "faq", href: "/faq" },
+  { key: "contact", href: "/contact" },
 ];
 
-const serviceLinks = [
-  { label: "Quran Recitation", href: "/services/quran-recitation" },
-  { label: "Tajweed", href: "/services/tajweed" },
-  { label: "Arabic Language", href: "/services/arabic-language" },
-  { label: "Islamic Studies", href: "/services/islamic-studies" },
-  { label: "Kids Program", href: "/services/kids-program" },
-  { label: "New Muslims", href: "/services/new-muslims" },
+const serviceLinkKeys = [
+  { key: "quranRecitation", href: "/services/quran-recitation" },
+  { key: "tajweed", href: "/services/tajweed" },
+  { key: "arabicLanguage", href: "/services/arabic-language" },
+  { key: "islamicStudies", href: "/services/islamic-studies" },
+  { key: "kidsProgram", href: "/services/kids-program" },
+  { key: "newMuslims", href: "/services/new-muslims" },
 ];
 
 export default function Footer() {
+  const t = useTranslations("footer");
+  const { isRTL } = useLocale();
+
   return (
     <footer className="relative bg-gray-900 text-gray-300 overflow-hidden">
       <div className="h-1 bg-gradient-to-r from-transparent via-accent to-transparent" />
@@ -36,10 +42,10 @@ export default function Footer() {
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div>
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
-                Ready to Start Your Journey?
+                {t("cta.title")}
               </h3>
               <p className="text-gray-400 text-lg">
-                Book a free trial lesson and experience the difference.
+                {t("cta.subtitle")}
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
@@ -47,7 +53,7 @@ export default function Footer() {
                 href="/book-trial"
                 className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-accent hover:bg-accent/90 text-gray-900 font-bold rounded-xl transition-all duration-300"
               >
-                Book Free Trial
+                {t("cta.bookTrial")}
                 <ArrowUpRight className="w-4 h-4" />
               </Link>
               <a
@@ -57,7 +63,7 @@ export default function Footer() {
                 className="inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold rounded-xl border border-white/10 transition-all duration-300"
               >
                 <Phone className="w-4 h-4" />
-                WhatsApp
+                {t("cta.whatsapp")}
               </a>
             </div>
           </div>
@@ -69,43 +75,25 @@ export default function Footer() {
           <div>
             <Logo light className="mb-6" />
             <p className="text-gray-400 leading-relaxed mb-6">
-              Helping students worldwide connect with the Quran, Arabic language,
-              and Islamic knowledge through personalized online education.
+              {t("about")}
             </p>
-            {/* <div className="flex items-center gap-3">
-              {[
-                { icon: Youtube, href: siteConfig.social.youtube },
-                { icon: Instagram, href: siteConfig.social.instagram },
-                { icon: Facebook, href: siteConfig.social.facebook },
-              ].map((social, i) => (
-                <a
-                  key={i}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 hover:bg-primary/20 text-gray-400 hover:text-accent transition-all duration-300 border border-white/5"
-                >
-                  <social.icon className="w-4 h-4" />
-                </a>
-              ))}
-            </div> */}
           </div>
 
           {/* Quick Links */}
           <div>
             <h4 className="text-white font-semibold text-lg mb-5 flex items-center gap-2">
               <span className="h-[3px] w-6 bg-accent rounded-full" />
-              Quick Links
+              {t("quickLinks")}
             </h4>
             <ul className="space-y-3">
-              {quickLinks.map((link) => (
+              {quickLinkKeys.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
                     className="text-gray-400 hover:text-accent transition-colors text-sm flex items-center gap-2 group"
                   >
                     <span className="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-accent transition-colors" />
-                    {link.label}
+                    {t(`links.${link.key}`)}
                   </Link>
                 </li>
               ))}
@@ -116,17 +104,17 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold text-lg mb-5 flex items-center gap-2">
               <span className="h-[3px] w-6 bg-accent rounded-full" />
-              Services
+              {t("services")}
             </h4>
             <ul className="space-y-3">
-              {serviceLinks.map((link) => (
+              {serviceLinkKeys.map((link) => (
                 <li key={link.href}>
                   <Link
                     href={link.href}
                     className="text-gray-400 hover:text-accent transition-colors text-sm flex items-center gap-2 group"
                   >
                     <span className="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-accent transition-colors" />
-                    {link.label}
+                    {t(`serviceLinks.${link.key}`)}
                   </Link>
                 </li>
               ))}
@@ -137,7 +125,7 @@ export default function Footer() {
           <div>
             <h4 className="text-white font-semibold text-lg mb-5 flex items-center gap-2">
               <span className="h-[3px] w-6 bg-accent rounded-full" />
-              Contact
+              {t("contact")}
             </h4>
             <ul className="space-y-4">
               <li>
@@ -163,7 +151,7 @@ export default function Footer() {
               <li>
                 <div className="flex items-start gap-3 text-gray-400">
                   <MapPin className="w-5 h-5 mt-0.5 text-gray-500" />
-                  <span className="text-sm">Online — Worldwide from Egypt</span>
+                  <span className="text-sm">{t("location")}</span>
                 </div>
               </li>
             </ul>
@@ -171,12 +159,12 @@ export default function Footer() {
             {/* Quran Verse */}
             <div className="mt-8 p-4 rounded-xl bg-white/5 border border-white/5">
               <p className="text-accent/80 text-right text-sm leading-loose mb-2" style={{ fontFamily: "var(--font-arabic, serif)" }}>
-                ﴿ وَقُل رَّبِّ زِدْنِي عِلْمًا ﴾
+                ? ����� ������ ������� ������� ?
               </p>
               <p className="text-gray-500 text-xs italic">
-                &quot;And say: My Lord, increase me in knowledge&quot;
+                &quot;{t("verse")}&quot;
                 <br />
-                <span className="text-gray-600">— Quran 20:114</span>
+                <span className="text-gray-600">� {t("verseRef")}</span>
               </p>
             </div>
           </div>
@@ -185,10 +173,10 @@ export default function Footer() {
         {/* Bottom */}
         <div className="py-6 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-gray-500 text-sm">
-            © {new Date().getFullYear()} Ibrahim Abdelnasser. All rights reserved.
+            � {new Date().getFullYear()} {t("copyright")}
           </p>
           <p className="text-gray-600 text-xs flex items-center gap-1">
-            Built with <Heart className="w-3 h-3 text-red-500" /> for the Ummah
+            {t("builtWith")} <Heart className="w-3 h-3 text-red-500" /> {t("forUmmah")}
           </p>
         </div>
       </Container>

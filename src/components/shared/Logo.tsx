@@ -1,5 +1,8 @@
-﻿import React from "react";
-import Link from "next/link";
+"use client";
+
+import React from "react";
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "@/hooks/useLocale";
 
 interface LogoProps {
   className?: string;
@@ -7,6 +10,8 @@ interface LogoProps {
 }
 
 export default function Logo({ className = "", light = false }: LogoProps) {
+  const { isRTL } = useLocale();
+
   return (
     <Link href="/" className={`flex items-center gap-3 group ${className}`}>
       <div className="relative">
@@ -23,10 +28,10 @@ export default function Logo({ className = "", light = false }: LogoProps) {
             }`}
             style={{ fontFamily: "var(--font-arabic, serif)" }}
           >
-            ق
+            �
           </span>
         </div>
-        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-white" />
+        <span className={`absolute -top-0.5 ${isRTL ? "-left-0.5" : "-right-0.5"} w-2.5 h-2.5 bg-accent rounded-full border-2 border-white`} />
       </div>
 
       <div className="flex flex-col">
