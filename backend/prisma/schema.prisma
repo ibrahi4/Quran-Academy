@@ -1,0 +1,419 @@
+﻿generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ═══════════════════════════════════════════
+// AUTH & USERS
+// ═══════════════════════════════════════════
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  password      String
+  role          Role      @default(GUEST)
+  firstName     String
+  lastName      String
+  phone         String?
+  avatar        String?
+  locale        Locale    @default(EN)
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  student       Student?
+  refreshTokens RefreshToken[]
+  notifications Notification[]
+  payments      Payment[]
+  subscriptions Subscription[]
+  testimonials  Testimonial[]
+  blogPosts     BlogPost[]
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+// ═══════════════════════════════════════════
+// STUDENTS & PROGRESS
+// ═══════════════════════════════════════════
+
+model Student {
+  id          String   @id @default(uuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parentName  String?
+  age         Int?
+  gender      Gender?
+  country     String?
+  city        String?
+  timezone    String?
+  level       StudentLevel @default(BEGINNER)
+  goals       String[]
+  notes       String?
+  source      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  bookings    Booking[]
+  sessions    Session[]
+  progress    Progress[]
+
+  @@map("students")
+}
+
+model Progress {
+  id              String   @id @default(uuid())
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  surahsCompleted Int      @default(0)
+  juzCompleted    Int      @default(0)
+  tajweedScore    Int      @default(0)
+  memorization    Int      @default(0)
+  lastLesson      String?
+  notes           String?
+  recordedAt      DateTime @default(now())
+
+  @@map("progress")
+}
+
+// ═══════════════════════════════════════════
+// BOOKINGS & SESSIONS
+// ═══════════════════════════════════════════
+
+model Booking {
+  id          String        @id @default(uuid())
+  studentId   String?
+  student     Student?      @relation(fields: [studentId], references: [id])
+  name        String
+  email       String
+  phone       String?
+  country     String?
+  timezone    String?
+  preferredDate DateTime?
+  preferredTime String?
+  serviceSlug String?
+  type        BookingType   @default(TRIAL)
+  status      BookingStatus @default(PENDING)
+  notes       String?
+  adminNotes  String?
+  meetingLink String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  session     Session?
+
+  @@map("bookings")
+}
+
+model Session {
+  id          String        @id @default(uuid())
+  studentId   String
+  student     Student       @relation(fields: [studentId], references: [id])
+  bookingId   String?       @unique
+  booking     Booking?      @relation(fields: [bookingId], references: [id])
+  title       String
+  date        DateTime
+  duration    Int           @default(60)
+  status      SessionStatus @default(SCHEDULED)
+  meetingLink String?
+  platform    Platform      @default(ZOOM)
+  recordingUrl String?
+  notes       String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@map("sessions")
+}
+
+// ═══════════════════════════════════════════
+// PAYMENTS & SUBSCRIPTIONS
+// ═══════════════════════════════════════════
+
+model Payment {
+  id              String        @id @default(uuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  subscriptionId  String?
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id])
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("USD")
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?       @unique
+  stripeInvoiceId String?
+  method          PaymentMethod @default(STRIPE)
+  description     String?
+  paidAt          DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+model Subscription {
+  id            String             @id @default(uuid())
+  userId        String
+  user          User               @relation(fields: [userId], references: [id])
+  plan          SubscriptionPlan
+  status        SubscriptionStatus @default(ACTIVE)
+  stripeSubId   String?            @unique
+  sessionsPerWeek Int              @default(2)
+  priceMonthly  Decimal            @db.Decimal(10, 2)
+  startDate     DateTime           @default(now())
+  endDate       DateTime?
+  cancelledAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+
+  payments      Payment[]
+
+  @@map("subscriptions")
+}
+
+model Plan {
+  id              String   @id @default(uuid())
+  slug            String   @unique
+  nameEn          String
+  nameAr          String
+  descriptionEn   String?
+  descriptionAr   String?
+  priceMonthly    Decimal  @db.Decimal(10, 2)
+  priceYearly     Decimal? @db.Decimal(10, 2)
+  sessionsPerWeek Int      @default(2)
+  sessionDuration Int      @default(60)
+  features        String[]
+  isActive        Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("plans")
+}
+
+// ═══════════════════════════════════════════
+// NOTIFICATIONS
+// ═══════════════════════════════════════════
+
+model Notification {
+  id        String              @id @default(uuid())
+  userId    String
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  channel   NotificationChannel @default(IN_APP)
+  title     String
+  body      String
+  data      Json?
+  read      Boolean             @default(false)
+  readAt    DateTime?
+  sentAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  @@index([userId, read])
+  @@map("notifications")
+}
+
+// ═══════════════════════════════════════════
+// CONTENT (Blog, Testimonials, Contact)
+// ═══════════════════════════════════════════
+
+model BlogPost {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  titleEn     String
+  titleAr     String?
+  contentEn   String
+  contentAr   String?
+  excerptEn   String?
+  excerptAr   String?
+  coverImage  String?
+  authorId    String
+  author      User      @relation(fields: [authorId], references: [id])
+  tags        String[]
+  locale      Locale    @default(EN)
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("blog_posts")
+}
+
+model Testimonial {
+  id        String   @id @default(uuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  name      String
+  country   String?
+  avatar    String?
+  textEn    String
+  textAr    String?
+  rating    Int      @default(5)
+  videoUrl  String?
+  approved  Boolean  @default(false)
+  featured  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("testimonials")
+}
+
+model Contact {
+  id        String        @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  status    ContactStatus @default(NEW)
+  repliedAt DateTime?
+  adminNote String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("contacts")
+}
+
+// ═══════════════════════════════════════════
+// ANALYTICS
+// ═══════════════════════════════════════════
+
+model AnalyticsEvent {
+  id        String   @id @default(uuid())
+  event     String
+  page      String?
+  metadata  Json?
+  ip        String?
+  userAgent String?
+  locale    Locale?
+  sessionId String?
+  createdAt DateTime @default(now())
+
+  @@index([event, createdAt])
+  @@map("analytics_events")
+}
+
+// ═══════════════════════════════════════════
+// ENUMS
+// ═══════════════════════════════════════════
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  GUEST
+}
+
+enum Locale {
+  EN
+  AR
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum StudentLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  HAFIZ
+}
+
+enum BookingType {
+  TRIAL
+  REGULAR
+  MAKEUP
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  MISSED
+}
+
+enum Platform {
+  ZOOM
+  GOOGLE_MEET
+  SKYPE
+  TEAMS
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE
+  PAYPAL
+  BANK_TRANSFER
+}
+
+enum SubscriptionPlan {
+  TRIAL
+  BASIC
+  PREMIUM
+  FAMILY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  EXPIRED
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  SESSION_REMINDER
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  SUBSCRIPTION_CREATED
+  SUBSCRIPTION_EXPIRING
+  WELCOME
+  GENERAL
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+  IN_APP
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  REPLIED
+  ARCHIVED
+}
