@@ -1,4 +1,4 @@
-﻿generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -6,10 +6,6 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
-// ═══════════════════════════════════════════
-// AUTH & USERS
-// ═══════════════════════════════════════════
 
 model User {
   id            String    @id @default(uuid())
@@ -26,7 +22,6 @@ model User {
   lastLoginAt   DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
   student       Student?
   refreshTokens RefreshToken[]
   notifications Notification[]
@@ -34,7 +29,6 @@ model User {
   subscriptions Subscription[]
   testimonials  Testimonial[]
   blogPosts     BlogPost[]
-
   @@map("users")
 }
 
@@ -45,13 +39,8 @@ model RefreshToken {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   createdAt DateTime @default(now())
-
   @@map("refresh_tokens")
 }
-
-// ═══════════════════════════════════════════
-// STUDENTS & PROGRESS
-// ═══════════════════════════════════════════
 
 model Student {
   id          String   @id @default(uuid())
@@ -69,11 +58,9 @@ model Student {
   source      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-
   bookings    Booking[]
   sessions    Session[]
   progress    Progress[]
-
   @@map("students")
 }
 
@@ -88,13 +75,8 @@ model Progress {
   lastLesson      String?
   notes           String?
   recordedAt      DateTime @default(now())
-
   @@map("progress")
 }
-
-// ═══════════════════════════════════════════
-// BOOKINGS & SESSIONS
-// ═══════════════════════════════════════════
 
 model Booking {
   id          String        @id @default(uuid())
@@ -115,9 +97,7 @@ model Booking {
   meetingLink String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-
   session     Session?
-
   @@map("bookings")
 }
 
@@ -137,13 +117,8 @@ model Session {
   notes       String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-
   @@map("sessions")
 }
-
-// ═══════════════════════════════════════════
-// PAYMENTS & SUBSCRIPTIONS
-// ═══════════════════════════════════════════
 
 model Payment {
   id              String        @id @default(uuid())
@@ -161,7 +136,6 @@ model Payment {
   paidAt          DateTime?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
-
   @@map("payments")
 }
 
@@ -179,9 +153,7 @@ model Subscription {
   cancelledAt   DateTime?
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
-
   payments      Payment[]
-
   @@map("subscriptions")
 }
 
@@ -201,13 +173,8 @@ model Plan {
   sortOrder       Int      @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
   @@map("plans")
 }
-
-// ═══════════════════════════════════════════
-// NOTIFICATIONS
-// ═══════════════════════════════════════════
 
 model Notification {
   id        String              @id @default(uuid())
@@ -222,14 +189,9 @@ model Notification {
   readAt    DateTime?
   sentAt    DateTime?
   createdAt DateTime            @default(now())
-
   @@index([userId, read])
   @@map("notifications")
 }
-
-// ═══════════════════════════════════════════
-// CONTENT (Blog, Testimonials, Contact)
-// ═══════════════════════════════════════════
 
 model BlogPost {
   id          String    @id @default(uuid())
@@ -249,7 +211,6 @@ model BlogPost {
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-
   @@map("blog_posts")
 }
 
@@ -268,7 +229,6 @@ model Testimonial {
   featured  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   @@map("testimonials")
 }
 
@@ -284,13 +244,8 @@ model Contact {
   adminNote String?
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
-
   @@map("contacts")
 }
-
-// ═══════════════════════════════════════════
-// ANALYTICS
-// ═══════════════════════════════════════════
 
 model AnalyticsEvent {
   id        String   @id @default(uuid())
@@ -302,14 +257,9 @@ model AnalyticsEvent {
   locale    Locale?
   sessionId String?
   createdAt DateTime @default(now())
-
   @@index([event, createdAt])
   @@map("analytics_events")
 }
-
-// ═══════════════════════════════════════════
-// ENUMS
-// ═══════════════════════════════════════════
 
 enum Role {
   ADMIN
