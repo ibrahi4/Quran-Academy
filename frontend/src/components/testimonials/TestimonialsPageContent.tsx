@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import { Star, Quote, Filter } from "lucide-react";
@@ -9,24 +9,72 @@ import TestimonialCard from "./TestimonialCard";
 import TestimonialsStats from "./TestimonialsStats";
 import VideoTestimonials from "./VideoTestimonials";
 import TestimonialsCTA from "./TestimonialsCTA";
+import { useLocale } from "@/hooks/useLocale";
+import { apiGetClient } from "@/lib/api";
 
 const filters = ["all", "parents", "adults", "newMuslims", "kids"] as const;
 
+type TestimonialItem = {
+  id: number | string;
+  name: string;
+  role: string;
+  country: string;
+  category: string;
+  rating: number;
+  text: string;
+  course: string;
+};
+
 export default function TestimonialsPageContent() {
   const t = useTranslations("testimonials");
+  const { locale } = useLocale();
   const [activeFilter, setActiveFilter] = useState<string>("all");
+  const [apiTestimonials, setApiTestimonials] = useState<TestimonialItem[] | null>(null);
 
-  const totalCount = Number(t("list.count"));
-  const testimonials = Array.from({ length: totalCount }, (_, i) => ({
-    id: i,
-    name: t(`list.items.${i}.name`),
-    role: t(`list.items.${i}.role`),
-    country: t(`list.items.${i}.country`),
-    category: t(`list.items.${i}.category`),
-    rating: Number(t(`list.items.${i}.rating`)),
-    text: t(`list.items.${i}.text`),
-    course: t(`list.items.${i}.course`),
-  }));
+  // Fetch from API
+  useEffect(() => {
+    apiGetClient("/testimonials/public")
+      .then((data: any) => {
+        const items = Array.isArray(data) ? data : data?.data || [];
+        if (items.length > 0) {
+          const mapped: TestimonialItem[] = items.map((item: any) => ({
+            id: item.id,
+            name: item.name || "Anonymous",
+            role: "",
+            country: item.country || "",
+            category: "all",
+            rating: item.rating || 5,
+            text: locale === "ar" && item.textAr ? item.textAr : item.textEn,
+            course: "",
+          }));
+          setApiTestimonials(mapped);
+        }
+      })
+      .catch(() => {
+        // Fallback to static data
+      });
+  }, [locale]);
+
+  // Static fallback from translations
+  const staticTestimonials = useMemo(() => {
+    try {
+      const totalCount = Number(t("list.count"));
+      return Array.from({ length: totalCount }, (_, i) => ({
+        id: i,
+        name: t(`list.items.${i}.name`),
+        role: t(`list.items.${i}.role`),
+        country: t(`list.items.${i}.country`),
+        category: t(`list.items.${i}.category`),
+        rating: Number(t(`list.items.${i}.rating`)),
+        text: t(`list.items.${i}.text`),
+        course: t(`list.items.${i}.course`),
+      }));
+    } catch {
+      return [];
+    }
+  }, [t]);
+
+  const testimonials = apiTestimonials || staticTestimonials;
 
   const filtered = useMemo(() => {
     if (activeFilter === "all") return testimonials;
@@ -59,7 +107,6 @@ export default function TestimonialsPageContent() {
               {t("hero.subtitle")}
             </p>
 
-            {/* Rating Summary */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -79,13 +126,10 @@ export default function TestimonialsPageContent() {
         </Container>
       </section>
 
-      {/* Stats */}
       <TestimonialsStats />
 
-      {/* Filter + Grid */}
       <section className="py-16 md:py-24 bg-sand-50">
         <Container>
-          {/* Filter Tabs */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -109,7 +153,6 @@ export default function TestimonialsPageContent() {
             ))}
           </motion.div>
 
-          {/* Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filtered.map((testimonial, index) => (
               <TestimonialCard
@@ -133,10 +176,7 @@ export default function TestimonialsPageContent() {
         </Container>
       </section>
 
-      {/* Video Testimonials */}
       <VideoTestimonials />
-
-      {/* CTA */}
       <TestimonialsCTA />
     </main>
   );

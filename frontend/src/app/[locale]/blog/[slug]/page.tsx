@@ -1,24 +1,10 @@
 import React from "react";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import BlogDetailContent from "@/components/blog/BlogDetailContent";
-
-const validSlugs = [
-  "how-to-start-learning-quran",
-  "tajweed-tips-for-beginners",
-  "benefits-of-memorizing-quran",
-  "arabic-language-learning-guide",
-  "new-muslim-first-steps",
-  "teaching-quran-to-kids",
-];
 
 type Props = {
   params: Promise<{ slug: string; locale: string }>;
 };
-
-export async function generateStaticParams() {
-  return validSlugs.map((slug) => ({ slug }));
-}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -35,10 +21,5 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogDetailPage({ params }: Props) {
   const { slug } = await params;
-
-  if (!validSlugs.includes(slug)) {
-    notFound();
-  }
-
   return <BlogDetailContent slug={slug} />;
 }

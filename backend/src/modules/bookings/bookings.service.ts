@@ -1,4 +1,4 @@
-﻿import { Injectable, Logger } from "@nestjs/common";
+﻿import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../../database/prisma.service";
 import { CreateBookingDto } from "./dto/create-booking.dto";
 import { BookingStatus } from "@prisma/client";
@@ -18,35 +18,74 @@ export class BookingsService {
     });
 
     this.logger.log(`New booking created: ${booking.id} - ${booking.email}`);
-    // TODO: Send email notification via queue
     return booking;
   }
 
-  async findAll(page = 1, limit = 20) {
+  async findAll(page = 1, limit = 20, status?: string, search?: string) {
     const skip = (page - 1) * limit;
-    const [bookings, total] = await Promise.all([
+    const where: any = {};
+    if (status) where.status = status;
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+        { phone: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const [data, total] = await Promise.all([
       this.prisma.booking.findMany({
+        where,
         skip,
         take: limit,
         orderBy: { createdAt: "desc" },
-        include: { student: { include: { user: { select: { firstName: true, lastName: true } } } } },
+        include: {
+          student: {
+            include: {
+              user: { select: { firstName: true, lastName: true } },
+            },
+          },
+        },
       }),
-      this.prisma.booking.count(),
+      this.prisma.booking.count({ where }),
     ]);
-    return { bookings, total, page, limit, totalPages: Math.ceil(total / limit) };
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+        hasNext: page < Math.ceil(total / limit),
+        hasPrev: page > 1,
+      },
+    };
   }
 
   async findOne(id: string) {
-    return this.prisma.booking.findUnique({
+    const booking = await this.prisma.booking.findUnique({
       where: { id },
       include: { student: true, session: true },
     });
+    if (!booking) throw new NotFoundException("Booking not found");
+    return booking;
   }
 
   async updateStatus(id: string, status: BookingStatus, adminNotes?: string) {
-    return this.prisma.booking.update({
+    await this.findOne(id);
+    const updated = await this.prisma.booking.update({
       where: { id },
       data: { status, adminNotes },
     });
+    this.logger.log(`Booking ${id} status updated to ${status}`);
+    return updated;
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    await this.prisma.booking.delete({ where: { id } });
+    this.logger.log(`Booking deleted: ${id}`);
+    return { message: "Booking deleted successfully" };
   }
 }

@@ -1,0 +1,3171 @@
+﻿====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\admin\admin.controller.ts ======
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { AdminService } from './admin.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
+
+@ApiTags('Admin Dashboard')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(Role.ADMIN)
+@Controller('admin')
+export class AdminController {
+  constructor(private readonly adminService: AdminService) {}
+
+  @Get('dashboard')
+  @ApiOperation({ summary: 'Get dashboard stats' })
+  getDashboardStats() {
+    return this.adminService.getDashboardStats();
+  }
+
+  @Get('recent-bookings')
+  @ApiOperation({ summary: 'Get recent bookings' })
+  getRecentBookings(@Query('limit') limit?: number) {
+    return this.adminService.getRecentBookings(limit || 10);
+  }
+
+  @Get('recent-contacts')
+  @ApiOperation({ summary: 'Get recent contacts' })
+  getRecentContacts(@Query('limit') limit?: number) {
+    return this.adminService.getRecentContacts(limit || 10);
+  }
+
+  @Get('recent-payments')
+  @ApiOperation({ summary: 'Get recent payments' })
+  getRecentPayments(@Query('limit') limit?: number) {
+    return this.adminService.getRecentPayments(limit || 10);
+  }
+
+  @Get('upcoming-sessions')
+  @ApiOperation({ summary: 'Get upcoming sessions' })
+  getUpcomingSessions(@Query('limit') limit?: number) {
+    return this.adminService.getUpcomingSessions(limit || 10);
+  }
+
+  @Get('revenue-chart')
+  @ApiOperation({ summary: 'Monthly revenue chart data' })
+  getRevenueChart(@Query('months') months?: number) {
+    return this.adminService.getMonthlyRevenueChart(months || 12);
+  }
+
+  @Get('user-growth')
+  @ApiOperation({ summary: 'Monthly user growth chart data' })
+  getUserGrowth(@Query('months') months?: number) {
+    return this.adminService.getUserGrowthChart(months || 12);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\admin\admin.module.ts ======
+import { Module } from '@nestjs/common';
+import { AdminService } from './admin.service';
+import { AdminController } from './admin.controller';
+
+@Module({
+  controllers: [AdminController],
+  providers: [AdminService],
+})
+export class AdminModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\admin\admin.service.ts ======
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+
+@Injectable()
+export class AdminService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async getDashboardStats() {
+    const now = new Date();
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
+    const [
+      totalUsers,
+      totalStudents,
+      activeSubscriptions,
+      totalBookings,
+      pendingBookings,
+      totalSessions,
+      upcomingSessions,
+      totalRevenue,
+      monthlyRevenue,
+      lastMonthRevenue,
+      newUsersThisMonth,
+      totalContacts,
+      unreadContacts,
+      totalBlogPosts,
+      publishedBlogPosts,
+      pendingTestimonials,
+    ] = await Promise.all([
+      this.prisma.user.count(),
+      this.prisma.student.count(),
+      this.prisma.subscription.count({ where: { status: 'ACTIVE' } }),
+      this.prisma.booking.count(),
+      this.prisma.booking.count({ where: { status: 'PENDING' } }),
+      this.prisma.session.count(),
+      this.prisma.session.count({
+        where: { date: { gte: now }, status: 'SCHEDULED' },
+      }),
+      this.prisma.payment.aggregate({
+        where: { status: 'PAID' },
+        _sum: { amount: true },
+      }),
+      this.prisma.payment.aggregate({
+        where: { status: 'PAID', paidAt: { gte: thisMonth } },
+        _sum: { amount: true },
+      }),
+      this.prisma.payment.aggregate({
+        where: {
+          status: 'PAID',
+          paidAt: { gte: lastMonth, lt: thisMonth },
+        },
+        _sum: { amount: true },
+      }),
+      this.prisma.user.count({ where: { createdAt: { gte: thisMonth } } }),
+      this.prisma.contact.count(),
+      this.prisma.contact.count({ where: { status: 'NEW' } }),
+      this.prisma.blogPost.count(),
+      this.prisma.blogPost.count({ where: { published: true } }),
+      this.prisma.testimonial.count({ where: { approved: false } }),
+    ]);
+
+    const currentMonthRev = Number(monthlyRevenue._sum.amount) || 0;
+    const lastMonthRev = Number(lastMonthRevenue._sum.amount) || 0;
+    const revenueGrowth =
+      lastMonthRev > 0
+        ? (
+            ((currentMonthRev - lastMonthRev) / lastMonthRev) *
+            100
+          ).toFixed(1)
+        : '0';
+
+    return {
+      users: {
+        total: totalUsers,
+        newThisMonth: newUsersThisMonth,
+        students: totalStudents,
+      },
+      subscriptions: { active: activeSubscriptions },
+      bookings: { total: totalBookings, pending: pendingBookings },
+      sessions: { total: totalSessions, upcoming: upcomingSessions },
+      revenue: {
+        total: Number(totalRevenue._sum.amount) || 0,
+        thisMonth: currentMonthRev,
+        lastMonth: lastMonthRev,
+        growthPercent: revenueGrowth,
+      },
+      contacts: { total: totalContacts, unread: unreadContacts },
+      blog: { total: totalBlogPosts, published: publishedBlogPosts },
+      testimonials: { pending: pendingTestimonials },
+    };
+  }
+
+  async getRecentBookings(limit = 10) {
+    return await this.prisma.booking.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
+  async getRecentContacts(limit = 10) {
+    return await this.prisma.contact.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
+  async getRecentPayments(limit = 10) {
+    return await this.prisma.payment.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getUpcomingSessions(limit = 10) {
+    return await this.prisma.session.findMany({
+      where: { date: { gte: new Date() }, status: 'SCHEDULED' },
+      orderBy: { date: 'asc' },
+      take: limit,
+      include: {
+        student: {
+          include: {
+            user: {
+              select: { firstName: true, lastName: true },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getMonthlyRevenueChart(months = 12) {
+    const results: Array<{ month: string; revenue: number }> = [];
+    const now = new Date();
+
+    for (let i = months - 1; i >= 0; i--) {
+      const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const end = new Date(
+        now.getFullYear(),
+        now.getMonth() - i + 1,
+        1,
+      );
+
+      const agg = await this.prisma.payment.aggregate({
+        where: { status: 'PAID', paidAt: { gte: start, lt: end } },
+        _sum: { amount: true },
+      });
+
+      results.push({
+        month: start.toISOString().substring(0, 7),
+        revenue: Number(agg._sum.amount) || 0,
+      });
+    }
+
+    return results;
+  }
+
+  async getUserGrowthChart(months = 12) {
+    const results: Array<{ month: string; count: number }> = [];
+    const now = new Date();
+
+    for (let i = months - 1; i >= 0; i--) {
+      const start = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const end = new Date(
+        now.getFullYear(),
+        now.getMonth() - i + 1,
+        1,
+      );
+
+      const count = await this.prisma.user.count({
+        where: { createdAt: { gte: start, lt: end } },
+      });
+
+      results.push({
+        month: start.toISOString().substring(0, 7),
+        count,
+      });
+    }
+
+    return results;
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\analytics\analytics.controller.ts ======
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { AnalyticsService } from './analytics.service';
+import { TrackEventDto } from './dto/track-event.dto';
+import { QueryAnalyticsDto } from './dto/query-analytics.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
+
+@ApiTags('Analytics')
+@Controller('analytics')
+export class AnalyticsController {
+  constructor(private readonly analyticsService: AnalyticsService) {}
+
+  @Post('track')
+  @ApiOperation({ summary: 'Track event (public)' })
+  track(@Body() dto: TrackEventDto, @Req() req: any) {
+    const ip =
+      req.ip || (req.headers['x-forwarded-for'] as string) || undefined;
+    const userAgent = req.headers['user-agent'] as string;
+    return this.analyticsService.trackEvent(dto, ip, userAgent);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List analytics events (Admin)' })
+  findAll(@Query() query: QueryAnalyticsDto) {
+    return this.analyticsService.findAll(query);
+  }
+
+  @Get('overview')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Analytics overview (Admin)' })
+  overview() {
+    return this.analyticsService.getOverview();
+  }
+
+  @Get('page-views')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Top page views (Admin)' })
+  pageViews(@Query('days') days?: number) {
+    return this.analyticsService.getPageViews(days || 30);
+  }
+
+  @Get('event-counts')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Event counts (Admin)' })
+  eventCounts(@Query('days') days?: number) {
+    return this.analyticsService.getEventCounts(days || 30);
+  }
+
+  @Get('daily')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Daily stats (Admin)' })
+  dailyStats(@Query('days') days?: number) {
+    return this.analyticsService.getDailyStats(days || 30);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\analytics\analytics.module.ts ======
+import { Module } from '@nestjs/common';
+import { AnalyticsService } from './analytics.service';
+import { AnalyticsController } from './analytics.controller';
+
+@Module({
+  controllers: [AnalyticsController],
+  providers: [AnalyticsService],
+  exports: [AnalyticsService],
+})
+export class AnalyticsModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\analytics\analytics.service.ts ======
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { TrackEventDto } from './dto/track-event.dto';
+import { QueryAnalyticsDto } from './dto/query-analytics.dto';
+import { Prisma, Locale } from '@prisma/client';
+
+@Injectable()
+export class AnalyticsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async trackEvent(dto: TrackEventDto, ip?: string, userAgent?: string) {
+    return await this.prisma.analyticsEvent.create({
+      data: {
+        event: dto.event,
+        page: dto.page,
+        metadata: (dto.metadata as Prisma.JsonObject) ?? {},
+        locale: dto.locale ? (dto.locale as Locale) : null,
+        sessionId: dto.sessionId,
+        ip: ip ?? null,
+        userAgent: userAgent ?? null,
+      },
+    });
+  }
+
+  async findAll(query: QueryAnalyticsDto) {
+    const { page = 1, limit = 50, event, page_path, from, to } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.AnalyticsEventWhereInput = {};
+    if (event) where.event = event;
+    if (page_path) {
+      where.page = { contains: page_path, mode: 'insensitive' };
+    }
+    if (from || to) {
+      where.createdAt = {};
+      if (from) where.createdAt.gte = new Date(from);
+      if (to) where.createdAt.lte = new Date(to);
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.analyticsEvent.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.analyticsEvent.count({ where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async getPageViews(days = 30) {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const events = await this.prisma.analyticsEvent.groupBy({
+      by: ['page'],
+      where: { event: 'page_view', createdAt: { gte: since } },
+      _count: true,
+      orderBy: { _count: { page: 'desc' } },
+      take: 20,
+    });
+
+    return events.map((e) => ({ page: e.page, views: e._count }));
+  }
+
+  async getEventCounts(days = 30) {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const events = await this.prisma.analyticsEvent.groupBy({
+      by: ['event'],
+      where: { createdAt: { gte: since } },
+      _count: true,
+      orderBy: { _count: { event: 'desc' } },
+    });
+
+    return events.map((e) => ({ event: e.event, count: e._count }));
+  }
+
+  async getDailyStats(days = 30) {
+    const since = new Date();
+    since.setDate(since.getDate() - days);
+
+    const raw = await this.prisma.$queryRaw<
+      Array<{ date: string; count: bigint }>
+    >`
+      SELECT DATE("createdAt") as date, COUNT(*)::int as count
+      FROM "AnalyticsEvent"
+      WHERE "createdAt" >= ${since}
+      GROUP BY DATE("createdAt")
+      ORDER BY date ASC
+    `;
+
+    return raw.map((r) => ({ date: r.date, count: Number(r.count) }));
+  }
+
+  async getOverview() {
+    const now = new Date();
+    const today = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+    );
+    const thisWeek = new Date(today);
+    thisWeek.setDate(thisWeek.getDate() - 7);
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [todayCount, weekCount, monthCount, totalCount] =
+      await Promise.all([
+        this.prisma.analyticsEvent.count({
+          where: { createdAt: { gte: today } },
+        }),
+        this.prisma.analyticsEvent.count({
+          where: { createdAt: { gte: thisWeek } },
+        }),
+        this.prisma.analyticsEvent.count({
+          where: { createdAt: { gte: thisMonth } },
+        }),
+        this.prisma.analyticsEvent.count(),
+      ]);
+
+    return {
+      today: todayCount,
+      thisWeek: weekCount,
+      thisMonth: monthCount,
+      total: totalCount,
+    };
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\analytics\dto\query-analytics.dto.ts ======
+import { IsOptional, IsString, IsDateString, IsInt, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+export class QueryAnalyticsDto {
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 50 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 50;
+
+  @ApiPropertyOptional({ example: 'page_view' })
+  @IsOptional()
+  @IsString()
+  event?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  page_path?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  from?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  to?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\analytics\dto\track-event.dto.ts ======
+import { IsString, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class TrackEventDto {
+  @ApiProperty({ example: 'page_view' })
+  @IsString()
+  event: string;
+
+  @ApiPropertyOptional({ example: '/en/services' })
+  @IsOptional()
+  @IsString()
+  page?: string;
+
+  @ApiPropertyOptional({ example: { serviceSlug: 'quran-memorization' } })
+  @IsOptional()
+  metadata?: any;
+
+  @ApiPropertyOptional({ example: 'en' })
+  @IsOptional()
+  @IsString()
+  locale?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  sessionId?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\auth\auth.controller.ts ======
+import { Controller, Post, Body, UseGuards, HttpCode, HttpStatus } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
+import { AuthService } from "./auth.service";
+import { RegisterDto } from "./dto/register.dto";
+import { LoginDto } from "./dto/login.dto";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
+
+@ApiTags("Auth")
+@Controller("auth")
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  @Post("register")
+  @ApiOperation({ summary: "Register new user" })
+  register(@Body() dto: RegisterDto) {
+    return this.authService.register(dto);
+  }
+
+  @Post("login")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Login" })
+  login(@Body() dto: LoginDto) {
+    return this.authService.login(dto);
+  }
+
+  @Post("refresh")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Refresh tokens" })
+  refresh(@Body("refreshToken") refreshToken: string) {
+    return this.authService.refreshTokens(refreshToken);
+  }
+
+  @Post("logout")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Logout" })
+  logout(@CurrentUser("id") userId: string) {
+    return this.authService.logout(userId);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\auth\auth.module.ts ======
+import { Module } from "@nestjs/common";
+import { JwtModule } from "@nestjs/jwt";
+import { PassportModule } from "@nestjs/passport";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { AuthController } from "./auth.controller";
+import { AuthService } from "./auth.service";
+import { JwtStrategy } from "./strategies/jwt.strategy";
+
+@Module({
+  imports: [
+    PassportModule.register({ defaultStrategy: "jwt" }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get("jwt.secret"),
+        signOptions: { expiresIn: config.get("jwt.expiration") },
+      }),
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
+})
+export class AuthModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\auth\auth.service.ts ======
+import { Injectable, ConflictException, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { ConfigService } from "@nestjs/config";
+import * as bcrypt from "bcryptjs";
+import { v4 as uuid } from "uuid";
+import { PrismaService } from "../../database/prisma.service";
+import { RegisterDto } from "./dto/register.dto";
+import { LoginDto } from "./dto/login.dto";
+
+@Injectable()
+export class AuthService {
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+    private configService: ConfigService,
+  ) {}
+
+  async register(dto: RegisterDto) {
+    const exists = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (exists) throw new ConflictException("Email already registered");
+
+    const hashedPassword = await bcrypt.hash(dto.password, 12);
+    const user = await this.prisma.user.create({
+      data: {
+        ...dto,
+        password: hashedPassword,
+      },
+    });
+
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    await this.saveRefreshToken(user.id, tokens.refreshToken);
+
+    return {
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+      ...tokens,
+    };
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (!user) throw new UnauthorizedException("Invalid credentials");
+
+    const valid = await bcrypt.compare(dto.password, user.password);
+    if (!valid) throw new UnauthorizedException("Invalid credentials");
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    await this.saveRefreshToken(user.id, tokens.refreshToken);
+
+    return {
+      user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role },
+      ...tokens,
+    };
+  }
+
+  async refreshTokens(refreshToken: string) {
+    const stored = await this.prisma.refreshToken.findUnique({ where: { token: refreshToken } });
+    if (!stored || stored.expiresAt < new Date()) {
+      throw new UnauthorizedException("Invalid refresh token");
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: stored.userId } });
+    if (!user) throw new UnauthorizedException();
+
+    await this.prisma.refreshToken.delete({ where: { id: stored.id } });
+
+    const tokens = await this.generateTokens(user.id, user.email, user.role);
+    await this.saveRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
+  }
+
+  async logout(userId: string) {
+    await this.prisma.refreshToken.deleteMany({ where: { userId } });
+    return { message: "Logged out successfully" };
+  }
+
+  private async generateTokens(userId: string, email: string, role: string) {
+    const payload = { sub: userId, email, role };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get("jwt.secret"),
+        expiresIn: this.configService.get("jwt.expiration"),
+      }),
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get("jwt.refreshSecret"),
+        expiresIn: this.configService.get("jwt.refreshExpiration"),
+      }),
+    ]);
+    return { accessToken, refreshToken };
+  }
+
+  private async saveRefreshToken(userId: string, token: string) {
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    await this.prisma.refreshToken.create({
+      data: { token, userId, expiresAt },
+    });
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\auth\dto\login.dto.ts ======
+import { IsEmail, IsString, MinLength } from "class-validator";
+
+export class LoginDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\auth\dto\register.dto.ts ======
+import { IsEmail, IsString, MinLength, IsOptional, IsEnum } from "class-validator";
+import { Locale } from "@prisma/client";
+
+export class RegisterDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8)
+  password: string;
+
+  @IsString()
+  firstName: string;
+
+  @IsString()
+  lastName: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsEnum(Locale)
+  locale?: Locale;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\auth\guards\jwt-auth.guard.ts ======
+import { Injectable, ExecutionContext } from "@nestjs/common";
+import { AuthGuard } from "@nestjs/passport";
+
+@Injectable()
+export class JwtAuthGuard extends AuthGuard("jwt") {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\auth\strategies\jwt.strategy.ts ======
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { ConfigService } from "@nestjs/config";
+import { PrismaService } from "../../../database/prisma.service";
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor(
+    configService: ConfigService,
+    private prisma: PrismaService,
+  ) {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.get<string>("jwt.secret") || 'default-secret',
+    });
+  }
+
+  async validate(payload: { sub: string; email: string; role: string }) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
+    if (!user || !user.isActive) throw new UnauthorizedException();
+    return { id: user.id, email: user.email, role: user.role };
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\blog\blog.controller.ts ======
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { BlogService } from './blog.service';
+import { CreateBlogPostDto } from './dto/create-blog-post.dto';
+import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
+import { QueryBlogDto } from './dto/query-blog.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
+
+@ApiTags('Blog')
+@Controller('blog')
+export class BlogController {
+  constructor(private readonly blogService: BlogService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'List blog posts (public: published only, admin: all)' })
+  findAll(@Query() query: QueryBlogDto) {
+    return this.blogService.findAll(query);
+  }
+
+  @Get('slug/:slug')
+  @ApiOperation({ summary: 'Get blog post by slug (public)' })
+  findBySlug(@Param('slug') slug: string) {
+    return this.blogService.findBySlug(slug);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create blog post (Admin)' })
+  create(@CurrentUser() user: any, @Body() dto: CreateBlogPostDto) {
+    return this.blogService.create(user.id, dto);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get blog post by ID (Admin)' })
+  findOne(@Param('id') id: string) {
+    return this.blogService.findOne(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update blog post (Admin)' })
+  update(@Param('id') id: string, @Body() dto: UpdateBlogPostDto) {
+    return this.blogService.update(id, dto);
+  }
+
+  @Patch(':id/publish')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Publish blog post (Admin)' })
+  publish(@Param('id') id: string) {
+    return this.blogService.publish(id);
+  }
+
+  @Patch(':id/unpublish')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Unpublish blog post (Admin)' })
+  unpublish(@Param('id') id: string) {
+    return this.blogService.unpublish(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete blog post (Admin)' })
+  remove(@Param('id') id: string) {
+    return this.blogService.remove(id);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\blog\blog.module.ts ======
+import { Module } from '@nestjs/common';
+import { BlogService } from './blog.service';
+import { BlogController } from './blog.controller';
+
+@Module({
+  controllers: [BlogController],
+  providers: [BlogService],
+  exports: [BlogService],
+})
+export class BlogModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\blog\blog.service.ts ======
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateBlogPostDto } from './dto/create-blog-post.dto';
+import { UpdateBlogPostDto } from './dto/update-blog-post.dto';
+import { QueryBlogDto } from './dto/query-blog.dto';
+import { Prisma } from '@prisma/client';
+
+@Injectable()
+export class BlogService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(authorId: string, dto: CreateBlogPostDto) {
+    const existing = await this.prisma.blogPost.findUnique({ where: { slug: dto.slug } });
+    if (existing) throw new ConflictException('Slug already exists');
+
+    return this.prisma.blogPost.create({
+      data: {
+        ...dto,
+        authorId,
+        publishedAt: dto.published ? new Date() : null,
+      },
+      include: { author: { select: { id: true, firstName: true, lastName: true } } },
+    });
+  }
+
+  async findAll(query: QueryBlogDto) {
+    const { page = 1, limit = 10, search, tag, published } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.BlogPostWhereInput = {};
+    if (published !== undefined) where.published = published;
+    if (tag) where.tags = { has: tag };
+    if (search) {
+      where.OR = [
+        { titleEn: { contains: search, mode: 'insensitive' } },
+        { titleAr: { contains: search, mode: 'insensitive' } },
+        { contentEn: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [posts, total] = await Promise.all([
+      this.prisma.blogPost.findMany({
+        where, skip, take: limit,
+        include: { author: { select: { id: true, firstName: true, lastName: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.blogPost.count({ where }),
+    ]);
+
+    return {
+      data: posts,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  async findBySlug(slug: string) {
+    const post = await this.prisma.blogPost.findUnique({
+      where: { slug },
+      include: { author: { select: { id: true, firstName: true, lastName: true } } },
+    });
+    if (!post) throw new NotFoundException('Blog post not found');
+    return post;
+  }
+
+  async findOne(id: string) {
+    const post = await this.prisma.blogPost.findUnique({
+      where: { id },
+      include: { author: { select: { id: true, firstName: true, lastName: true } } },
+    });
+    if (!post) throw new NotFoundException('Blog post not found');
+    return post;
+  }
+
+  async update(id: string, dto: UpdateBlogPostDto) {
+    await this.findOne(id);
+    if (dto.slug) {
+      const existing = await this.prisma.blogPost.findFirst({ where: { slug: dto.slug, NOT: { id } } });
+      if (existing) throw new ConflictException('Slug already in use');
+    }
+
+    const data: any = { ...dto };
+    if (dto.published === true) {
+      const current = await this.prisma.blogPost.findUnique({ where: { id } });
+      if (!current?.publishedAt) data.publishedAt = new Date();
+    }
+
+    return this.prisma.blogPost.update({
+      where: { id }, data,
+      include: { author: { select: { id: true, firstName: true, lastName: true } } },
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    await this.prisma.blogPost.delete({ where: { id } });
+    return { message: 'Blog post deleted successfully' };
+  }
+
+  async publish(id: string) {
+    await this.findOne(id);
+    return this.prisma.blogPost.update({
+      where: { id },
+      data: { published: true, publishedAt: new Date() },
+    });
+  }
+
+  async unpublish(id: string) {
+    await this.findOne(id);
+    return this.prisma.blogPost.update({
+      where: { id },
+      data: { published: false },
+    });
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\blog\dto\create-blog-post.dto.ts ======
+import { IsString, IsOptional, IsBoolean, IsArray, IsEnum } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Locale } from '@prisma/client';
+
+export class CreateBlogPostDto {
+  @ApiProperty({ example: 'how-to-memorize-quran' })
+  @IsString()
+  slug: string;
+
+  @ApiProperty({ example: 'How to Memorize Quran' })
+  @IsString()
+  titleEn: string;
+
+  @ApiPropertyOptional({ example: 'كيف تحفظ القرآن' })
+  @IsOptional()
+  @IsString()
+  titleAr?: string;
+
+  @ApiProperty({ example: '<p>Full content here...</p>' })
+  @IsString()
+  contentEn: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  contentAr?: string;
+
+  @ApiPropertyOptional({ example: 'A short excerpt...' })
+  @IsOptional()
+  @IsString()
+  excerptEn?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  excerptAr?: string;
+
+  @ApiPropertyOptional({ example: 'https://example.com/cover.jpg' })
+  @IsOptional()
+  @IsString()
+  coverImage?: string;
+
+  @ApiPropertyOptional({ example: ['quran', 'memorization'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @ApiPropertyOptional({ enum: Locale, default: Locale.EN })
+  @IsOptional()
+  @IsEnum(Locale)
+  locale?: Locale;
+
+  @ApiPropertyOptional({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  published?: boolean;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\blog\dto\query-blog.dto.ts ======
+import { IsOptional, IsString, IsBoolean, IsInt, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type, Transform } from 'class-transformer';
+
+export class QueryBlogDto {
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 10 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 10;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  tag?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  published?: boolean;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\blog\dto\update-blog-post.dto.ts ======
+import { PartialType } from '@nestjs/swagger';
+import { CreateBlogPostDto } from './create-blog-post.dto';
+
+export class UpdateBlogPostDto extends PartialType(CreateBlogPostDto) {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\bookings\bookings.controller.ts ======
+import { Controller, Post, Get, Patch, Body, Param, Query, UseGuards } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
+import { BookingsService } from "./bookings.service";
+import { CreateBookingDto } from "./dto/create-booking.dto";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../common/guards/roles.guard";
+import { Roles } from "../../common/decorators/roles.decorator";
+import { BookingStatus, Role } from "@prisma/client";
+
+@ApiTags("Bookings")
+@Controller("bookings")
+export class BookingsController {
+  constructor(private bookingsService: BookingsService) {}
+
+  @Post()
+  @ApiOperation({ summary: "Create a trial booking (public)" })
+  create(@Body() dto: CreateBookingDto) {
+    return this.bookingsService.create(dto);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get all bookings (admin)" })
+  findAll(@Query("page") page?: string, @Query("limit") limit?: string) {
+    return this.bookingsService.findAll(Number(page) || 1, Number(limit) || 20);
+  }
+
+  @Get(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @ApiBearerAuth()
+  findOne(@Param("id") id: string) {
+    return this.bookingsService.findOne(id);
+  }
+
+  @Patch(":id/status")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  updateStatus(
+    @Param("id") id: string,
+    @Body("status") status: BookingStatus,
+    @Body("adminNotes") adminNotes?: string,
+  ) {
+    return this.bookingsService.updateStatus(id, status, adminNotes);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\bookings\bookings.module.ts ======
+import { Module } from "@nestjs/common";
+import { BookingsController } from "./bookings.controller";
+import { BookingsService } from "./bookings.service";
+
+@Module({
+  controllers: [BookingsController],
+  providers: [BookingsService],
+  exports: [BookingsService],
+})
+export class BookingsModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\bookings\bookings.service.ts ======
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../../database/prisma.service";
+import { CreateBookingDto } from "./dto/create-booking.dto";
+import { BookingStatus } from "@prisma/client";
+
+@Injectable()
+export class BookingsService {
+  private readonly logger = new Logger(BookingsService.name);
+
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateBookingDto) {
+    const booking = await this.prisma.booking.create({
+      data: {
+        ...dto,
+        preferredDate: dto.preferredDate ? new Date(dto.preferredDate) : null,
+      },
+    });
+
+    this.logger.log(`New booking created: ${booking.id} - ${booking.email}`);
+    // TODO: Send email notification via queue
+    return booking;
+  }
+
+  async findAll(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const [bookings, total] = await Promise.all([
+      this.prisma.booking.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: "desc" },
+        include: { student: { include: { user: { select: { firstName: true, lastName: true } } } } },
+      }),
+      this.prisma.booking.count(),
+    ]);
+    return { bookings, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+
+  async findOne(id: string) {
+    return this.prisma.booking.findUnique({
+      where: { id },
+      include: { student: true, session: true },
+    });
+  }
+
+  async updateStatus(id: string, status: BookingStatus, adminNotes?: string) {
+    return this.prisma.booking.update({
+      where: { id },
+      data: { status, adminNotes },
+    });
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\bookings\dto\create-booking.dto.ts ======
+import { IsString, IsEmail, IsOptional, IsEnum, IsDateString } from "class-validator";
+import { BookingType } from "@prisma/client";
+
+export class CreateBookingDto {
+  @IsString()
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @IsOptional()
+  @IsString()
+  timezone?: string;
+
+  @IsOptional()
+  @IsDateString()
+  preferredDate?: string;
+
+  @IsOptional()
+  @IsString()
+  preferredTime?: string;
+
+  @IsOptional()
+  @IsString()
+  serviceSlug?: string;
+
+  @IsOptional()
+  @IsEnum(BookingType)
+  type?: BookingType;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\contact\contact.controller.ts ======
+import { Controller, Post, Get, Body, Query, UseGuards } from "@nestjs/common";
+import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
+import { ContactService } from "./contact.service";
+import { CreateContactDto } from "./dto/create-contact.dto";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../../common/guards/roles.guard";
+import { Roles } from "../../common/decorators/roles.decorator";
+import { Role } from "@prisma/client";
+
+@ApiTags("Contact")
+@Controller("contact")
+export class ContactController {
+  constructor(private contactService: ContactService) {}
+
+  @Post()
+  @ApiOperation({ summary: "Submit contact message (public)" })
+  create(@Body() dto: CreateContactDto) {
+    return this.contactService.create(dto);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Get all messages (admin)" })
+  findAll(@Query("page") page?: string, @Query("limit") limit?: string) {
+    return this.contactService.findAll(Number(page) || 1, Number(limit) || 20);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\contact\contact.module.ts ======
+import { Module } from "@nestjs/common";
+import { ContactController } from "./contact.controller";
+import { ContactService } from "./contact.service";
+
+@Module({
+  controllers: [ContactController],
+  providers: [ContactService],
+  exports: [ContactService],
+})
+export class ContactModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\contact\contact.service.ts ======
+import { Injectable, Logger } from "@nestjs/common";
+import { PrismaService } from "../../database/prisma.service";
+import { CreateContactDto } from "./dto/create-contact.dto";
+
+@Injectable()
+export class ContactService {
+  private readonly logger = new Logger(ContactService.name);
+
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateContactDto) {
+    const contact = await this.prisma.contact.create({ data: dto });
+    this.logger.log(`New contact message: ${contact.id} - ${contact.email}`);
+    // TODO: Send email notification
+    return contact;
+  }
+
+  async findAll(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const [contacts, total] = await Promise.all([
+      this.prisma.contact.findMany({ skip, take: limit, orderBy: { createdAt: "desc" } }),
+      this.prisma.contact.count(),
+    ]);
+    return { contacts, total, page, limit, totalPages: Math.ceil(total / limit) };
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\contact\dto\create-contact.dto.ts ======
+import { IsString, IsEmail, IsOptional } from "class-validator";
+
+export class CreateContactDto {
+  @IsString()
+  name: string;
+
+  @IsEmail()
+  email: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsString()
+  subject?: string;
+
+  @IsString()
+  message: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\notifications\notifications.module.ts ======
+import { Module, Global } from "@nestjs/common";
+import { NotificationsService } from "./notifications.service";
+
+@Global()
+@Module({
+  providers: [NotificationsService],
+  exports: [NotificationsService],
+})
+export class NotificationsModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\notifications\notifications.service.ts ======
+import { Injectable, Logger } from "@nestjs/common";
+import { Resend } from "resend";
+import { ConfigService } from "@nestjs/config";
+
+@Injectable()
+export class NotificationsService {
+  private readonly logger = new Logger(NotificationsService.name);
+  private resend: Resend;
+
+  constructor(private configService: ConfigService) {
+    const apiKey = this.configService.get("email.resendApiKey");
+    if (apiKey && apiKey !== "re_xxxxxxxxxxxx") {
+      this.resend = new Resend(apiKey);
+    }
+  }
+
+  async sendBookingConfirmation(email: string, name: string, date?: string) {
+    if (!this.resend) {
+      this.logger.warn("Resend not configured - skipping email");
+      return;
+    }
+
+    try {
+      await this.resend.emails.send({
+        from: "Ibrahim Quran Academy <noreply@ibrahimquranacademy.com>",
+        to: email,
+        subject: "Booking Confirmed - Ibrahim Quran Academy",
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+            <h1 style="color:#0D4F4F;">Assalamu Alaikum ${name}!</h1>
+            <p>Your trial session has been booked successfully.</p>
+            ${date ? `<p><strong>Date:</strong> ${date}</p>` : ""}
+            <p>We will contact you shortly to confirm the details.</p>
+            <br/>
+            <p style="color:#C8A96E;font-weight:bold;">Ibrahim Quran Academy</p>
+          </div>
+        `,
+      });
+      this.logger.log(`Booking email sent to ${email}`);
+    } catch (error) {
+      this.logger.error(`Failed to send email to ${email}`, error);
+    }
+  }
+
+  async sendContactNotification(name: string, email: string, message: string) {
+    if (!this.resend) {
+      this.logger.warn("Resend not configured - skipping email");
+      return;
+    }
+
+    try {
+      await this.resend.emails.send({
+        from: "Ibrahim Quran Academy <noreply@ibrahimquranacademy.com>",
+        to: "admin@ibrahimquranacademy.com",
+        subject: `New Contact: ${name}`,
+        html: `
+          <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+            <h2 style="color:#0D4F4F;">New Contact Message</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Message:</strong></p>
+            <p style="background:#f5f5f5;padding:15px;border-radius:8px;">${message}</p>
+          </div>
+        `,
+      });
+      this.logger.log(`Contact notification sent for ${email}`);
+    } catch (error) {
+      this.logger.error("Failed to send contact notification", error);
+    }
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\payments\payments.controller.ts ======
+import { Controller, Get, Post, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { PaymentsService } from './payments.service';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { QueryPaymentsDto } from './dto/query-payments.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
+
+@ApiTags('Payments')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('payments')
+export class PaymentsController {
+  constructor(private readonly paymentsService: PaymentsService) {}
+
+  @Post()
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Create payment record (Admin)' })
+  create(@Body() dto: CreatePaymentDto) {
+    return this.paymentsService.create(dto);
+  }
+
+  @Get()
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'List all payments (Admin)' })
+  findAll(@Query() query: QueryPaymentsDto) {
+    return this.paymentsService.findAll(query);
+  }
+
+  @Get('my')
+  @ApiOperation({ summary: 'Get my payments' })
+  myPayments(@CurrentUser() user: any, @Query('page') page?: number, @Query('limit') limit?: number) {
+    return this.paymentsService.findUserPayments(user.id, page || 1, limit || 20);
+  }
+
+  @Get('revenue')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get revenue stats (Admin)' })
+  revenueStats() {
+    return this.paymentsService.getRevenueStats();
+  }
+
+  @Get(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get payment by ID (Admin)' })
+  findOne(@Param('id') id: string) {
+    return this.paymentsService.findOne(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Update payment (Admin)' })
+  update(@Param('id') id: string, @Body() dto: UpdatePaymentDto) {
+    return this.paymentsService.update(id, dto);
+  }
+
+  @Patch(':id/mark-paid')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Mark payment as paid (Admin)' })
+  markAsPaid(@Param('id') id: string) {
+    return this.paymentsService.markAsPaid(id);
+  }
+
+  @Patch(':id/refund')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Refund payment (Admin)' })
+  refund(@Param('id') id: string) {
+    return this.paymentsService.refund(id);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\payments\payments.module.ts ======
+import { Module } from '@nestjs/common';
+import { PaymentsService } from './payments.service';
+import { PaymentsController } from './payments.controller';
+
+@Module({
+  controllers: [PaymentsController],
+  providers: [PaymentsService],
+  exports: [PaymentsService],
+})
+export class PaymentsModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\payments\payments.service.ts ======
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreatePaymentDto } from './dto/create-payment.dto';
+import { UpdatePaymentDto } from './dto/update-payment.dto';
+import { QueryPaymentsDto } from './dto/query-payments.dto';
+import { Prisma } from '@prisma/client';
+
+@Injectable()
+export class PaymentsService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreatePaymentDto) {
+    return this.prisma.payment.create({
+      data: {
+        ...dto,
+        currency: dto.currency || 'USD',
+        method: dto.method || 'STRIPE',
+        status: 'PENDING',
+      },
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+    });
+  }
+
+  async findAll(query: QueryPaymentsDto) {
+    const { page = 1, limit = 20, userId, status, from, to } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.PaymentWhereInput = {};
+    if (userId) where.userId = userId;
+    if (status) where.status = status;
+    if (from || to) {
+      where.createdAt = {};
+      if (from) where.createdAt.gte = new Date(from);
+      if (to) where.createdAt.lte = new Date(to);
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.payment.findMany({
+        where, skip, take: limit,
+        include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.payment.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async findOne(id: string) {
+    const payment = await this.prisma.payment.findUnique({
+      where: { id },
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true, email: true } },
+        subscription: true,
+      },
+    });
+    if (!payment) throw new NotFoundException('Payment not found');
+    return payment;
+  }
+
+  async findUserPayments(userId: string, page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+    const where = { userId };
+    const [data, total] = await Promise.all([
+      this.prisma.payment.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
+      this.prisma.payment.count({ where }),
+    ]);
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async update(id: string, dto: UpdatePaymentDto) {
+    await this.findOne(id);
+    const data: any = { ...dto };
+    if (dto.status === 'PAID') data.paidAt = new Date();
+    return this.prisma.payment.update({
+      where: { id }, data,
+      include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+    });
+  }
+
+  async markAsPaid(id: string, stripePaymentId?: string) {
+    await this.findOne(id);
+    return this.prisma.payment.update({
+      where: { id },
+      data: { status: 'PAID', paidAt: new Date(), stripePaymentId },
+    });
+  }
+
+  async refund(id: string) {
+    await this.findOne(id);
+    return this.prisma.payment.update({
+      where: { id },
+      data: { status: 'REFUNDED' },
+    });
+  }
+
+  async getRevenueStats() {
+    const totalRevenue = await this.prisma.payment.aggregate({
+      where: { status: 'PAID' },
+      _sum: { amount: true },
+      _count: true,
+    });
+
+    const thisMonth = new Date();
+    thisMonth.setDate(1);
+    thisMonth.setHours(0, 0, 0, 0);
+
+    const monthlyRevenue = await this.prisma.payment.aggregate({
+      where: { status: 'PAID', paidAt: { gte: thisMonth } },
+      _sum: { amount: true },
+      _count: true,
+    });
+
+    return {
+      total: { amount: totalRevenue._sum.amount || 0, count: totalRevenue._count },
+      thisMonth: { amount: monthlyRevenue._sum.amount || 0, count: monthlyRevenue._count },
+    };
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\payments\dto\create-payment.dto.ts ======
+import { IsString, IsOptional, IsNumber, IsEnum, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PaymentMethod } from '@prisma/client';
+
+export class CreatePaymentDto {
+  @ApiProperty({ example: 'user-uuid' })
+  @IsString()
+  userId: string;
+
+  @ApiPropertyOptional({ example: 'subscription-uuid' })
+  @IsOptional()
+  @IsString()
+  subscriptionId?: string;
+
+  @ApiProperty({ example: 99.99 })
+  @IsNumber()
+  @Min(0)
+  amount: number;
+
+  @ApiPropertyOptional({ example: 'USD', default: 'USD' })
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @ApiPropertyOptional({ enum: PaymentMethod, default: PaymentMethod.STRIPE })
+  @IsOptional()
+  @IsEnum(PaymentMethod)
+  method?: PaymentMethod;
+
+  @ApiPropertyOptional({ example: 'Monthly subscription payment' })
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\payments\dto\query-payments.dto.ts ======
+import { IsOptional, IsEnum, IsString, IsInt, Min, IsDateString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { PaymentStatus } from '@prisma/client';
+
+export class QueryPaymentsDto {
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 20 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 20;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  userId?: string;
+
+  @ApiPropertyOptional({ enum: PaymentStatus })
+  @IsOptional()
+  @IsEnum(PaymentStatus)
+  status?: PaymentStatus;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  from?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  to?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\payments\dto\update-payment.dto.ts ======
+import { IsOptional, IsEnum, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { PaymentStatus } from '@prisma/client';
+
+export class UpdatePaymentDto {
+  @ApiPropertyOptional({ enum: PaymentStatus })
+  @IsOptional()
+  @IsEnum(PaymentStatus)
+  status?: PaymentStatus;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  stripePaymentId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  stripeInvoiceId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\sessions\sessions.controller.ts ======
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { SessionsService } from './sessions.service';
+import { CreateSessionDto } from './dto/create-session.dto';
+import { UpdateSessionDto } from './dto/update-session.dto';
+import { QuerySessionsDto } from './dto/query-sessions.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
+
+@ApiTags('Sessions')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('sessions')
+export class SessionsController {
+  constructor(private readonly sessionsService: SessionsService) {}
+
+  @Post()
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @ApiOperation({ summary: 'Create session' })
+  create(@Body() dto: CreateSessionDto) {
+    return this.sessionsService.create(dto);
+  }
+
+  @Get()
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @ApiOperation({ summary: 'List sessions' })
+  findAll(@Query() query: QuerySessionsDto) {
+    return this.sessionsService.findAll(query);
+  }
+
+  @Get('upcoming')
+  @ApiOperation({ summary: 'Get upcoming sessions' })
+  getUpcoming(@Query('studentId') studentId?: string) {
+    return this.sessionsService.getUpcoming(studentId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get session by ID' })
+  findOne(@Param('id') id: string) {
+    return this.sessionsService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @ApiOperation({ summary: 'Update session' })
+  update(@Param('id') id: string, @Body() dto: UpdateSessionDto) {
+    return this.sessionsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete session (Admin)' })
+  remove(@Param('id') id: string) {
+    return this.sessionsService.remove(id);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\sessions\sessions.module.ts ======
+import { Module } from '@nestjs/common';
+import { SessionsService } from './sessions.service';
+import { SessionsController } from './sessions.controller';
+
+@Module({
+  controllers: [SessionsController],
+  providers: [SessionsService],
+  exports: [SessionsService],
+})
+export class SessionsModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\sessions\sessions.service.ts ======
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateSessionDto } from './dto/create-session.dto';
+import { UpdateSessionDto } from './dto/update-session.dto';
+import { QuerySessionsDto } from './dto/query-sessions.dto';
+import { Prisma } from '@prisma/client';
+
+@Injectable()
+export class SessionsService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateSessionDto) {
+    return this.prisma.session.create({
+      data: {
+        ...dto,
+        date: new Date(dto.date),
+        duration: dto.duration || 60,
+      },
+      include: { student: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
+    });
+  }
+
+  async findAll(query: QuerySessionsDto) {
+    const { page = 1, limit = 20, studentId, status, from, to } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.SessionWhereInput = {};
+    if (studentId) where.studentId = studentId;
+    if (status) where.status = status;
+    if (from || to) {
+      where.date = {};
+      if (from) where.date.gte = new Date(from);
+      if (to) where.date.lte = new Date(to);
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.session.findMany({
+        where, skip, take: limit,
+        include: { student: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
+        orderBy: { date: 'desc' },
+      }),
+      this.prisma.session.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async findOne(id: string) {
+    const session = await this.prisma.session.findUnique({
+      where: { id },
+      include: { student: { include: { user: { select: { firstName: true, lastName: true, email: true } } } }, booking: true },
+    });
+    if (!session) throw new NotFoundException('Session not found');
+    return session;
+  }
+
+  async update(id: string, dto: UpdateSessionDto) {
+    await this.findOne(id);
+    const data: any = { ...dto };
+    if (dto.date) data.date = new Date(dto.date);
+    return this.prisma.session.update({
+      where: { id }, data,
+      include: { student: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    await this.prisma.session.delete({ where: { id } });
+    return { message: 'Session deleted successfully' };
+  }
+
+  async getUpcoming(studentId?: string) {
+    const where: Prisma.SessionWhereInput = {
+      date: { gte: new Date() },
+      status: 'SCHEDULED',
+    };
+    if (studentId) where.studentId = studentId;
+
+    return this.prisma.session.findMany({
+      where,
+      include: { student: { include: { user: { select: { firstName: true, lastName: true } } } } },
+      orderBy: { date: 'asc' },
+      take: 10,
+    });
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\sessions\dto\create-session.dto.ts ======
+import { IsString, IsOptional, IsDateString, IsInt, IsEnum, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { SessionStatus, Platform } from '@prisma/client';
+
+export class CreateSessionDto {
+  @ApiProperty({ example: 'student-uuid' })
+  @IsString()
+  studentId: string;
+
+  @ApiPropertyOptional({ example: 'booking-uuid' })
+  @IsOptional()
+  @IsString()
+  bookingId?: string;
+
+  @ApiProperty({ example: 'Surah Al-Fatiha Review' })
+  @IsString()
+  title: string;
+
+  @ApiProperty({ example: '2025-01-20T10:00:00Z' })
+  @IsDateString()
+  date: string;
+
+  @ApiPropertyOptional({ example: 60, default: 60 })
+  @IsOptional()
+  @IsInt()
+  @Min(15)
+  duration?: number;
+
+  @ApiPropertyOptional({ enum: Platform, default: Platform.ZOOM })
+  @IsOptional()
+  @IsEnum(Platform)
+  platform?: Platform;
+
+  @ApiPropertyOptional({ example: 'https://zoom.us/j/xxx' })
+  @IsOptional()
+  @IsString()
+  meetingLink?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\sessions\dto\query-sessions.dto.ts ======
+import { IsOptional, IsString, IsEnum, IsInt, Min, IsDateString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { SessionStatus } from '@prisma/client';
+
+export class QuerySessionsDto {
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 20 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 20;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  studentId?: string;
+
+  @ApiPropertyOptional({ enum: SessionStatus })
+  @IsOptional()
+  @IsEnum(SessionStatus)
+  status?: SessionStatus;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  from?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  to?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\sessions\dto\update-session.dto.ts ======
+import { IsOptional, IsString, IsDateString, IsInt, IsEnum, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { SessionStatus, Platform } from '@prisma/client';
+
+export class UpdateSessionDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  title?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  date?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Min(15)
+  duration?: number;
+
+  @ApiPropertyOptional({ enum: SessionStatus })
+  @IsOptional()
+  @IsEnum(SessionStatus)
+  status?: SessionStatus;
+
+  @ApiPropertyOptional({ enum: Platform })
+  @IsOptional()
+  @IsEnum(Platform)
+  platform?: Platform;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  meetingLink?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  recordingUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\subscriptions\subscriptions.controller.ts ======
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { SubscriptionsService } from './subscriptions.service';
+import { CreatePlanDto } from './dto/create-plan.dto';
+import { UpdatePlanDto } from './dto/update-plan.dto';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
+import { Transform } from 'class-transformer';
+
+@ApiTags('Subscriptions')
+@Controller('subscriptions')
+export class SubscriptionsController {
+  constructor(private readonly subscriptionsService: SubscriptionsService) {}
+
+  // ===== PLANS (public read, admin write) =====
+  @Get('plans')
+  @ApiOperation({ summary: 'List active plans (public)' })
+  findAllPlans() {
+    return this.subscriptionsService.findAllPlans(true);
+  }
+
+  @Get('plans/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all plans (Admin)' })
+  findAllPlansAdmin() {
+    return this.subscriptionsService.findAllPlans(false);
+  }
+
+  @Post('plans')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create plan (Admin)' })
+  createPlan(@Body() dto: CreatePlanDto) {
+    return this.subscriptionsService.createPlan(dto);
+  }
+
+  @Get('plans/:id')
+  @ApiOperation({ summary: 'Get plan by ID' })
+  findPlan(@Param('id') id: string) {
+    return this.subscriptionsService.findPlan(id);
+  }
+
+  @Patch('plans/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update plan (Admin)' })
+  updatePlan(@Param('id') id: string, @Body() dto: UpdatePlanDto) {
+    return this.subscriptionsService.updatePlan(id, dto);
+  }
+
+  @Delete('plans/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete plan (Admin)' })
+  removePlan(@Param('id') id: string) {
+    return this.subscriptionsService.removePlan(id);
+  }
+
+  // ===== SUBSCRIPTIONS =====
+  @Get('my')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get my active subscription' })
+  mySubscription(@CurrentUser() user: any) {
+    return this.subscriptionsService.findUserSubscription(user.id);
+  }
+
+  @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create subscription (Admin)' })
+  createSubscription(@Body() dto: CreateSubscriptionDto) {
+    return this.subscriptionsService.createSubscription(dto);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all subscriptions (Admin)' })
+  findAll(@Query('page') page?: number, @Query('limit') limit?: number) {
+    return this.subscriptionsService.findAllSubscriptions(page || 1, limit || 20);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get subscription by ID (Admin)' })
+  findOne(@Param('id') id: string) {
+    return this.subscriptionsService.findSubscription(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update subscription (Admin)' })
+  update(@Param('id') id: string, @Body() dto: UpdateSubscriptionDto) {
+    return this.subscriptionsService.updateSubscription(id, dto);
+  }
+
+  @Patch(':id/cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cancel subscription (Admin)' })
+  cancel(@Param('id') id: string) {
+    return this.subscriptionsService.cancelSubscription(id);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\subscriptions\subscriptions.module.ts ======
+import { Module } from '@nestjs/common';
+import { SubscriptionsService } from './subscriptions.service';
+import { SubscriptionsController } from './subscriptions.controller';
+
+@Module({
+  controllers: [SubscriptionsController],
+  providers: [SubscriptionsService],
+  exports: [SubscriptionsService],
+})
+export class SubscriptionsModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\subscriptions\subscriptions.service.ts ======
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreatePlanDto } from './dto/create-plan.dto';
+import { UpdatePlanDto } from './dto/update-plan.dto';
+import { CreateSubscriptionDto } from './dto/create-subscription.dto';
+import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
+import { Prisma } from '@prisma/client';
+
+@Injectable()
+export class SubscriptionsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  // ===== PLANS =====
+
+  async createPlan(dto: CreatePlanDto) {
+    const existing = await this.prisma.plan.findUnique({
+      where: { slug: dto.slug },
+    });
+    if (existing) {
+      throw new ConflictException('Plan slug already exists');
+    }
+
+    return await this.prisma.plan.create({
+      data: {
+        slug: dto.slug,
+        nameEn: dto.nameEn,
+        nameAr: dto.nameAr ?? '',
+        descriptionEn: dto.descriptionEn,
+        descriptionAr: dto.descriptionAr,
+        priceMonthly: dto.priceMonthly,
+        priceYearly: dto.priceYearly,
+        sessionsPerWeek: dto.sessionsPerWeek,
+        sessionDuration: dto.sessionDuration,
+        features: dto.features ?? [],
+        isActive: dto.isActive ?? true,
+        sortOrder: dto.sortOrder ?? 0,
+      },
+    });
+  }
+
+  async findAllPlans(activeOnly = false) {
+    const where: Prisma.PlanWhereInput = {};
+    if (activeOnly) {
+      where.isActive = true;
+    }
+    return await this.prisma.plan.findMany({
+      where,
+      orderBy: { sortOrder: 'asc' },
+    });
+  }
+
+  async findPlan(id: string) {
+    const plan = await this.prisma.plan.findUnique({
+      where: { id },
+    });
+    if (!plan) {
+      throw new NotFoundException('Plan not found');
+    }
+    return plan;
+  }
+
+  async updatePlan(id: string, dto: UpdatePlanDto) {
+    await this.findPlan(id);
+
+    if (dto.slug) {
+      const existing = await this.prisma.plan.findFirst({
+        where: { slug: dto.slug, NOT: { id } },
+      });
+      if (existing) {
+        throw new ConflictException('Slug already in use');
+      }
+    }
+
+    const data: Prisma.PlanUpdateInput = {};
+    if (dto.slug !== undefined) data.slug = dto.slug;
+    if (dto.nameEn !== undefined) data.nameEn = dto.nameEn;
+    if (dto.nameAr !== undefined) data.nameAr = dto.nameAr;
+    if (dto.descriptionEn !== undefined) data.descriptionEn = dto.descriptionEn;
+    if (dto.descriptionAr !== undefined) data.descriptionAr = dto.descriptionAr;
+    if (dto.priceMonthly !== undefined) data.priceMonthly = dto.priceMonthly;
+    if (dto.priceYearly !== undefined) data.priceYearly = dto.priceYearly;
+    if (dto.sessionsPerWeek !== undefined) data.sessionsPerWeek = dto.sessionsPerWeek;
+    if (dto.sessionDuration !== undefined) data.sessionDuration = dto.sessionDuration;
+    if (dto.features !== undefined) data.features = dto.features;
+    if (dto.isActive !== undefined) data.isActive = dto.isActive;
+    if (dto.sortOrder !== undefined) data.sortOrder = dto.sortOrder;
+
+    return await this.prisma.plan.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async removePlan(id: string) {
+    await this.findPlan(id);
+    await this.prisma.plan.delete({ where: { id } });
+    return { message: 'Plan deleted successfully' };
+  }
+
+  // ===== SUBSCRIPTIONS =====
+
+  async createSubscription(dto: CreateSubscriptionDto) {
+    const activeExists = await this.prisma.subscription.findFirst({
+      where: { userId: dto.userId, status: 'ACTIVE' },
+    });
+    if (activeExists) {
+      throw new ConflictException(
+        'User already has an active subscription',
+      );
+    }
+
+    return await this.prisma.subscription.create({
+      data: {
+        user: { connect: { id: dto.userId } },
+        plan: dto.plan,
+        sessionsPerWeek: dto.sessionsPerWeek ?? 2,
+        priceMonthly: dto.priceMonthly ?? 0,
+        startDate: dto.startDate ? new Date(dto.startDate) : new Date(),
+        endDate: dto.endDate ? new Date(dto.endDate) : null,
+        status: 'ACTIVE',
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findAllSubscriptions(page = 1, limit = 20) {
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await Promise.all([
+      this.prisma.subscription.findMany({
+        skip,
+        take: limit,
+        include: {
+          user: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.subscription.count(),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async findSubscription(id: string) {
+    const sub = await this.prisma.subscription.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        payments: true,
+      },
+    });
+    if (!sub) {
+      throw new NotFoundException('Subscription not found');
+    }
+    return sub;
+  }
+
+  async findUserSubscription(userId: string) {
+    return await this.prisma.subscription.findFirst({
+      where: { userId, status: 'ACTIVE' },
+      include: {
+        payments: {
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+        },
+      },
+    });
+  }
+
+  async updateSubscription(id: string, dto: UpdateSubscriptionDto) {
+    await this.findSubscription(id);
+
+    const data: Prisma.SubscriptionUpdateInput = {};
+    if (dto.status !== undefined) data.status = dto.status;
+    if (dto.sessionsPerWeek !== undefined)
+      data.sessionsPerWeek = dto.sessionsPerWeek;
+    if (dto.priceMonthly !== undefined) data.priceMonthly = dto.priceMonthly;
+    if (dto.stripeSubId !== undefined) data.stripeSubId = dto.stripeSubId;
+    if (dto.endDate !== undefined) data.endDate = new Date(dto.endDate);
+    if (dto.status === 'CANCELLED') data.cancelledAt = new Date();
+
+    return await this.prisma.subscription.update({
+      where: { id },
+      data,
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  async cancelSubscription(id: string) {
+    return await this.updateSubscription(id, { status: 'CANCELLED' });
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\subscriptions\dto\create-plan.dto.ts ======
+import { IsString, IsOptional, IsNumber, IsInt, IsBoolean, IsArray, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class CreatePlanDto {
+  @ApiProperty({ example: 'premium' })
+  @IsString()
+  slug: string;
+
+  @ApiProperty({ example: 'Premium Plan' })
+  @IsString()
+  nameEn: string;
+
+  @ApiPropertyOptional({ example: 'الخطة المميزة' })
+  @IsOptional()
+  @IsString()
+  nameAr?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  descriptionEn?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  descriptionAr?: string;
+
+  @ApiProperty({ example: 99.99 })
+  @IsNumber()
+  @Min(0)
+  priceMonthly: number;
+
+  @ApiPropertyOptional({ example: 999.99 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  priceYearly?: number;
+
+  @ApiProperty({ example: 3 })
+  @IsInt()
+  @Min(1)
+  sessionsPerWeek: number;
+
+  @ApiPropertyOptional({ example: 60, default: 60 })
+  @IsOptional()
+  @IsInt()
+  @Min(15)
+  sessionDuration?: number;
+
+  @ApiPropertyOptional({ example: ['1-on-1 sessions', 'Progress tracking'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  features?: string[];
+
+  @ApiPropertyOptional({ default: true })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @ApiPropertyOptional({ default: 0 })
+  @IsOptional()
+  @IsInt()
+  sortOrder?: number;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\subscriptions\dto\create-subscription.dto.ts ======
+import { IsString, IsOptional, IsEnum, IsDateString, IsInt, IsNumber, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { SubscriptionPlan } from '@prisma/client';
+
+export class CreateSubscriptionDto {
+  @ApiProperty({ example: 'user-uuid' })
+  @IsString()
+  userId: string;
+
+  @ApiProperty({ enum: SubscriptionPlan })
+  @IsEnum(SubscriptionPlan)
+  plan: SubscriptionPlan;
+
+  @ApiPropertyOptional({ example: 3 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  sessionsPerWeek?: number;
+
+  @ApiPropertyOptional({ example: 99.99 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  priceMonthly?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  startDate?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\subscriptions\dto\update-plan.dto.ts ======
+import { PartialType } from '@nestjs/swagger';
+import { CreatePlanDto } from './create-plan.dto';
+
+export class UpdatePlanDto extends PartialType(CreatePlanDto) {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\subscriptions\dto\update-subscription.dto.ts ======
+import { IsOptional, IsEnum, IsDateString, IsInt, IsNumber, IsString, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { SubscriptionStatus } from '@prisma/client';
+
+export class UpdateSubscriptionDto {
+  @ApiPropertyOptional({ enum: SubscriptionStatus })
+  @IsOptional()
+  @IsEnum(SubscriptionStatus)
+  status?: SubscriptionStatus;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  sessionsPerWeek?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  priceMonthly?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  endDate?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  stripeSubId?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\testimonials\testimonials.controller.ts ======
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { TestimonialsService } from './testimonials.service';
+import { CreateTestimonialDto } from './dto/create-testimonial.dto';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
+import { QueryTestimonialsDto } from './dto/query-testimonials.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
+
+@ApiTags('Testimonials')
+@Controller('testimonials')
+export class TestimonialsController {
+  constructor(private readonly testimonialsService: TestimonialsService) {}
+
+  @Get('public')
+  @ApiOperation({ summary: 'Get approved testimonials (public)' })
+  findPublished() {
+    return this.testimonialsService.findPublished();
+  }
+
+  @Post()
+  @ApiOperation({ summary: 'Submit testimonial (public)' })
+  create(@Body() dto: CreateTestimonialDto) {
+    return this.testimonialsService.create(dto);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List all testimonials (Admin)' })
+  findAll(@Query() query: QueryTestimonialsDto) {
+    return this.testimonialsService.findAll(query);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get testimonial by ID (Admin)' })
+  findOne(@Param('id') id: string) {
+    return this.testimonialsService.findOne(id);
+  }
+
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update testimonial (Admin)' })
+  update(@Param('id') id: string, @Body() dto: UpdateTestimonialDto) {
+    return this.testimonialsService.update(id, dto);
+  }
+
+  @Patch(':id/approve')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Approve testimonial (Admin)' })
+  approve(@Param('id') id: string) {
+    return this.testimonialsService.approve(id);
+  }
+
+  @Patch(':id/reject')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Reject testimonial (Admin)' })
+  reject(@Param('id') id: string) {
+    return this.testimonialsService.reject(id);
+  }
+
+  @Patch(':id/toggle-featured')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Toggle featured (Admin)' })
+  toggleFeatured(@Param('id') id: string) {
+    return this.testimonialsService.toggleFeatured(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete testimonial (Admin)' })
+  remove(@Param('id') id: string) {
+    return this.testimonialsService.remove(id);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\testimonials\testimonials.module.ts ======
+import { Module } from '@nestjs/common';
+import { TestimonialsService } from './testimonials.service';
+import { TestimonialsController } from './testimonials.controller';
+
+@Module({
+  controllers: [TestimonialsController],
+  providers: [TestimonialsService],
+  exports: [TestimonialsService],
+})
+export class TestimonialsModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\testimonials\testimonials.service.ts ======
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateTestimonialDto } from './dto/create-testimonial.dto';
+import { UpdateTestimonialDto } from './dto/update-testimonial.dto';
+import { QueryTestimonialsDto } from './dto/query-testimonials.dto';
+import { Prisma } from '@prisma/client';
+
+@Injectable()
+export class TestimonialsService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateTestimonialDto, userId?: string) {
+    return this.prisma.testimonial.create({
+      data: { ...dto, userId: userId || null },
+    });
+  }
+
+  async findAll(query: QueryTestimonialsDto) {
+    const { page = 1, limit = 20, approved, featured } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.TestimonialWhereInput = {};
+    if (approved !== undefined) where.approved = approved;
+    if (featured !== undefined) where.featured = featured;
+
+    const [data, total] = await Promise.all([
+      this.prisma.testimonial.findMany({ where, skip, take: limit, orderBy: { createdAt: 'desc' } }),
+      this.prisma.testimonial.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async findPublished() {
+    return this.prisma.testimonial.findMany({
+      where: { approved: true },
+      orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
+    });
+  }
+
+  async findOne(id: string) {
+    const t = await this.prisma.testimonial.findUnique({ where: { id } });
+    if (!t) throw new NotFoundException('Testimonial not found');
+    return t;
+  }
+
+  async update(id: string, dto: UpdateTestimonialDto) {
+    await this.findOne(id);
+    return this.prisma.testimonial.update({ where: { id }, data: dto });
+  }
+
+  async approve(id: string) {
+    await this.findOne(id);
+    return this.prisma.testimonial.update({ where: { id }, data: { approved: true } });
+  }
+
+  async reject(id: string) {
+    await this.findOne(id);
+    return this.prisma.testimonial.update({ where: { id }, data: { approved: false } });
+  }
+
+  async toggleFeatured(id: string) {
+    const t = await this.findOne(id);
+    return this.prisma.testimonial.update({ where: { id }, data: { featured: !t.featured } });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    await this.prisma.testimonial.delete({ where: { id } });
+    return { message: 'Testimonial deleted successfully' };
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\testimonials\dto\create-testimonial.dto.ts ======
+import { IsString, IsOptional, IsInt, Min, Max, IsUrl } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+
+export class CreateTestimonialDto {
+  @ApiProperty({ example: 'Ahmed Ali' })
+  @IsString()
+  name: string;
+
+  @ApiPropertyOptional({ example: 'Egypt' })
+  @IsOptional()
+  @IsString()
+  country?: string;
+
+  @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg' })
+  @IsOptional()
+  @IsString()
+  avatar?: string;
+
+  @ApiProperty({ example: 'Amazing experience with Quran learning!' })
+  @IsString()
+  textEn: string;
+
+  @ApiPropertyOptional({ example: 'تجربة رائعة في تعلم القرآن!' })
+  @IsOptional()
+  @IsString()
+  textAr?: string;
+
+  @ApiPropertyOptional({ example: 5, minimum: 1, maximum: 5 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(5)
+  rating?: number;
+
+  @ApiPropertyOptional({ example: 'https://youtube.com/watch?v=xxx' })
+  @IsOptional()
+  @IsString()
+  videoUrl?: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\testimonials\dto\query-testimonials.dto.ts ======
+import { IsOptional, IsBoolean, IsInt, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type, Transform } from 'class-transformer';
+
+export class QueryTestimonialsDto {
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 20 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 20;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  approved?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  featured?: boolean;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\testimonials\dto\update-testimonial.dto.ts ======
+import { PartialType } from '@nestjs/swagger';
+import { CreateTestimonialDto } from './create-testimonial.dto';
+
+export class UpdateTestimonialDto extends PartialType(CreateTestimonialDto) {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\users.controller.ts ======
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { UsersService } from './users.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { QueryUsersDto } from './dto/query-users.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
+
+@ApiTags('Users')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Post()
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Create user (Admin)' })
+  create(@Body() dto: CreateUserDto) {
+    return this.usersService.create(dto);
+  }
+
+  @Get()
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'List users (Admin)' })
+  findAll(@Query() query: QueryUsersDto) {
+    return this.usersService.findAll(query);
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  getProfile(@CurrentUser() user: any) {
+    return this.usersService.findOne(user.id);
+  }
+
+  @Patch('me')
+  @ApiOperation({ summary: 'Update current user profile' })
+  updateProfile(@CurrentUser() user: any, @Body() dto: UpdateUserDto) {
+    return this.usersService.update(user.id, dto);
+  }
+
+  @Patch('me/password')
+  @ApiOperation({ summary: 'Change password' })
+  changePassword(@CurrentUser() user: any, @Body() dto: ChangePasswordDto) {
+    return this.usersService.changePassword(user.id, dto);
+  }
+
+  @Get(':id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Get user by ID (Admin)' })
+  findOne(@Param('id') id: string) {
+    return this.usersService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Update user (Admin)' })
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.update(id, dto);
+  }
+
+  @Patch(':id/toggle-active')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Toggle user active status (Admin)' })
+  toggleActive(@Param('id') id: string) {
+    return this.usersService.toggleActive(id);
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete user (Admin)' })
+  remove(@Param('id') id: string) {
+    return this.usersService.remove(id);
+  }
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\users.module.ts ======
+import { Module } from '@nestjs/common';
+import { UsersService } from './users.service';
+import { UsersController } from './users.controller';
+
+@Module({
+  controllers: [UsersController],
+  providers: [UsersService],
+  exports: [UsersService],
+})
+export class UsersModule {}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\users.service.ts ======
+import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { QueryUsersDto } from './dto/query-users.dto';
+import * as bcrypt from 'bcrypt';
+import { Prisma } from '@prisma/client';
+
+@Injectable()
+export class UsersService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateUserDto) {
+    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+    if (existing) throw new ConflictException('Email already registered');
+
+    const hashedPassword = await bcrypt.hash(dto.password, 12);
+    const user = await this.prisma.user.create({
+      data: { ...dto, password: hashedPassword },
+      select: this.userSelect,
+    });
+    return user;
+  }
+
+  async findAll(query: QueryUsersDto) {
+    const { page = 1, limit = 20, search, role } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.UserWhereInput = {};
+    if (role) where.role = role;
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({ where, skip, take: limit, select: this.userSelect, orderBy: { createdAt: 'desc' } }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+    };
+  }
+
+  async findOne(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id }, select: this.userSelect });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
+  }
+
+  async update(id: string, dto: UpdateUserDto) {
+    await this.findOne(id);
+    if (dto.email) {
+      const existing = await this.prisma.user.findFirst({ where: { email: dto.email, NOT: { id } } });
+      if (existing) throw new ConflictException('Email already in use');
+    }
+    return this.prisma.user.update({ where: { id }, data: dto, select: this.userSelect });
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+
+    const valid = await bcrypt.compare(dto.currentPassword, user.password);
+    if (!valid) throw new BadRequestException('Current password is incorrect');
+
+    const hashed = await bcrypt.hash(dto.newPassword, 12);
+    await this.prisma.user.update({ where: { id: userId }, data: { password: hashed } });
+    return { message: 'Password changed successfully' };
+  }
+
+  async toggleActive(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    return this.prisma.user.update({
+      where: { id },
+      data: { isActive: !user.isActive },
+      select: this.userSelect,
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    await this.prisma.user.delete({ where: { id } });
+    return { message: 'User deleted successfully' };
+  }
+
+  private userSelect = {
+    id: true, email: true, firstName: true, lastName: true,
+    phone: true, role: true, locale: true, avatar: true,
+    isActive: true, emailVerified: true, lastLoginAt: true,
+    createdAt: true, updatedAt: true,
+  };
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\dto\change-password.dto.ts ======
+import { IsString, MinLength, IsOptional } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class ChangePasswordDto {
+  @ApiProperty()
+  @IsString()
+  @MinLength(8)
+  currentPassword: string;
+
+  @ApiProperty()
+  @IsString()
+  @MinLength(8)
+  newPassword: string;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\dto\create-user.dto.ts ======
+import { IsString, IsEmail, IsOptional, IsEnum, IsBoolean, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Role, Locale } from '@prisma/client';
+
+export class CreateUserDto {
+  @ApiProperty({ example: 'john@example.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ example: 'Password123!' })
+  @IsString()
+  @MinLength(8)
+  password: string;
+
+  @ApiProperty({ example: 'John' })
+  @IsString()
+  firstName: string;
+
+  @ApiProperty({ example: 'Doe' })
+  @IsString()
+  lastName: string;
+
+  @ApiPropertyOptional({ example: '+1234567890' })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiPropertyOptional({ enum: Role, default: Role.STUDENT })
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
+
+  @ApiPropertyOptional({ enum: Locale, default: Locale.EN })
+  @IsOptional()
+  @IsEnum(Locale)
+  locale?: Locale;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\dto\index.ts ======
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\dto\query-users.dto.ts ======
+import { IsOptional, IsString, IsEnum, IsInt, Min } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+import { Role } from '@prisma/client';
+
+export class QueryUsersDto {
+  @ApiPropertyOptional({ default: 1 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({ default: 20 })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 20;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional({ enum: Role })
+  @IsOptional()
+  @IsEnum(Role)
+  role?: Role;
+}
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\dto\update-profile.dto.ts ======
+
+====== C:\Users\ibrahim\OneDrive\Desktop\Tajweed\QURAN ACADEMY\ibrahim-quran-academy\backend\src\modules\users\dto\update-user.dto.ts ======
+import { PartialType, OmitType } from '@nestjs/swagger';
+import { CreateUserDto } from './create-user.dto';
+
+export class UpdateUserDto extends PartialType(
+  OmitType(CreateUserDto, ['password'] as const),
+) {}
+

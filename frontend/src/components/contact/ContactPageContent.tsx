@@ -10,6 +10,7 @@ import { siteConfig } from "@/config/site";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/hooks/useLocale";
+import { apiPost } from "@/lib/api";
 
 const contactIcons = [Mail, Phone, MapPin, Clock];
 const contactKeys = ["email", "whatsapp", "location", "availability"];
@@ -27,6 +28,7 @@ export default function ContactPageContent() {
 
   const [formData, setFormData] = useState({ name: "", email: "", whatsapp: "", message: "" });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,20 +37,21 @@ export default function ContactPageContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
+    setErrorMsg("");
+
     try {
-      const res = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+      await apiPost("/contact", {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.whatsapp || undefined,
+        subject: "Contact Form",
+        message: formData.message,
       });
-      if (res.ok) {
-        setStatus("success");
-        setFormData({ name: "", email: "", whatsapp: "", message: "" });
-      } else {
-        setStatus("error");
-      }
-    } catch {
+      setStatus("success");
+      setFormData({ name: "", email: "", whatsapp: "", message: "" });
+    } catch (err: any) {
       setStatus("error");
+      setErrorMsg(err.message || "Something went wrong");
     }
   };
 
@@ -207,7 +210,7 @@ export default function ContactPageContent() {
                     </Button>
                     {status === "error" && (
                       <div className="p-4 rounded-xl bg-red-50 border border-red-100 text-center">
-                        <p className="text-sm text-red-600 font-medium">{t("form.error")}</p>
+                        <p className="text-sm text-red-600 font-medium">{errorMsg || t("form.error")}</p>
                       </div>
                     )}
                     <p className="text-xs text-gray-400 text-center">{t("form.privacy")}</p>

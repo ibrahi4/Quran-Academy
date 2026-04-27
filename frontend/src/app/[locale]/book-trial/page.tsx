@@ -1,10 +1,11 @@
-﻿"use client";
+"use client";
 
 import React, { useState } from "react";
 import { CheckCircle2, Clock, Video, MessageCircle, Star, Users, Send, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/shared/Container";
 import { siteConfig } from "@/config/site";
+import { apiPost } from "@/lib/api";
 
 const expectations = [
   { icon: Clock, text: "30-minute free session" },
@@ -16,17 +17,21 @@ const expectations = [
 ];
 
 const serviceOptions = [
-  "Quran Recitation and Memorization",
-  "Tajweed",
-  "Arabic Language",
-  "Islamic Studies",
-  "Kids Program",
-  "New Muslims Program",
+  { value: "quran-recitation", label: "Quran Recitation and Memorization" },
+  { value: "tajweed-course", label: "Tajweed" },
+  { value: "arabic-language", label: "Arabic Language" },
+  { value: "islamic-studies", label: "Islamic Studies" },
+  { value: "kids-program", label: "Kids Program" },
+  { value: "new-muslims", label: "New Muslims Program" },
 ];
 
 export default function BookTrialPage() {
-  const [formData, setFormData] = useState({ name: "", email: "", whatsapp: "", country: "", service: "", studentType: "", preferredTime: "", message: "" });
+  const [formData, setFormData] = useState({
+    name: "", email: "", whatsapp: "", country: "",
+    service: "", studentType: "", preferredTime: "", message: "",
+  });
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -35,11 +40,33 @@ export default function BookTrialPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus("loading");
+    setErrorMsg("");
+
     try {
-      const res = await fetch("/api/booking", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(formData) });
-      if (res.ok) { setStatus("success"); setFormData({ name: "", email: "", whatsapp: "", country: "", service: "", studentType: "", preferredTime: "", message: "" }); }
-      else { setStatus("error"); }
-    } catch { setStatus("error"); }
+      await apiPost("/bookings", {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.whatsapp || undefined,
+        country: formData.country || undefined,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        serviceSlug: formData.service || undefined,
+        preferredTime: formData.preferredTime || undefined,
+        type: "TRIAL",
+        notes: [
+          formData.studentType ? `Student type: ${formData.studentType}` : "",
+          formData.message || "",
+        ].filter(Boolean).join("\n"),
+      });
+
+      setStatus("success");
+      setFormData({
+        name: "", email: "", whatsapp: "", country: "",
+        service: "", studentType: "", preferredTime: "", message: "",
+      });
+    } catch (err: any) {
+      setStatus("error");
+      setErrorMsg(err.message || "Something went wrong");
+    }
   };
 
   const inputClass = "w-full px-4 py-3.5 rounded-xl border border-sand-200 bg-sand-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all";
@@ -52,7 +79,7 @@ export default function BookTrialPage() {
         <Container className="relative z-10">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 mb-6">
-              <span className="text-white/80 text-sm font-medium">100% Free — No Commitment</span>
+              <span className="text-white/80 text-sm font-medium">100% Free � No Commitment</span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
               Book Your <span className="text-accent">Free Trial</span> Lesson
@@ -120,7 +147,7 @@ export default function BookTrialPage() {
                       <div><label className="block text-sm font-semibold text-gray-700 mb-2">Country *</label><input type="text" name="country" value={formData.country} onChange={handleChange} required placeholder="e.g., USA (EST)" className={inputClass} /></div>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-5">
-                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Service *</label><select name="service" value={formData.service} onChange={handleChange} required className={inputClass}><option value="">Select a service</option>{serviceOptions.map((s) => (<option key={s} value={s}>{s}</option>))}</select></div>
+                      <div><label className="block text-sm font-semibold text-gray-700 mb-2">Service *</label><select name="service" value={formData.service} onChange={handleChange} required className={inputClass}><option value="">Select a service</option>{serviceOptions.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}</select></div>
                       <div><label className="block text-sm font-semibold text-gray-700 mb-2">Student Type *</label><select name="studentType" value={formData.studentType} onChange={handleChange} required className={inputClass}><option value="">Select type</option><option value="self">Myself (Adult)</option><option value="child">My Child</option><option value="family">Family</option></select></div>
                     </div>
                     <div><label className="block text-sm font-semibold text-gray-700 mb-2">Preferred Time (Optional)</label><input type="text" name="preferredTime" value={formData.preferredTime} onChange={handleChange} placeholder="e.g., Weekdays after 5 PM EST" className={inputClass} /></div>
@@ -128,7 +155,7 @@ export default function BookTrialPage() {
                     <Button type="submit" disabled={status === "loading"} size="lg" className="w-full rounded-xl bg-primary hover:bg-primary/90 text-white font-bold py-6 text-base shadow-lg shadow-primary/20">
                       {status === "loading" ? (<span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</span>) : (<span className="flex items-center gap-2"><Send className="w-4 h-4" /> Submit Booking Request</span>)}
                     </Button>
-                    {status === "error" && <p className="text-sm text-red-500 text-center">Something went wrong. Please try again or contact via WhatsApp.</p>}
+                    {status === "error" && <p className="text-sm text-red-500 text-center">{errorMsg || "Something went wrong. Please try again or contact via WhatsApp."}</p>}
                     <p className="text-xs text-gray-400 text-center">By submitting, you agree to be contacted via email and WhatsApp.</p>
                   </form>
                 )}

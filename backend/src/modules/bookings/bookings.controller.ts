@@ -1,4 +1,4 @@
-﻿import { Controller, Post, Get, Patch, Body, Param, Query, UseGuards } from "@nestjs/common";
+﻿import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards } from "@nestjs/common";
 import { ApiTags, ApiOperation, ApiBearerAuth } from "@nestjs/swagger";
 import { BookingsService } from "./bookings.service";
 import { CreateBookingDto } from "./dto/create-booking.dto";
@@ -23,14 +23,25 @@ export class BookingsController {
   @Roles(Role.ADMIN, Role.TEACHER)
   @ApiBearerAuth()
   @ApiOperation({ summary: "Get all bookings (admin)" })
-  findAll(@Query("page") page?: string, @Query("limit") limit?: string) {
-    return this.bookingsService.findAll(Number(page) || 1, Number(limit) || 20);
+  findAll(
+    @Query("page") page?: string,
+    @Query("limit") limit?: string,
+    @Query("status") status?: string,
+    @Query("search") search?: string,
+  ) {
+    return this.bookingsService.findAll(
+      Number(page) || 1,
+      Number(limit) || 20,
+      status,
+      search,
+    );
   }
 
   @Get(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN, Role.TEACHER)
   @ApiBearerAuth()
+  @ApiOperation({ summary: "Get booking by ID (admin)" })
   findOne(@Param("id") id: string) {
     return this.bookingsService.findOne(id);
   }
@@ -39,11 +50,21 @@ export class BookingsController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
+  @ApiOperation({ summary: "Update booking status (admin)" })
   updateStatus(
     @Param("id") id: string,
     @Body("status") status: BookingStatus,
     @Body("adminNotes") adminNotes?: string,
   ) {
     return this.bookingsService.updateStatus(id, status, adminNotes);
+  }
+
+  @Delete(":id")
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: "Delete booking (admin)" })
+  remove(@Param("id") id: string) {
+    return this.bookingsService.remove(id);
   }
 }

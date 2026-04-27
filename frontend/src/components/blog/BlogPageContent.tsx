@@ -1,43 +1,80 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import { Search, BookOpen } from "lucide-react";
+import { Search, BookOpen, Loader2 } from "lucide-react";
 import Container from "@/components/shared/Container";
 import BlogCard from "./BlogCard";
 import BlogCTA from "./BlogCTA";
+import { useLocale } from "@/hooks/useLocale";
+import { BlogPost, BlogPostFormatted, formatBlogPost } from "@/types/blog";
 
 const categories = ["all", "quran", "tajweed", "arabic", "islamic", "tips"] as const;
 
 export default function BlogPageContent() {
   const t = useTranslations("blog");
+  const { locale } = useLocale();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeCategory, setActiveCategory] = useState<string>("all");
+  const [apiPosts, setApiPosts] = useState<BlogPostFormatted[] | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const totalCount = Number(t("posts.count"));
-  const posts = Array.from({ length: totalCount }, (_, i) => ({
-    id: i,
-    slug: t(`posts.items.${i}.slug`),
-    title: t(`posts.items.${i}.title`),
-    excerpt: t(`posts.items.${i}.excerpt`),
-    category: t(`posts.items.${i}.category`),
-    date: t(`posts.items.${i}.date`),
-    readTime: t(`posts.items.${i}.readTime`),
-    author: t(`posts.items.${i}.author`),
-  }));
+  // Fetch from API
+  useEffect(() => {
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+    fetch(`${API_BASE}/blog?published=true&limit=50`)
+      .then((res) => res.json())
+      .then((json) => {
+        const items: BlogPost[] = json?.data || [];
+        if (items.length > 0) {
+          const formatted = items.map((p) => formatBlogPost(p, locale));
+          setApiPosts(formatted);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [locale]);
+
+  // Static fallback from translations
+  const staticPosts = useMemo(() => {
+    try {
+      const totalCount = Number(t("posts.count"));
+      return Array.from({ length: totalCount }, (_, i) => ({
+        id: String(i),
+        slug: t(`posts.items.${i}.slug`),
+        title: t(`posts.items.${i}.title`),
+        excerpt: t(`posts.items.${i}.excerpt`),
+        content: "",
+        coverImage: null,
+        category: t(`posts.items.${i}.category`),
+        date: t(`posts.items.${i}.date`),
+        readTime: t(`posts.items.${i}.readTime`),
+        author: t(`posts.items.${i}.author`),
+        tags: [],
+      }));
+    } catch {
+      return [];
+    }
+  }, [t]);
+
+  const posts = apiPosts || staticPosts;
 
   const filtered = useMemo(() => {
     let result = posts;
     if (activeCategory !== "all") {
-      result = result.filter((p) => p.category === activeCategory);
+      result = result.filter(
+        (p) =>
+          p.category === activeCategory ||
+          p.tags?.includes(activeCategory),
+      );
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
         (p) =>
           p.title.toLowerCase().includes(q) ||
-          p.excerpt.toLowerCase().includes(q)
+          p.excerpt.toLowerCase().includes(q),
       );
     }
     return result;
@@ -114,21 +151,29 @@ export default function BlogPageContent() {
       {/* Posts Grid */}
       <section className="py-16 md:py-24 bg-sand-50">
         <Container>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filtered.map((post, index) => (
-              <BlogCard key={post.id} post={post} index={index} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filtered.map((post, index) => (
+                  <BlogCard key={post.id} post={post} index={index} />
+                ))}
+              </div>
 
-          {filtered.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-20"
-            >
-              <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">{t("noResults")}</p>
-            </motion.div>
+              {filtered.length === 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center py-20"
+                >
+                  <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">{t("noResults")}</p>
+                </motion.div>
+              )}
+            </>
           )}
         </Container>
       </section>

@@ -1,9 +1,11 @@
-import React from "react";
+﻿import React from "react";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/config/site";
+import AuthProvider from "@/providers/AuthProvider";
+import { Toaster } from "react-hot-toast";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import WhatsAppButton from "@/components/layout/WhatsAppButton";
@@ -39,12 +41,28 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <SetLocaleAttributes locale={locale} isRTL={isRTL} />
-      <Navbar />
-      <main className="flex-1">{children}</main>
-      <Footer />
-      <WhatsAppButton />
-      <ScrollToTop />
+      <AuthProvider>
+        <SetLocaleAttributes locale={locale} isRTL={isRTL} />
+        <Toaster
+          position="top-center"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#0D4F4F',
+              color: '#fff',
+              borderRadius: '12px',
+              padding: '16px',
+            },
+          }}
+        />
+        <LayoutShell>{children}</LayoutShell>
+      </AuthProvider>
     </NextIntlClientProvider>
   );
 }
+
+function LayoutShell({ children }: { children: React.ReactNode }) {
+  return <LayoutShellClient>{children}</LayoutShellClient>;
+}
+
+import LayoutShellClient from "@/components/layout/LayoutShellClient";

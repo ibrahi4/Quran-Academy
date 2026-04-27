@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { TrackEventDto } from './dto/track-event.dto';
 import { QueryAnalyticsDto } from './dto/query-analytics.dto';
@@ -6,18 +6,26 @@ import { Prisma, Locale } from '@prisma/client';
 
 @Injectable()
 export class AnalyticsService {
+  private readonly logger = new Logger(AnalyticsService.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async trackEvent(dto: TrackEventDto, ip?: string, userAgent?: string) {
+    // Sanitize metadata
+    const safeMeta =
+      dto.metadata && typeof dto.metadata === 'object'
+        ? JSON.parse(JSON.stringify(dto.metadata))
+        : {};
+
     return await this.prisma.analyticsEvent.create({
       data: {
-        event: dto.event,
-        page: dto.page,
-        metadata: (dto.metadata as Prisma.JsonObject) ?? {},
-        locale: dto.locale ? (dto.locale as Locale) : null,
-        sessionId: dto.sessionId,
-        ip: ip ?? null,
-        userAgent: userAgent ?? null,
+        event: dto.event.substring(0, 100),
+        page: dto.page?.substring(0, 500) || null,
+        metadata: safeMeta as Prisma.JsonObject,
+        locale: dto.locale ? (dto.locale.toUpperCase() as Locale) : null,
+        sessionId: dto.sessionId?.substring(0, 100) || null,
+        ip: ip?.substring(0, 45) ?? null,
+        userAgent: userAgent?.substring(0, 500) ?? null,
       },
     });
   }
@@ -49,12 +57,7 @@ export class AnalyticsService {
 
     return {
       data,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
+      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
     };
   }
 
@@ -64,7 +67,11 @@ export class AnalyticsService {
 
     const events = await this.prisma.analyticsEvent.groupBy({
       by: ['page'],
-      where: { event: 'page_view', createdAt: { gte: since } },
+      where: {
+        event: 'page_view',
+        createdAt: { gte: since },
+        page: { not: null },
+      },
       _count: true,
       orderBy: { _count: { page: 'desc' } },
       take: 20,
@@ -91,49 +98,39 @@ export class AnalyticsService {
     const since = new Date();
     since.setDate(since.getDate() - days);
 
-    const raw = await this.prisma.$queryRaw<
-      Array<{ date: string; count: bigint }>
-    >`
-      SELECT DATE("createdAt") as date, COUNT(*)::int as count
-      FROM "AnalyticsEvent"
-      WHERE "createdAt" >= ${since}
-      GROUP BY DATE("createdAt")
-      ORDER BY date ASC
-    `;
+    // Use Prisma groupBy instead of raw query for safety
+    const events = await this.prisma.analyticsEvent.findMany({
+      where: { createdAt: { gte: since } },
+      select: { createdAt: true },
+    });
 
-    return raw.map((r) => ({ date: r.date, count: Number(r.count) }));
+    // Group by date in JS (safer than raw query)
+    const grouped: Record<string, number> = {};
+    events.forEach((e) => {
+      const dateKey = e.createdAt.toISOString().split('T')[0];
+      grouped[dateKey] = (grouped[dateKey] || 0) + 1;
+    });
+
+    return Object.entries(grouped)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
   }
 
   async getOverview() {
     const now = new Date();
-    const today = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    );
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const thisWeek = new Date(today);
     thisWeek.setDate(thisWeek.getDate() - 7);
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
     const [todayCount, weekCount, monthCount, totalCount] =
       await Promise.all([
-        this.prisma.analyticsEvent.count({
-          where: { createdAt: { gte: today } },
-        }),
-        this.prisma.analyticsEvent.count({
-          where: { createdAt: { gte: thisWeek } },
-        }),
-        this.prisma.analyticsEvent.count({
-          where: { createdAt: { gte: thisMonth } },
-        }),
+        this.prisma.analyticsEvent.count({ where: { createdAt: { gte: today } } }),
+        this.prisma.analyticsEvent.count({ where: { createdAt: { gte: thisWeek } } }),
+        this.prisma.analyticsEvent.count({ where: { createdAt: { gte: thisMonth } } }),
         this.prisma.analyticsEvent.count(),
       ]);
 
-    return {
-      today: todayCount,
-      thisWeek: weekCount,
-      thisMonth: monthCount,
-      total: totalCount,
-    };
+    return { today: todayCount, thisWeek: weekCount, thisMonth: monthCount, total: totalCount };
   }
 }

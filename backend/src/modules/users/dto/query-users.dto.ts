@@ -1,6 +1,6 @@
-import { IsOptional, IsString, IsEnum, IsInt, Min } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsInt, Min, IsBoolean } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { Role } from '@prisma/client';
 
 export class QueryUsersDto {
@@ -18,7 +18,7 @@ export class QueryUsersDto {
   @Min(1)
   limit?: number = 20;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ description: 'Search by name, email, or phone' })
   @IsOptional()
   @IsString()
   search?: string;
@@ -27,4 +27,23 @@ export class QueryUsersDto {
   @IsOptional()
   @IsEnum(Role)
   role?: Role;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  isActive?: boolean;
+
+  @ApiPropertyOptional({
+    enum: ['createdAt', 'firstName', 'lastName', 'email', 'lastLoginAt'],
+    default: 'createdAt',
+  })
+  @IsOptional()
+  @IsString()
+  sortBy?: string = 'createdAt';
+
+  @ApiPropertyOptional({ enum: ['asc', 'desc'], default: 'desc' })
+  @IsOptional()
+  @IsString()
+  sortOrder?: 'asc' | 'desc' = 'desc';
 }
