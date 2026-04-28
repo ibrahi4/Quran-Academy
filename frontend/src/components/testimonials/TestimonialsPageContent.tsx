@@ -157,7 +157,7 @@ export default function TestimonialsPageContent() {
             {filtered.map((testimonial, index) => (
               <TestimonialCard
                 key={testimonial.id}
-                testimonial={testimonial}
+                testimonial={testimonial as any}
                 index={index}
               />
             ))}
