@@ -159,7 +159,7 @@ export default function Footer() {
             {/* Quran Verse */}
             <div className="mt-8 p-4 rounded-xl bg-white/5 border border-white/5">
               <p className="text-accent/80 text-right text-sm leading-loose mb-2" style={{ fontFamily: "var(--font-arabic, serif)" }}>
-                ? ����� ������ ������� ������� ?
+                {("إِنَّمَا يَخْشَى اللَّهَ مِنْ عِبَادِهِ الْعُلَمَاءُ")}
               </p>
               <p className="text-gray-500 text-xs italic">
                 &quot;{t("verse")}&quot;

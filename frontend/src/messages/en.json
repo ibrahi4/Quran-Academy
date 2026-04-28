@@ -1692,11 +1692,11 @@
                                                    "description":  "Receive regular progress reports, assessments, and feedback. Watch yourself grow in confidence and skill with every session."
                                                }
                                      },
-                           "cta":  "Get Started ??? It\u0027s Free",
-                           "ctaNote":  "No credit card required ??? 30-minute free session"
+                           "cta":  "Get Started | It\u0027s Free",
+                           "ctaNote":  "No credit card required |30-minute free session"
                        },
     "quranVerse":  {
-                       "verse": "﴿ اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ ۝ خَلَقَ الْإِنسَانَ مِنْ عَلَقٍ ۝ اقْرَأْ وَرَبُّكَ الْأَكْرَمُ ﴾",
+                       "verse": " ﴾اقْرَأْ بِاسْمِ رَبِّكَ الَّذِي خَلَقَ ۝ خَلَقَ الْإِنسَانَ مِنْ عَلَقٍ ۝ اقْرَأْ وَرَبُّكَ الْأَكْرَمُ ﴿",
                        "translation":  "Read in the name of your Lord who created. Created man from a clinging substance. Read, and your Lord is the Most Generous.",
                        "reference":  "Surah Al-Alaq (96:1-3)"
                    },
@@ -2150,5 +2150,66 @@
                  "invalidTokenMessage":  "This reset link is invalid or has expired.",
                  "requestNewLink":  "Request a new link",
                  "forgotPassword":  "Forgot password?"
-             }
+             },"contactPage": {
+  "hero": {
+    "badge": "Get in Touch",
+    "title": "Connect with",
+    "titleHighlight": "Ibrahim",
+    "subtitle": "Have a question or want to learn more? I'd love to hear from you. Reach out anytime and I'll get back to you as soon as possible."
+  },
+  "info": {
+    "title": "Get in Touch",
+    "email": { "title": "Email", "description": "I respond within 24 hours" },
+    "whatsapp": { "title": "WhatsApp", "description": "Fastest way to reach me" },
+    "location": { "title": "Location", "value": "Online — Worldwide", "description": "Teaching from Egypt to the world" },
+    "availability": { "title": "Availability", "value": "Flexible Hours", "description": "All major time zones" }
+  },
+  "followMe": "Follow Me",
+  "quickWhatsApp": "Quick Chat via WhatsApp",
+  "responseTimes": {
+    "title": "Response Times",
+    "whatsapp": "Within hours",
+    "email": "Within 24 hours",
+    "form": "Within 24 hours"
+  },
+  "form": {
+    "title": "Send a Message",
+    "subtitle": "Fill out the form below and I'll get back to you as soon as possible.",
+    "name": "Full Name",
+    "namePlaceholder": "Enter your full name",
+    "email": "Email",
+    "emailPlaceholder": "your@email.com",
+    "whatsappNumber": "WhatsApp Number",
+    "optional": "(Optional)",
+    "whatsappPlaceholder": "+1 234 567 8900",
+    "message": "Your Message",
+    "messagePlaceholder": "How can I help you? Tell me about your learning goals, questions, or anything else...",
+    "required": "*",
+    "sending": "Sending message...",
+    "send": "Send Message",
+    "error": "An error occurred. Please try again or contact me directly via WhatsApp.",
+    "privacy": "Your information is safe. I will never share your data with anyone. By submitting this form, you agree to be contacted regarding your inquiry."
+  },
+  "success": {
+    "title": "Message Sent Successfully!",
+    "message": "Thank you for reaching out! I've received your message and will respond within 24 hours.",
+    "checkEmail": "Check your email for confirmation.",
+    "sendAnother": "Send Another Message"
+  },
+  "worldwide": {
+    "title": "Teaching Students Around the World",
+    "subtitle": "I work with students across all major time zones. Wherever you are, we'll find a time that works for you.",
+    "more": "And many more countries across Europe, Asia, and Africa",
+    "countries": {
+      "0": "USA", "1": "UK", "2": "Canada", "3": "Germany", "4": "Netherlands", "5": "Australia",
+      "6": "France", "7": "Sweden", "8": "Norway", "9": "Belgium", "10": "Ireland", "11": "Austria"
+    }
+  },
+  "cta": {
+    "title": "Ready to Start Your Learning Journey?",
+    "subtitle": "Don't wait any longer. Book your free trial lesson today and take the first step towards mastering the Quran and Arabic.",
+    "bookTrial": "Book a Free Trial Lesson",
+    "whatsappChat": "WhatsApp Chat"
+  }
+}
 }

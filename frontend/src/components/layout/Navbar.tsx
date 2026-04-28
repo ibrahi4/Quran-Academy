@@ -21,7 +21,6 @@ const navLinks = [
   { key: "services", href: "/services" },
   { key: "howItWorks", href: "/how-it-works" },
   { key: "games", href: "/games" },
-  { key: "testimonials", href: "/testimonials" },
   { key: "contact", href: "/contact" },
 ];
 

@@ -6,10 +6,14 @@ import { ArrowRight, Phone, Star, Users, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/shared/Container";
 import { siteConfig } from "@/config/site";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function CTABanner() {
   const ref = useRef<HTMLDivElement>(null);
   const [isInView, setIsInView] = useState(false);
+  const t = useTranslations("ctaBanner");
+  const locale = useLocale();
+  const isRTL = locale === "ar";
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -57,32 +61,30 @@ export default function CTABanner() {
             {/* Quran Verse */}
             <div className="inline-block px-4 py-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm mb-8">
               <p className="text-white/80 text-sm" style={{ fontFamily: "var(--font-arabic, serif)" }}>
-                ﴿ وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ فَهَلْ مِن مُّدَّكِرٍ ﴾
+                ﴾وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ فَهَلْ مِن مُّدَّكِرٍ ﴿
               </p>
             </div>
 
             {/* Headline */}
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
-              Ready to Begin Your
-              <span className="text-accent"> Quran Journey</span>?
+              {t("headline")}
+              <span className="text-accent"> {t("headlineHighlight")}</span>
+              {locale === "en" ? "?" : "؟"}
             </h2>
 
             {/* Subheadline */}
             <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-8 leading-relaxed">
-              Take the first step today. Book a free 30-minute trial lesson and
-              experience the difference personalized teaching makes.
+              {t("subtitle")}
             </p>
 
             {/* Trust Points */}
             <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 mb-10">
-              {[
-                { icon: CheckCircle2, text: "No payment required" },
-                { icon: CheckCircle2, text: "30-minute free session" },
-                { icon: CheckCircle2, text: "Personalized assessment" },
-              ].map((point, i) => (
+              {[0, 1, 2].map((i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <point.icon className="w-4 h-4 text-green-400" />
-                  <span className="text-sm text-white/70 font-medium">{point.text}</span>
+                  <CheckCircle2 className="w-4 h-4 text-green-400" />
+                  <span className="text-sm text-white/70 font-medium">
+                    {t(`trustPoints.${i}`)}
+                  </span>
                 </div>
               ))}
             </div>
@@ -94,8 +96,8 @@ export default function CTABanner() {
                   size="lg"
                   className="rounded-xl px-10 py-6 text-base font-bold shadow-2xl bg-accent hover:bg-accent/90 text-gray-900"
                 >
-                  Book My Free Trial
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  {t("bookTrial")}
+                  <ArrowRight className={`w-4 h-4 ${isRTL ? "mr-2 rotate-180" : "ml-2"}`} />
                 </Button>
               </Link>
 
@@ -106,13 +108,13 @@ export default function CTABanner() {
                 className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold border border-white/15 transition-all duration-300"
               >
                 <Phone className="w-4 h-4" />
-                Chat on WhatsApp
+                {t("chatWhatsApp")}
               </a>
             </div>
 
             {/* Social Proof */}
             <div className="mt-10 flex items-center justify-center gap-3">
-              <div className="flex -space-x-2">
+              <div className={`flex ${isRTL ? "-space-x-reverse -space-x-2" : "-space-x-2"}`}>
                 {["S", "J", "F", "A", "E"].map((initial, i) => (
                   <div
                     key={i}
@@ -122,14 +124,14 @@ export default function CTABanner() {
                   </div>
                 ))}
               </div>
-              <div className="text-left">
+              <div className={`${isRTL ? "text-right" : "text-left"}`}>
                 <div className="flex items-center gap-1">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
                   ))}
                 </div>
                 <p className="text-xs text-white/60">
-                  Joined by 500+ students worldwide
+                  {t("socialProof")}
                 </p>
               </div>
             </div>
