@@ -7,6 +7,7 @@ import { QuerySessionsDto } from './dto/query-sessions.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Role } from '@prisma/client';
 
 @ApiTags('Sessions')
@@ -28,6 +29,12 @@ export class SessionsController {
   @ApiOperation({ summary: 'List sessions' })
   findAll(@Query() query: QuerySessionsDto) {
     return this.sessionsService.findAll(query);
+  }
+
+  @Get('my')
+  @ApiOperation({ summary: 'Get current user sessions (Student)' })
+  findMy(@CurrentUser() user: any, @Query() query: QuerySessionsDto) {
+    return this.sessionsService.findMy(user.id, query);
   }
 
   @Get('upcoming')

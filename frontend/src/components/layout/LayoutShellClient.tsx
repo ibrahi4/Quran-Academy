@@ -8,6 +8,7 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 
 const HIDDEN_LAYOUT_PATTERNS = [
   "/admin",
+  "/student",
   "/auth/login",
   "/auth/register",
   "/auth/forgot-password",
@@ -17,7 +18,7 @@ const HIDDEN_LAYOUT_PATTERNS = [
 export default function LayoutShellClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const cleanPath = pathname.replace(/^\/(en|ar)/, "") || "/";
-  
+
   const hideLayout = HIDDEN_LAYOUT_PATTERNS.some((pattern) => cleanPath.startsWith(pattern));
 
   if (hideLayout) {

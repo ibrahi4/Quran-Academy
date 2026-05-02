@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 import {
   Award, BookOpen, GraduationCap, Heart, MessageCircle,
-  Shield, Users, Globe, ArrowRight, ArrowLeft, Clock, Star,
+  Shield, Users, Globe, ArrowRight, ArrowLeft, Clock, Star, Sparkles, Moon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/shared/Container";
@@ -15,40 +16,190 @@ import { useLocale } from "@/hooks/useLocale";
 const qualificationIcons = [GraduationCap, Award, BookOpen, MessageCircle, Clock, Globe];
 const valueIcons = [Heart, Shield, Users, Star];
 
+/* ----------------------------- Decorative BG ----------------------------- */
+function seededRandom(seed: number): number {
+  const x = Math.sin(seed + 1) * 10000;
+  return x - Math.floor(x);
+}
+
+function FloatingShapes() {
+  const shapes = useMemo(() => {
+    return Array.from({ length: 25 }, (_, i) => {
+      const isCircle = seededRandom(i * 9 + 3) > 0.5;
+      return {
+        size: Math.round((6 + seededRandom(i * 9 + 1) * 14) * 100) / 100,
+        top: Math.round(seededRandom(i * 9 + 2) * 10000) / 100 + "%",
+        left: Math.round(seededRandom(i * 9 + 4) * 10000) / 100 + "%",
+        duration: Math.round((5 + seededRandom(i * 9 + 5) * 7) * 10) / 10,
+        delay: Math.round(seededRandom(i * 9 + 6) * 40) / 10,
+        opacity: 0.15 + seededRandom(i * 9 + 7) * 0.25,
+        isCircle,
+        rotation: Math.round(seededRandom(i * 9 + 8) * 360),
+      };
+    });
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {shapes.map((s, i) => (
+        <motion.div
+          key={i}
+          className="absolute"
+          style={{
+            width: s.size, height: s.size, top: s.top, left: s.left,
+            backgroundColor: `rgba(255, 255, 255, ${s.opacity})`,
+            borderRadius: s.isCircle ? "50%" : "4px",
+            transform: `rotate(${s.rotation}deg)`,
+          }}
+          animate={{
+            y: [0, -25, 0],
+            opacity: [s.opacity, s.opacity + 0.15, s.opacity],
+            rotate: [s.rotation, s.rotation + 25, s.rotation],
+          }}
+          transition={{ duration: s.duration, repeat: Infinity, delay: s.delay, ease: "easeInOut" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function FloatingIcons() {
+  const icons = useMemo(() => {
+    const iconList = [BookOpen, Star, Sparkles, Heart, Moon, Award, GraduationCap, Globe];
+    return Array.from({ length: 10 }, (_, i) => ({
+      Icon: iconList[i % iconList.length],
+      top: Math.round(seededRandom(i * 5 + 11) * 9000) / 100 + "%",
+      left: Math.round(seededRandom(i * 5 + 12) * 9500) / 100 + "%",
+      duration: 6 + Math.round(seededRandom(i * 5 + 14) * 60) / 10,
+      delay: Math.round(seededRandom(i * 5 + 15) * 50) / 10,
+    }));
+  }, []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {icons.map((item, i) => {
+        const IconComp = item.Icon;
+        return (
+          <motion.div
+            key={i}
+            className="absolute text-white/20"
+            style={{ top: item.top, left: item.left }}
+            animate={{ y: [0, -30, 0], rotate: [0, 15, -15, 0], opacity: [0.15, 0.4, 0.15] }}
+            transition={{ duration: item.duration, repeat: Infinity, delay: item.delay, ease: "easeInOut" }}
+          >
+            <IconComp className="w-6 h-6" />
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* --------------------------------- Page --------------------------------- */
 export default function AboutPageContent() {
   const t = useTranslations("aboutPage");
   const { isRTL } = useLocale();
 
   return (
     <main>
-      <section className="relative pt-28 pb-16 md:pt-36 md:pb-24 overflow-hidden">
+      {/* ============================ HERO SECTION ============================ */}
+      <section className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28">
         <div className="absolute inset-0 bg-hero-gradient" />
-        <div className="absolute inset-0 opacity-[0.03]">
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="about-pattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-                <polygon points="40,8 46,26 64,20 50,34 64,48 46,42 40,60 34,42 16,48 30,34 16,20 34,26" fill="none" stroke="white" strokeWidth="0.3" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#about-pattern)" />
-          </svg>
-        </div>
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-sand-50 to-transparent" />
-        <Container className="relative z-10">
-          <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 mb-6">
-              <span className="text-white/80 text-sm font-medium">{t("hero.badge")}</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
-              {t("hero.title")} <span className="text-accent">{t("hero.titleHighlight")}</span>
-            </h1>
-            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-2xl">
+        <FloatingShapes />
+        <FloatingIcons />
+
+        <div className="absolute top-1/4 -left-20 w-72 h-72 bg-accent/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-primary/20 rounded-full blur-3xl" />
+
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-sand-50 to-transparent z-10" />
+
+        <Container className="relative z-20">
+          <div className="text-center max-w-3xl mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/25 rounded-full px-6 py-3 mb-8"
+            >
+              <Sparkles className="w-4 h-4 text-accent" />
+              <span className="text-white/90 text-sm font-semibold">{t("hero.badge")}</span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-[1.1] tracking-tight mb-6"
+            >
+              {t("hero.title")}{" "}
+              <span className="text-accent relative inline-block">
+                {t("hero.titleHighlight")}
+                <motion.span
+                  className="absolute -top-3 -right-4 text-accent"
+                  animate={{ rotate: [0, 20, -20, 0], scale: [1, 1.15, 1] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                >
+                  <Sparkles className="w-6 h-6" />
+                </motion.span>
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-lg md:text-xl text-white/75 leading-relaxed max-w-2xl mx-auto mb-10"
+            >
               {t("hero.subtitle")}
-            </p>
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-wrap items-center justify-center gap-4 md:gap-6"
+            >
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-5 py-3">
+                <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
+                  <Award className="w-5 h-5 text-accent" />
+                </div>
+                <div className="text-start">
+                  <p className="font-bold text-white text-lg leading-none">10+</p>
+                  <p className="text-xs font-medium text-white/70 mt-1">{t("hero.stats.years")}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-5 py-3">
+                <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-accent" />
+                </div>
+                <div className="text-start">
+                  <p className="font-bold text-white text-lg leading-none">500+</p>
+                  <p className="text-xs font-medium text-white/70 mt-1">{t("hero.stats.students")}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-5 py-3">
+                <div className="w-9 h-9 rounded-xl bg-accent/20 flex items-center justify-center">
+                  <Globe className="w-5 h-5 text-accent" />
+                </div>
+                <div className="text-start">
+                  <p className="font-bold text-white text-lg leading-none">25+</p>
+                  <p className="text-xs font-medium text-white/70 mt-1">{t("hero.stats.countries")}</p>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </Container>
+
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M0 120L60 105C120 90 240 60 360 52.5C480 45 600 60 720 67.5C840 75 960 75 1080 67.5C1200 60 1320 45 1380 37.5L1440 30V120H0Z"
+              className="fill-sand-50"
+            />
+          </svg>
+        </div>
       </section>
 
+      {/* ============================ STORY SECTION (unchanged) ============================ */}
       <section className="section-padding bg-sand-50">
         <Container>
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
@@ -99,6 +250,7 @@ export default function AboutPageContent() {
         </Container>
       </section>
 
+      {/* ============================ QUALIFICATIONS (unchanged) ============================ */}
       <section className="section-padding bg-white">
         <Container>
           <SectionHeader title={t("qualifications.title")} subtitle={t("qualifications.subtitle")} />
@@ -116,6 +268,7 @@ export default function AboutPageContent() {
         </Container>
       </section>
 
+      {/* ============================ VALUES (unchanged) ============================ */}
       <section className="section-padding" style={{ background: "linear-gradient(180deg, #FAFAF7 0%, #F5F0EB 100%)" }}>
         <Container>
           <SectionHeader title={t("values.title")} subtitle={t("values.subtitle")} />
@@ -133,6 +286,7 @@ export default function AboutPageContent() {
         </Container>
       </section>
 
+      {/* ============================ TIMELINE (unchanged) ============================ */}
       <section className="section-padding bg-white">
         <Container>
           <SectionHeader title={t("timeline.title")} subtitle={t("timeline.subtitle")} />
@@ -155,6 +309,7 @@ export default function AboutPageContent() {
         </Container>
       </section>
 
+      {/* ============================ CTA (unchanged) ============================ */}
       <section className="py-16 md:py-20">
         <Container>
           <div className="relative rounded-3xl overflow-hidden">

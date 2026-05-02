@@ -1881,129 +1881,139 @@
                                               }
                                     }
                     },
-    "aboutPage":  {
-                      "hero":  {
-                                   "badge":  "About Your Teacher",
-                                   "title":  "Meet",
-                                   "titleHighlight":  "Ibrahim Abdelnasser",
-                                   "subtitle":  "A passionate, certified Quran and Arabic teacher dedicated to helping students worldwide connect with the beauty of Islamic knowledge."
-                               },
-                      "story":  {
-                                    "title":  "My Story",
-                                    "paragraphs":  {
-                                                       "0":  "Assalamu Alaikum! I am Ibrahim Abdelnasser, and I am deeply passionate about helping people around the world connect with the Holy Quran and the Arabic language.",
-                                                       "1":  "My journey began over a decade ago when I realized that millions of Muslims worldwide struggle to read and understand the Quran simply because they do not speak Arabic. This inspired me to dedicate my life to bridging this gap through patient, personalized, and professional online education.",
-                                                       "2":  "Having studied in the Al-Azhar tradition and obtained my Ijazah in Quran recitation, I combine traditional Islamic scholarship with modern teaching techniques. I teach in clear, fluent English, making complex concepts accessible to everyone regardless of their background.",
-                                                       "3":  "Over the years, I have had the honor of teaching more than 500 students from over 15 countries. Each student has a unique story, and I consider it a privilege to be part of their learning journey."
-                                                   },
-                                    "hadith":  "The best of you are those who learn the Quran and teach it.",
-                                    "hadithSource":  "Prophet Muhammad (Sahih Bukhari)",
-                                    "yearsTeaching":  "Years Teaching",
-                                    "teacherTitle":  "Quran, Arabic and Islamic Studies Teacher",
-                                    "photoPlaceholder":  "Replace with professional photo"
-                                },
-                      "qualifications":  {
-                                             "title":  "Qualifications and Expertise",
-                                             "subtitle":  "The knowledge, certifications, and experience behind every lesson.",
-                                             "items":  {
-                                                           "0":  {
-                                                                     "title":  "Islamic Education",
-                                                                     "description":  "Formal education in Islamic Sciences and Quranic Studies from Al-Azhar tradition."
-                                                                 },
-                                                           "1":  {
-                                                                     "title":  "Ijazah Certified",
-                                                                     "description":  "Certified Ijazah in Quran recitation with an authentic chain of narration (Sanad)."
-                                                                 },
-                                                           "2":  {
-                                                                     "title":  "Tajweed Expertise",
-                                                                     "description":  "Deep expertise in all Tajweed rules with years of practical teaching experience."
-                                                                 },
-                                                           "3":  {
-                                                                     "title":  "Fluent English",
-                                                                     "description":  "Professional-level English communication for effective teaching of non-Arabic speakers."
-                                                                 },
-                                                           "4":  {
-                                                                     "title":  "10+ Years Experience",
-                                                                     "description":  "Over a decade of dedicated teaching experience with students of all ages and levels."
-                                                                 },
-                                                           "5":  {
-                                                                     "title":  "15+ Countries",
-                                                                     "description":  "Experience teaching students from diverse cultural backgrounds across multiple continents."
-                                                                 }
-                                                       }
-                                         },
-                      "values":  {
-                                     "title":  "My Teaching Philosophy",
-                                     "subtitle":  "The core values and principles that guide every lesson I teach.",
-                                     "items":  {
-                                                   "0":  {
-                                                             "title":  "Patience",
-                                                             "description":  "Every student learns at their own pace. I never rush ??? I guide with calm encouragement."
-                                                         },
-                                                   "1":  {
-                                                             "title":  "Authenticity",
-                                                             "description":  "All teachings are rooted in authentic Islamic scholarship and traditional methodology."
-                                                         },
-                                                   "2":  {
-                                                             "title":  "Personalization",
-                                                             "description":  "No two students are the same. Every curriculum is tailored to individual needs and goals."
-                                                         },
-                                                   "3":  {
-                                                             "title":  "Excellence",
-                                                             "description":  "I am committed to delivering the highest quality education in every single session."
-                                                         }
-                                               }
-                                 },
-                      "timeline":  {
-                                       "title":  "My Journey",
-                                       "subtitle":  "Key milestones in my teaching career.",
-                                       "items":  {
-                                                     "0":  {
-                                                               "year":  "2014",
-                                                               "title":  "Started Teaching Journey",
-                                                               "description":  "Began teaching Quran and Arabic to local students while completing Islamic studies education."
-                                                           },
-                                                     "1":  {
-                                                               "year":  "2016",
-                                                               "title":  "Obtained Ijazah",
-                                                               "description":  "Received Ijazah certification in Quran recitation with a complete chain of narration."
-                                                           },
-                                                     "2":  {
-                                                               "year":  "2018",
-                                                               "title":  "Went Global",
-                                                               "description":  "Started teaching international students online, reaching learners in the USA, UK, and Europe."
-                                                           },
-                                                     "3":  {
-                                                               "year":  "2020",
-                                                               "title":  "500+ Students Milestone",
-                                                               "description":  "Reached the milestone of teaching over 500 students from more than 15 countries worldwide."
-                                                           },
-                                                     "4":  {
-                                                               "year":  "2023",
-                                                               "title":  "Expanded Programs",
-                                                               "description":  "Launched specialized programs for kids, new Muslims, and family packages."
-                                                           },
-                                                     "5":  {
-                                                               "year":  "2025",
-                                                               "title":  "Continuing the Mission",
-                                                               "description":  "Continuing to grow and help more students connect with the Quran and Arabic language."
-                                                           }
-                                                 }
-                                   },
-                      "cta":  {
-                                  "title":  "Ready to Start Learning?",
-                                  "subtitle":  "Book a free trial lesson and let us create a personalized plan for your goals.",
-                                  "bookTrial":  "Book Free Trial",
-                                  "viewServices":  "View Services"
-                              }
-                  },
-    "servicesPage":  {
-                         "hero":  {
-                                      "badge":  "Our Programs",
-                                      "title":  "Programs Designed for",
-                                      "titleHighlight":  "Your Success",
-                                      "subtitle":  "Whether you are a beginner, a parent, or a new Muslim ??? we have the perfect program tailored for your needs."
-                                  },
+   "aboutPage": {
+    "hero": {
+        "badge": "Meet Your Teacher",
+        "title": "Dedicated to",
+        "titleHighlight": "Quality Quran Education",
+        "subtitle": "Learn more about my journey, qualifications, and the values that guide my teaching approach.",
+        "stats": {
+            "years": "Years Experience",
+            "students": "Happy Students",
+            "countries": "Countries"
+        }
+    },
+    "story": {
+        "title": "My Story",
+        "teacherName": "Ibrahim Abdelnasser",
+        "teacherTitle": "Quran & Arabic Teacher",
+        "photoPlaceholder": "Replace with professional photo",
+        "yearsTeaching": "Years Teaching",
+        "paragraphs": {
+            "0": "Assalamu Alaikum! I am Ibrahim Abdelnasser, a passionate Quran, Arabic, and Islamic Studies teacher with over a decade of experience helping non-Arabic speakers connect with the beauty of the Quran.",
+            "1": "I graduated from Al-Azhar University, one of the oldest and most respected Islamic institutions in the world, where I studied Quranic sciences, Tajweed, and Arabic linguistics under the guidance of distinguished scholars.",
+            "2": "I believe every Muslim deserves access to quality Quran education, regardless of their language or background. My approach combines traditional Islamic scholarship with modern teaching methods, creating an experience that is both authentic and engaging.",
+            "3": "Over the years, I have had the honor of teaching hundreds of students from over 25 countries, watching them grow from struggling beginners to confident reciters of the Book of Allah."
+        },
+        "hadith": "The best of you are those who learn the Quran and teach it",
+        "hadithSource": "Sahih al-Bukhari"
+    },
+    "qualifications": {
+        "title": "Qualifications & Certifications",
+        "subtitle": "A decade of dedicated study and teaching, certified by trusted institutions.",
+        "items": {
+            "0": {
+                "title": "Al-Azhar University",
+                "description": "Graduated from the prestigious Al-Azhar University with specialization in Quranic Sciences and Arabic Linguistics."
+            },
+            "1": {
+                "title": "Ijazah Certified",
+                "description": "Holding an authentic Ijazah (chain of transmission) in Quran recitation, connecting back to Prophet Muhammad ﷺ."
+            },
+            "2": {
+                "title": "Tajweed Mastery",
+                "description": "Deep expertise in the rules of Tajweed and Qira'at, with years of practical teaching experience."
+            },
+            "3": {
+                "title": "Fluent in English",
+                "description": "Fluent English speaker — making lessons clear, engaging, and accessible to non-Arabic speakers."
+            },
+            "4": {
+                "title": "10+ Years Teaching",
+                "description": "Over a decade of teaching experience with students of all ages and backgrounds, from beginners to advanced."
+            },
+            "5": {
+                "title": "Global Reach",
+                "description": "Successfully taught hundreds of students from over 25 countries across the globe."
+            }
+        }
+    },
+    "values": {
+        "title": "Core Values",
+        "subtitle": "The principles that guide my teaching and shape every lesson.",
+        "items": {
+            "0": {
+                "title": "Sincere Passion",
+                "description": "Teaching the Quran is not just my profession — it is my calling and my way to draw closer to Allah."
+            },
+            "1": {
+                "title": "Trust & Integrity",
+                "description": "Authentic, ijazah-backed knowledge transmitted with honesty, transparency, and respect."
+            },
+            "2": {
+                "title": "Patience & Care",
+                "description": "Every student learns at their own pace — I am here to support and guide, never to rush or judge."
+            },
+            "3": {
+                "title": "Excellence",
+                "description": "Striving for ihsan in every lesson, lesson plan, and interaction with my students."
+            }
+        }
+    },
+    "timeline": {
+        "title": "My Journey",
+        "subtitle": "Key milestones in my path of learning and teaching the Quran.",
+        "items": {
+            "0": {
+                "year": "2008",
+                "title": "Started Memorizing Quran",
+                "description": "Began my journey of memorizing the Holy Quran under qualified teachers in Egypt."
+            },
+            "1": {
+                "year": "2012",
+                "title": "Completed Hifz",
+                "description": "Alhamdulillah, completed the full memorization of the Quran with proper Tajweed."
+            },
+            "2": {
+                "year": "2014",
+                "title": "Joined Al-Azhar",
+                "description": "Started formal studies at Al-Azhar University in Quranic Sciences and Arabic."
+            },
+            "3": {
+                "year": "2016",
+                "title": "Started Teaching",
+                "description": "Began teaching Quran and Arabic to international students online."
+            },
+            "4": {
+                "year": "2020",
+                "title": "Received Ijazah",
+                "description": "Honored to receive Ijazah in Quran recitation from a chain of trusted scholars."
+            },
+            "5": {
+                "year": "Today",
+                "title": "Serving 500+ Students",
+                "description": "Currently teaching hundreds of students worldwide, helping them connect with the Quran."
+            }
+        }
+    },
+    "cta": {
+        "title": "Ready to Begin Your Journey?",
+        "subtitle": "Book a free trial lesson today and experience my teaching style firsthand.",
+        "bookTrial": "Book a Free Trial",
+        "viewServices": "View All Services"
+    }
+},    "servicesPage":  {
+                        "hero": {
+    "badge": "Comprehensive Islamic Education",
+    "title": "Programs Tailored",
+    "titleHighlight": "for Every Learner",
+    "subtitle": "From beginners to advanced students — discover programs designed to help you connect deeply with the Quran, Arabic, and Islamic knowledge.",
+    "stats": {
+        "programs": "Programs",
+        "students": "Happy Students",
+        "years": "Years Experience"
+    }
+},
                          "bestFor":  "Best for:",
                          "whatYouLearn":  "What You Will Learn",
                          "bookTrial":  "Book Free Trial",
@@ -2155,7 +2165,11 @@
     "badge": "Get in Touch",
     "title": "Connect with",
     "titleHighlight": "Ibrahim",
-    "subtitle": "Have a question or want to learn more? I'd love to hear from you. Reach out anytime and I'll get back to you as soon as possible."
+    "subtitle": "Have a question or want to learn more? I'd love to hear from you. Reach out anytime and I'll get back to you as soon as possible.","stats": {
+    "response": "Response Time",
+    "countries": "Countries",
+    "students": "Happy Students"
+}
   },
   "info": {
     "title": "Get in Touch",
@@ -2211,5 +2225,101 @@
     "bookTrial": "Book a Free Trial Lesson",
     "whatsappChat": "WhatsApp Chat"
   }
+},"bookTrial": {
+  "hero": {
+    "badge": "100% Free — No Commitment",
+    "title": "Book Your <accent>Free Trial</accent> Lesson",
+    "subtitle": "Experience a personalized 30-minute session and see the difference quality teaching makes.",
+    "stats": {
+        "minutes": "Minutes",
+        "students": "Happy Students",
+        "free": "Free Trial"
+    }
+},
+    "expectations": {
+        "title": "What to Expect",
+        "items": {
+            "0": "30-minute free session",
+            "1": "Via Zoom or Google Meet",
+            "2": "Assess your current level",
+            "3": "Get a personalized plan",
+            "4": "Experience my teaching style",
+            "5": "No commitment required"
+        }
+    },
+    "testimonial": {
+        "quote": "The free trial was amazing. Ibrahim assessed my level, explained everything clearly, and I signed up right away.",
+        "initial": "S",
+        "name": "Sarah M.",
+        "location": "Texas, USA"
+    },
+    "whatsapp": {
+        "title": "Prefer WhatsApp?",
+        "description": "Send a message directly and I will respond within hours.",
+        "button": "Chat on WhatsApp"
+    },
+    "form": {
+        "title": "Book Your Session",
+        "subtitle": "Fill out the form and I will contact you within 24 hours.",
+        "submit": "Submit Booking Request",
+        "submitting": "Submitting...",
+        "disclaimer": "By submitting, you agree to be contacted via email and WhatsApp.",
+        "success": {
+            "title": "Booking Received!",
+            "message": "JazakAllahu Khairan! I will contact you within 24 hours to confirm your trial session.",
+            "again": "Submit another booking"
+        },
+        "fields": {
+            "name": {
+                "label": "Full Name *",
+                "placeholder": "Your full name"
+            },
+            "email": {
+                "label": "Email *",
+                "placeholder": "your@email.com"
+            },
+            "whatsapp": {
+                "label": "WhatsApp *",
+                "placeholder": "+1 234 567 8900"
+            },
+            "country": {
+                "label": "Country *",
+                "placeholder": "e.g., USA (EST)"
+            },
+            "service": {
+                "label": "Service *",
+                "placeholder": "Select a service",
+                "options": {
+                    "quran-recitation": "Quran Recitation and Memorization",
+                    "tajweed-course": "Tajweed",
+                    "arabic-language": "Arabic Language",
+                    "islamic-studies": "Islamic Studies",
+                    "kids-program": "Kids Program",
+                    "new-muslims": "New Muslims Program"
+                }
+            },
+            "studentType": {
+                "label": "Student Type *",
+                "placeholder": "Select type",
+                "options": {
+                    "self": "Myself (Adult)",
+                    "child": "My Child",
+                    "family": "Family"
+                }
+            },
+            "preferredTime": {
+                "label": "Preferred Time (Optional)",
+                "placeholder": "e.g., Weekdays after 5 PM EST"
+            },
+            "message": {
+                "label": "Message (Optional)",
+                "placeholder": "Tell me about your goals..."
+            }
+        }
+    },
+    "errors": {
+        "generic": "Something went wrong",
+        "submit": "Something went wrong. Please try again or contact via WhatsApp."
+    }
 }
 }

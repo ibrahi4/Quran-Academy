@@ -1,9 +1,8 @@
-
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Phone, Globe, Gamepad2, User, LogOut, LayoutDashboard, Settings, ChevronDown } from "lucide-react";
+import { Menu, X, Phone, Globe, Gamepad2, User, LogOut, LayoutDashboard, Settings, ChevronDown, Calendar, GraduationCap } from "lucide-react";
 import { useTranslations, useLocale as useNextIntlLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/hooks/useLocale";
@@ -76,7 +75,7 @@ export default function Navbar() {
     clearAuth();
     setIsUserMenuOpen(false);
     setIsMobileOpen(false);
-    toast.success(locale === "ar" ? "تم تسجيل الخروج" : "Logged out successfully");
+    toast.success(locale === "ar" ? "\u062A\u0645 \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C" : "Logged out successfully");
     router.push(`/${intlLocale}`);
   };
 
@@ -85,6 +84,34 @@ export default function Navbar() {
     : "";
 
   const isAdmin = user?.role === "ADMIN";
+  const isTeacher = user?.role === "TEACHER";
+  const isStudent = user?.role === "STUDENT";
+
+  // Role-based routing
+  const dashboardHref = isAdmin
+    ? "/admin"
+    : isStudent || isTeacher
+    ? "/student/dashboard"
+    : "/";
+
+  const profileHref = isAdmin
+    ? "/admin/settings"
+    : "/student/profile";
+
+  const sessionsHref = "/student/sessions";
+
+  const roleLabel = (() => {
+    if (isAdmin) return locale === "ar" ? "\u0645\u062F\u064A\u0631" : "ADMIN";
+    if (isTeacher) return locale === "ar" ? "\u0645\u0639\u0644\u0651\u0645" : "TEACHER";
+    if (isStudent) return locale === "ar" ? "\u0637\u0627\u0644\u0628" : "STUDENT";
+    return "";
+  })();
+
+  const roleBadgeColor = isAdmin
+    ? "text-primary bg-primary/10"
+    : isTeacher
+    ? "text-purple-700 bg-purple-50"
+    : "text-emerald-700 bg-emerald-50";
 
   return (
     <>
@@ -168,45 +195,58 @@ export default function Navbar() {
 
                   {/* Dropdown */}
                   {isUserMenuOpen && (
-                    <div className="absolute top-full right-0 rtl:right-auto rtl:left-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                    <div className="absolute top-full right-0 rtl:right-auto rtl:left-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
                       {/* User Info */}
                       <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-                        <p className="text-sm font-semibold text-gray-900">{user.firstName} {user.lastName}</p>
+                        <p className="text-sm font-semibold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                        {isAdmin && (
-                          <span className="inline-block mt-1 text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                            ADMIN
+                        {roleLabel && (
+                          <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${roleBadgeColor}`}>
+                            {roleLabel}
                           </span>
                         )}
                       </div>
 
                       <div className="py-1">
-                        {isAdmin && (
+                        <Link
+                          href={dashboardHref}
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          {locale === "ar" ? "\u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645" : "Dashboard"}
+                        </Link>
+
+                        {(isStudent || isTeacher) && (
                           <Link
-                            href="/admin"
+                            href={sessionsHref}
                             onClick={() => setIsUserMenuOpen(false)}
                             className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
                           >
-                            <LayoutDashboard className="w-4 h-4" />
-                            {locale === "ar" ? "لوحة التحكم" : "Dashboard"}
+                            <Calendar className="w-4 h-4" />
+                            {locale === "ar" ? "\u062C\u0644\u0633\u0627\u062A\u064A" : "My Sessions"}
                           </Link>
                         )}
 
                         <Link
-                          href="/profile"
+                          href={profileHref}
                           onClick={() => setIsUserMenuOpen(false)}
                           className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
                         >
                           <Settings className="w-4 h-4" />
-                          {locale === "ar" ? "الملف الشخصي" : "My Profile"}
+                          {isAdmin
+                            ? (locale === "ar" ? "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A" : "Settings")
+                            : (locale === "ar" ? "\u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062E\u0635\u064A" : "My Profile")}
                         </Link>
+
+                        <div className="my-1 border-t border-gray-100" />
 
                         <button
                           onClick={handleLogout}
                           className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
                         >
                           <LogOut className="w-4 h-4" />
-                          {locale === "ar" ? "تسجيل الخروج" : "Sign Out"}
+                          {locale === "ar" ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C" : "Sign Out"}
                         </button>
                       </div>
                     </div>
@@ -287,6 +327,11 @@ export default function Navbar() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    {roleLabel && (
+                      <span className={`inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded-full ${roleBadgeColor}`}>
+                        {roleLabel}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -315,27 +360,39 @@ export default function Navbar() {
                 </Link>
               ))}
 
-              {/* Mobile Admin/Profile Links */}
+              {/* Mobile Role-Based Links */}
               {isAuthenticated && user && (
                 <>
                   <div className="h-px bg-gray-100 my-2" />
-                  {isAdmin && (
+                  <Link
+                    href={dashboardHref}
+                    onClick={() => setIsMobileOpen(false)}
+                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-50"
+                  >
+                    <LayoutDashboard className="w-5 h-5" />
+                    {locale === "ar" ? "\u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645" : "Dashboard"}
+                  </Link>
+
+                  {(isStudent || isTeacher) && (
                     <Link
-                      href="/admin"
+                      href={sessionsHref}
                       onClick={() => setIsMobileOpen(false)}
                       className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-50"
                     >
-                      <LayoutDashboard className="w-5 h-5" />
-                      {locale === "ar" ? "لوحة التحكم" : "Dashboard"}
+                      <Calendar className="w-5 h-5" />
+                      {locale === "ar" ? "\u062C\u0644\u0633\u0627\u062A\u064A" : "My Sessions"}
                     </Link>
                   )}
+
                   <Link
-                    href="/profile"
+                    href={profileHref}
                     onClick={() => setIsMobileOpen(false)}
                     className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-50"
                   >
                     <Settings className="w-5 h-5" />
-                    {locale === "ar" ? "الملف الشخصي" : "My Profile"}
+                    {isAdmin
+                      ? (locale === "ar" ? "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A" : "Settings")
+                      : (locale === "ar" ? "\u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062E\u0635\u064A" : "My Profile")}
                   </Link>
                 </>
               )}
@@ -357,26 +414,18 @@ export default function Navbar() {
                   className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-red-50 text-red-600 font-semibold hover:bg-red-100 transition-all"
                 >
                   <LogOut className="w-5 h-5" />
-                  {locale === "ar" ? "تسجيل الخروج" : "Sign Out"}
+                  {locale === "ar" ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C" : "Sign Out"}
                 </button>
               ) : (
                 <Link href="/auth/login" onClick={() => setIsMobileOpen(false)} className="block">
                   <button className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-all">
                     <User className="w-5 h-5" />
-                    {locale === "ar" ? "تسجيل الدخول" : "Sign In"}
+                    {locale === "ar" ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644" : "Sign In"}
                   </button>
                 </Link>
               )}
 
-              <a
-                href={siteConfig.contact.whatsappLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-green-500 text-white font-semibold hover:bg-green-600 transition-all"
-              >
-                <Phone className="w-5 h-5" />
-                {locale === "en" ? "Chat on WhatsApp" : "\u062A\u0648\u0627\u0635\u0644 \u0639\u0628\u0631 \u0648\u0627\u062A\u0633\u0627\u0628"}
-              </a>
+            
 
               <Link href="/book-trial" onClick={() => setIsMobileOpen(false)} className="block">
                 <Button className="w-full rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold py-6 text-base shadow-lg shadow-primary/20">

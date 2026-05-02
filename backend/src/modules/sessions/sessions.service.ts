@@ -45,6 +45,14 @@ export class SessionsService {
     return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
   }
 
+  async findMy(userId: string, query: QuerySessionsDto) {
+    const student = await this.prisma.student.findUnique({ where: { userId } });
+    if (!student) {
+      return { data: [], meta: { total: 0, page: 1, limit: query.limit || 20, totalPages: 0 } };
+    }
+    return this.findAll({ ...query, studentId: student.id });
+  }
+
   async findOne(id: string) {
     const session = await this.prisma.session.findUnique({
       where: { id },

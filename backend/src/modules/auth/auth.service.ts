@@ -9,6 +9,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
+import { Role } from '@prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -33,18 +34,37 @@ export class AuthService {
     if (exists) throw new ConflictException('Email already registered');
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
-    const user = await this.prisma.user.create({
-      data: {
-        ...dto,
-        email,
-        password: hashedPassword,
-      },
+
+    // Create User + Student record in a transaction
+    const user = await this.prisma.$transaction(async (tx) => {
+      const newUser = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          firstName: dto.firstName.trim(),
+          lastName: dto.lastName.trim(),
+          phone: dto.phone?.trim() || null,
+          locale: dto.locale || 'EN',
+          role: Role.STUDENT, // Default role for self-registration
+        },
+      });
+
+      // Auto-create Student profile linked to this user
+      await tx.student.create({
+        data: {
+          userId: newUser.id,
+          level: 'BEGINNER',
+          goals: [],
+        },
+      });
+
+      return newUser;
     });
 
     const tokens = await this.generateTokens(user.id, user.email, user.role);
     await this.saveRefreshToken(user.id, tokens.refreshToken);
 
-    this.logger.log(`New user registered: ${user.email}`);
+    this.logger.log(`New student registered: ${user.email}`);
 
     return {
       user: {
@@ -54,6 +74,7 @@ export class AuthService {
         lastName: user.lastName,
         role: user.role,
         locale: user.locale,
+        avatar: user.avatar,
       },
       ...tokens,
     };
