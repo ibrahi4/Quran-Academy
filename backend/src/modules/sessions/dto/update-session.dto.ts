@@ -1,46 +1,49 @@
-import { IsOptional, IsString, IsDateString, IsInt, IsEnum, Min } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { SessionStatus, Platform } from '@prisma/client';
 
-export class UpdateSessionDto {
+import {
+  IsBoolean,
+  IsInt,
+  IsOptional,
+  Min,
+  IsString,
+} from 'class-validator';
+
+import { CreateSessionDto } from './create-session.dto';
+
+export class UpdateSessionDto extends PartialType(CreateSessionDto) {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  title?: string;
+  teacherNotes?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    default: true,
+  })
   @IsOptional()
-  @IsDateString()
-  date?: string;
+  @IsBoolean()
+  studentAttended?: boolean;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  teacherAttended?: boolean;
+
+  @ApiPropertyOptional({
+    default: 0,
+  })
   @IsOptional()
   @IsInt()
-  @Min(15)
-  duration?: number;
+  @Min(0)
+  studentLateMins?: number;
 
-  @ApiPropertyOptional({ enum: SessionStatus })
+  @ApiPropertyOptional({
+    default: 0,
+  })
   @IsOptional()
-  @IsEnum(SessionStatus)
-  status?: SessionStatus;
-
-  @ApiPropertyOptional({ enum: Platform })
-  @IsOptional()
-  @IsEnum(Platform)
-  platform?: Platform;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  meetingLink?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  recordingUrl?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
-  notes?: string;
+  @IsInt()
+  @Min(0)
+  teacherLateMins?: number;
 }

@@ -1,0 +1,1452 @@
+============================================
+TEACHER BACKEND COMPLETE ANALYSIS
+============================================
+Generated: 2026-05-18 02:32:02
+
+
+============================================
+FILE: src\modules\teacher\teacher.service.ts
+============================================
+
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { Role } from '@prisma/client';
+
+@Injectable()
+export class TeacherService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(dto: CreateTeacherDto) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: dto.userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role !== Role.TEACHER) {
+      await this.prisma.user.update({
+        where: { id: dto.userId },
+        data: { role: Role.TEACHER },
+      });
+    }
+
+    return this.prisma.teacher.create({
+      data: {
+        userId: dto.userId,
+        hourlyRate: dto.hourlyRate ?? 15.0,
+        bio: dto.bio,
+        specialties: dto.specialties ?? [],
+        isActive: dto.isActive ?? true,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            isActive: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findAll() {
+    return this.prisma.teacher.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            isActive: true,
+          },
+        },
+        _count: {
+          select: {
+            students: true,
+            sessions: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findOne(id: string) {
+    const teacher = await this.prisma.teacher.findUnique({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            isActive: true,
+          },
+        },
+        students: {
+          select: {
+            id: true,
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+            level: true,
+          },
+        },
+        _count: {
+          select: {
+            sessions: true,
+          },
+        },
+      },
+    });
+
+    if (!teacher) {
+      throw new NotFoundException('Teacher not found');
+    }
+
+    return teacher;
+  }
+
+  async findByUserId(userId: string) {
+    const teacher = await this.prisma.teacher.findUnique({
+      where: { userId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    if (!teacher) {
+      throw new NotFoundException('Teacher not found');
+    }
+
+    return teacher;
+  }
+
+  async update(id: string, dto: UpdateTeacherDto) {
+    await this.findOne(id);
+
+    return this.prisma.teacher.update({
+      where: { id },
+      data: {
+        hourlyRate: dto.hourlyRate,
+        bio: dto.bio,
+        specialties: dto.specialties,
+        isActive: dto.isActive,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+
+    return this.prisma.teacher.delete({
+      where: { id },
+    });
+  }
+
+  async getDashboard(userId: string) {
+    const teacher = await this.findByUserId(userId);
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const [todaySessions, upcomingSessions, totalStudents, monthlyStats] = await Promise.all([
+      this.prisma.session.count({
+        where: {
+          teacherId: teacher.id,
+          date: {
+            gte: today,
+            lt: tomorrow,
+          },
+          status: 'SCHEDULED',
+        },
+      }),
+      this.prisma.session.count({
+        where: {
+          teacherId: teacher.id,
+          date: {
+            gte: today,
+          },
+          status: 'SCHEDULED',
+        },
+      }),
+      this.prisma.student.count({
+        where: { teacherId: teacher.id },
+      }),
+      this.getMonthlyStats(teacher.id),
+    ]);
+
+    return {
+      teacher,
+      todaySessions,
+      upcomingSessions,
+      totalStudents,
+      monthlyStats,
+    };
+  }
+
+  async getSessions(userId: string, query: { status?: string; from?: string; to?: string }) {
+    const teacher = await this.findByUserId(userId);
+
+    const where: any = { teacherId: teacher.id };
+
+    if (query.status) {
+      where.status = query.status;
+    }
+
+    if (query.from || query.to) {
+      where.date = {};
+      if (query.from) where.date.gte = new Date(query.from);
+      if (query.to) where.date.lte = new Date(query.to);
+    }
+
+    return this.prisma.session.findMany({
+      where,
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { date: 'desc' },
+    });
+  }
+
+  async getEarnings(userId: string, month?: string) {
+    const teacher = await this.findByUserId(userId);
+
+    const targetMonth = month ? new Date(month) : new Date();
+    const startOfMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
+    const endOfMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0, 23, 59, 59);
+
+    const sessions = await this.prisma.session.findMany({
+      where: {
+        teacherId: teacher.id,
+        status: 'COMPLETED',
+        completedAt: {
+          gte: startOfMonth,
+          lte: endOfMonth,
+        },
+      },
+      select: {
+        id: true,
+        date: true,
+        duration: true,
+        completedAt: true,
+        student: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const totalHours = sessions.reduce((sum, s) => sum + (s.duration || 60) / 60, 0);
+    const totalEarnings = totalHours * Number(teacher.hourlyRate);
+
+    return {
+      teacher: {
+        id: teacher.id,
+        hourlyRate: teacher.hourlyRate,
+      },
+      month: startOfMonth.toISOString().slice(0, 7),
+      totalHours: Math.round(totalHours * 100) / 100,
+      totalEarnings: Math.round(totalEarnings * 100) / 100,
+      sessionCount: sessions.length,
+      sessions,
+    };
+  }
+
+  async completeSession(userId: string, sessionId: string, data: { teacherNotes?: string; studentAttended?: boolean; teacherAttended?: boolean; studentLateMins?: number; teacherLateMins?: number }) {
+    const teacher = await this.findByUserId(userId);
+
+    const session = await this.prisma.session.findFirst({
+      where: {
+        id: sessionId,
+        teacherId: teacher.id,
+      },
+    });
+
+    if (!session) {
+      throw new NotFoundException('Session not found');
+    }
+
+    if (session.status === 'COMPLETED') {
+      throw new ForbiddenException('Session already completed');
+    }
+
+    return this.prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        status: 'COMPLETED',
+        completedAt: new Date(),
+        teacherNotes: data.teacherNotes,
+        studentAttended: data.studentAttended ?? true,
+        teacherAttended: data.teacherAttended ?? true,
+        studentLateMins: data.studentLateMins ?? 0,
+        teacherLateMins: data.teacherLateMins ?? 0,
+      },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  private async getMonthlyStats(teacherId: string) {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    const [completedSessions, totalHours] = await Promise.all([
+      this.prisma.session.count({
+        where: {
+          teacherId,
+          status: 'COMPLETED',
+          completedAt: {
+            gte: startOfMonth,
+          },
+        },
+      }),
+      this.prisma.session.aggregate({
+        where: {
+          teacherId,
+          status: 'COMPLETED',
+          completedAt: {
+            gte: startOfMonth,
+          },
+        },
+        _sum: {
+          duration: true,
+        },
+      }),
+    ]);
+
+    return {
+      completedSessions,
+      totalHours: Math.round((totalHours._sum.duration || 0) / 60 * 100) / 100,
+    };
+  }
+}
+
+
+============================================
+FILE: src\modules\teacher\teacher.controller.ts
+============================================
+
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { TeacherService } from './teacher.service';
+import { CreateTeacherDto } from './dto/create-teacher.dto';
+import { UpdateTeacherDto } from './dto/update-teacher.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
+
+@Controller('teacher')
+@UseGuards(JwtAuthGuard, RolesGuard)
+export class TeacherController {
+  constructor(private readonly teacherService: TeacherService) {}
+
+  @Post()
+  @Roles(Role.ADMIN)
+  create(@Body() dto: CreateTeacherDto) {
+    return this.teacherService.create(dto);
+  }
+
+  @Get()
+  findAll() {
+    return this.teacherService.findAll();
+  }
+
+  @Get('dashboard')
+  @Roles(Role.TEACHER)
+  getDashboard(@CurrentUser('id') userId: string) {
+    return this.teacherService.getDashboard(userId);
+  }
+
+  @Get('sessions')
+  @Roles(Role.TEACHER)
+  getSessions(
+    @CurrentUser('id') userId: string,
+    @Query() query: { status?: string; from?: string; to?: string },
+  ) {
+    return this.teacherService.getSessions(userId, query);
+  }
+
+  @Get('earnings')
+  @Roles(Role.TEACHER)
+  getEarnings(
+    @CurrentUser('id') userId: string,
+    @Query('month') month?: string,
+  ) {
+    return this.teacherService.getEarnings(userId, month);
+  }
+
+  @Patch('sessions/:id/complete')
+  @Roles(Role.TEACHER)
+  completeSession(
+    @CurrentUser('id') userId: string,
+    @Param('id') sessionId: string,
+    @Body()
+    data: {
+      teacherNotes?: string;
+      studentAttended?: boolean;
+      teacherAttended?: boolean;
+      studentLateMins?: number;
+      teacherLateMins?: number;
+    },
+  ) {
+    return this.teacherService.completeSession(userId, sessionId, data);
+  }
+
+  @Get(':id')
+  @Roles(Role.ADMIN)
+  findOne(@Param('id') id: string) {
+    return this.teacherService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Roles(Role.ADMIN)
+  update(@Param('id') id: string, @Body() dto: UpdateTeacherDto) {
+    return this.teacherService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN)
+  remove(@Param('id') id: string) {
+    return this.teacherService.remove(id);
+  }
+}
+
+
+============================================
+FILE: src\modules\teacher\teacher.module.ts
+============================================
+
+import { Module } from '@nestjs/common';
+import { TeacherService } from './teacher.service';
+import { TeacherController } from './teacher.controller';
+import { DatabaseModule } from '../../database/database.module';
+
+@Module({
+  imports: [DatabaseModule],
+  controllers: [TeacherController],
+  providers: [TeacherService],
+  exports: [TeacherService],
+})
+export class TeacherModule {}
+
+============================================
+FILE: src\modules\teacher\dto\create-teacher.dto.ts
+============================================
+
+import { IsString, IsNumber, IsOptional, IsBoolean, IsArray } from 'class-validator';
+
+export class CreateTeacherDto {
+  @IsString()
+  userId: string;
+
+  @IsNumber()
+  @IsOptional()
+  hourlyRate?: number;
+
+  @IsString()
+  @IsOptional()
+  bio?: string;
+
+  @IsArray()
+  @IsOptional()
+  specialties?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  isActive?: boolean;
+}
+
+
+============================================
+FILE: src\modules\teacher\dto\update-teacher.dto.ts
+============================================
+
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateTeacherDto } from './create-teacher.dto';
+
+export class UpdateTeacherDto extends PartialType(CreateTeacherDto) {}
+
+
+============================================
+FILE: src\modules\sessions\sessions.service.ts
+============================================
+
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../../database/prisma.service';
+import { CreateSessionDto } from './dto/create-session.dto';
+import { UpdateSessionDto } from './dto/update-session.dto';
+import { QuerySessionsDto } from './dto/query-sessions.dto';
+import { Prisma } from '@prisma/client';
+
+@Injectable()
+export class SessionsService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(dto: CreateSessionDto) {
+    return this.prisma.session.create({
+      data: {
+        ...dto,
+        date: new Date(dto.date),
+        duration: dto.duration || 60,
+      },
+      include: { student: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
+    });
+  }
+
+  async findAll(query: QuerySessionsDto) {
+    const { page = 1, limit = 20, studentId, status, from, to } = query;
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.SessionWhereInput = {};
+    if (studentId) where.studentId = studentId;
+    if (status) where.status = status;
+    if (from || to) {
+      where.date = {};
+      if (from) where.date.gte = new Date(from);
+      if (to) where.date.lte = new Date(to);
+    }
+
+    const [data, total] = await Promise.all([
+      this.prisma.session.findMany({
+        where, skip, take: limit,
+        include: { student: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
+        orderBy: { date: 'desc' },
+      }),
+      this.prisma.session.count({ where }),
+    ]);
+
+    return { data, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+  }
+
+  async findMy(userId: string, query: QuerySessionsDto) {
+    const student = await this.prisma.student.findUnique({ where: { userId } });
+    if (!student) {
+      return { data: [], meta: { total: 0, page: 1, limit: query.limit || 20, totalPages: 0 } };
+    }
+    return this.findAll({ ...query, studentId: student.id });
+  }
+
+  async findOne(id: string) {
+    const session = await this.prisma.session.findUnique({
+      where: { id },
+      include: { student: { include: { user: { select: { firstName: true, lastName: true, email: true } } } }, booking: true },
+    });
+    if (!session) throw new NotFoundException('Session not found');
+    return session;
+  }
+
+  async update(id: string, dto: UpdateSessionDto) {
+    await this.findOne(id);
+    const data: any = { ...dto };
+    if (dto.date) data.date = new Date(dto.date);
+    return this.prisma.session.update({
+      where: { id }, data,
+      include: { student: { include: { user: { select: { firstName: true, lastName: true, email: true } } } } },
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+    await this.prisma.session.delete({ where: { id } });
+    return { message: 'Session deleted successfully' };
+  }
+
+  async getUpcoming(studentId?: string) {
+    const where: Prisma.SessionWhereInput = {
+      date: { gte: new Date() },
+      status: 'SCHEDULED',
+    };
+    if (studentId) where.studentId = studentId;
+
+    return this.prisma.session.findMany({
+      where,
+      include: { student: { include: { user: { select: { firstName: true, lastName: true } } } } },
+      orderBy: { date: 'asc' },
+      take: 10,
+    });
+  }
+}
+
+============================================
+FILE: src\modules\sessions\sessions.controller.ts
+============================================
+
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { SessionsService } from './sessions.service';
+import { CreateSessionDto } from './dto/create-session.dto';
+import { UpdateSessionDto } from './dto/update-session.dto';
+import { QuerySessionsDto } from './dto/query-sessions.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../../common/guards/roles.guard';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { Role } from '@prisma/client';
+
+@ApiTags('Sessions')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('sessions')
+export class SessionsController {
+  constructor(private readonly sessionsService: SessionsService) {}
+
+  @Post()
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @ApiOperation({ summary: 'Create session' })
+  create(@Body() dto: CreateSessionDto) {
+    return this.sessionsService.create(dto);
+  }
+
+  @Get()
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @ApiOperation({ summary: 'List sessions' })
+  findAll(@Query() query: QuerySessionsDto) {
+    return this.sessionsService.findAll(query);
+  }
+
+  @Get('my')
+  @ApiOperation({ summary: 'Get current user sessions (Student)' })
+  findMy(@CurrentUser() user: any, @Query() query: QuerySessionsDto) {
+    return this.sessionsService.findMy(user.id, query);
+  }
+
+  @Get('upcoming')
+  @ApiOperation({ summary: 'Get upcoming sessions' })
+  getUpcoming(@Query('studentId') studentId?: string) {
+    return this.sessionsService.getUpcoming(studentId);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get session by ID' })
+  findOne(@Param('id') id: string) {
+    return this.sessionsService.findOne(id);
+  }
+
+  @Patch(':id')
+  @Roles(Role.ADMIN, Role.TEACHER)
+  @ApiOperation({ summary: 'Update session' })
+  update(@Param('id') id: string, @Body() dto: UpdateSessionDto) {
+    return this.sessionsService.update(id, dto);
+  }
+
+  @Delete(':id')
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Delete session (Admin)' })
+  remove(@Param('id') id: string) {
+    return this.sessionsService.remove(id);
+  }
+}
+
+============================================
+FILE: src\modules\sessions\dto\create-session.dto.ts
+============================================
+
+import {
+  IsUUID,
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsInt,
+  IsEnum,
+  IsUrl,
+  Min,
+} from 'class-validator';
+
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Platform, SessionStatus } from '@prisma/client';
+
+export class CreateSessionDto {
+  @ApiProperty({
+    example: 'student-uuid',
+  })
+  @IsUUID()
+  studentId: string;
+
+  @ApiPropertyOptional({
+    example: 'teacher-uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  teacherId?: string;
+
+  @ApiPropertyOptional({
+    example: 'booking-uuid',
+  })
+  @IsOptional()
+  @IsUUID()
+  bookingId?: string;
+
+  @ApiProperty({
+    example: 'Surah Al-Fatiha Review',
+  })
+  @IsString()
+  title: string;
+
+  @ApiProperty({
+    example: '2026-05-16T18:00:00.000Z',
+  })
+  @IsDateString()
+  date: string;
+
+  @ApiPropertyOptional({
+    example: 60,
+    default: 60,
+    minimum: 15,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(15)
+  duration?: number;
+
+  @ApiPropertyOptional({
+    enum: SessionStatus,
+    default: SessionStatus.SCHEDULED,
+  })
+  @IsOptional()
+  @IsEnum(SessionStatus)
+  status?: SessionStatus;
+
+  @ApiPropertyOptional({
+    enum: Platform,
+    default: Platform.ZOOM,
+  })
+  @IsOptional()
+  @IsEnum(Platform)
+  platform?: Platform;
+
+  @ApiPropertyOptional({
+    example: 'https://zoom.us/j/123456789',
+  })
+  @IsOptional()
+  @IsUrl()
+  meetingLink?: string;
+
+  @ApiPropertyOptional({
+    example: 'https://drive.google.com/file/xxx',
+  })
+  @IsOptional()
+  @IsUrl()
+  recordingUrl?: string;
+
+  @ApiPropertyOptional({
+    example: 'Student needs revision in tajweed',
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+============================================
+FILE: src\modules\sessions\dto\update-session.dto.ts
+============================================
+
+import { PartialType } from '@nestjs/mapped-types';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+
+import {
+  IsBoolean,
+  IsInt,
+  IsOptional,
+  Min,
+  IsString,
+} from 'class-validator';
+
+import { CreateSessionDto } from './create-session.dto';
+
+export class UpdateSessionDto extends PartialType(CreateSessionDto) {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  teacherNotes?: string;
+
+  @ApiPropertyOptional({
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  studentAttended?: boolean;
+
+  @ApiPropertyOptional({
+    default: true,
+  })
+  @IsOptional()
+  @IsBoolean()
+  teacherAttended?: boolean;
+
+  @ApiPropertyOptional({
+    default: 0,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  studentLateMins?: number;
+
+  @ApiPropertyOptional({
+    default: 0,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  teacherLateMins?: number;
+}
+
+============================================
+FILE: src\modules\sessions\dto\query-sessions.dto.ts
+============================================
+
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  IsInt,
+  Min,
+  IsDateString,
+  IsUUID,
+} from 'class-validator';
+
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
+
+import { SessionStatus, Platform } from '@prisma/client';
+
+export class QuerySessionsDto {
+  @ApiPropertyOptional({
+    default: 1,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiPropertyOptional({
+    default: 20,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  limit?: number = 20;
+
+  @ApiPropertyOptional({
+    example: 'tajweed',
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  studentId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsUUID()
+  teacherId?: string;
+
+  @ApiPropertyOptional({
+    enum: SessionStatus,
+  })
+  @IsOptional()
+  @IsEnum(SessionStatus)
+  status?: SessionStatus;
+
+  @ApiPropertyOptional({
+    enum: Platform,
+  })
+  @IsOptional()
+  @IsEnum(Platform)
+  platform?: Platform;
+
+  @ApiPropertyOptional({
+    example: '2026-05-01T00:00:00.000Z',
+  })
+  @IsOptional()
+  @IsDateString()
+  from?: string;
+
+  @ApiPropertyOptional({
+    example: '2026-05-31T23:59:59.999Z',
+  })
+  @IsOptional()
+  @IsDateString()
+  to?: string;
+}
+
+============================================
+FILE: prisma\schema.prisma
+============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+  GUEST
+}
+
+enum Locale {
+  EN
+  AR
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum StudentLevel {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  HAFIZ
+}
+
+enum BookingType {
+  TRIAL
+  REGULAR
+  MAKEUP
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum SessionStatus {
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  MISSED
+}
+
+enum Platform {
+  ZOOM
+  GOOGLE_MEET
+  SKYPE
+  TEAMS
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  STRIPE
+  PAYPAL
+  BANK_TRANSFER
+}
+
+enum SubscriptionPlan {
+  TRIAL
+  BASIC
+  PREMIUM
+  FAMILY
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  EXPIRED
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMED
+  BOOKING_CANCELLED
+  SESSION_REMINDER
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  SUBSCRIPTION_CREATED
+  SUBSCRIPTION_EXPIRING
+  WELCOME
+  GENERAL
+}
+
+enum NotificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+  PUSH
+  IN_APP
+}
+
+enum ContactStatus {
+  NEW
+  READ
+  REPLIED
+  ARCHIVED
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+  role     Role   @default(GUEST)
+
+  firstName String
+  lastName  String
+  phone     String?
+  avatar    String?
+
+  locale Locale @default(EN)
+
+  isActive      Boolean @default(true)
+  emailVerified Boolean @default(false)
+
+  lastLoginAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student Student?
+  teacher Teacher?
+
+  refreshTokens RefreshToken[]
+  notifications Notification[]
+  payments      Payment[]
+  subscriptions Subscription[]
+  testimonials  Testimonial[]
+  blogPosts     BlogPost[]
+
+  @@map("users")
+}
+
+model Teacher {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bio         String?
+  specialties String[]
+  experience  Int      @default(0)
+  rating      Float    @default(5.0)
+  hourlyRate  Decimal  @default(15.00) @db.Decimal(10, 2)
+
+  isActive Boolean @default(true)
+
+  sessions  Session[]
+  students  Student[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("teachers")
+}
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("refresh_tokens")
+}
+
+model Student {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  parentName String?
+  age        Int?
+  gender     Gender?
+  country    String?
+  city       String?
+  timezone   String?
+
+  level  StudentLevel @default(BEGINNER)
+  goals  String[]
+  notes  String?
+  source String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bookings Booking[]
+  sessions Session[]
+  progress Progress[]
+
+  @@map("students")
+}
+
+model Progress {
+  id        String  @id @default(uuid())
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  surahsCompleted Int @default(0)
+  juzCompleted    Int @default(0)
+  tajweedScore    Int @default(0)
+  memorization    Int @default(0)
+
+  lastLesson String?
+  notes      String?
+
+  recordedAt DateTime @default(now())
+
+  @@map("progress")
+}
+
+model Booking {
+  id        String   @id @default(uuid())
+  studentId String?
+  student   Student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  name  String
+  email String
+  phone String?
+
+  country  String?
+  timezone String?
+
+  preferredDate DateTime?
+  preferredTime String?
+
+  serviceSlug String?
+  type        BookingType   @default(TRIAL)
+  status      BookingStatus @default(PENDING)
+
+  notes      String?
+  adminNotes String?
+
+  meetingLink String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  session Session?
+
+  @@map("bookings")
+}
+
+model Session {
+  id String @id @default(uuid())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  teacherId String?
+  teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
+
+  bookingId String?  @unique
+  booking   Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  title    String
+  date     DateTime
+  duration Int @default(60)
+
+  status SessionStatus @default(SCHEDULED)
+
+  meetingLink String?
+  platform    Platform @default(ZOOM)
+
+  recordingUrl String?
+
+  notes        String?
+  teacherNotes String?
+
+  // ✅ Changed to nullable - only set when session is completed
+  studentAttended Boolean?
+  teacherAttended Boolean?
+
+  studentLateMins Int @default(0)
+  teacherLateMins Int @default(0)
+
+  completedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId, date])
+  @@index([teacherId, date])
+  @@index([status, date])
+  @@map("sessions")
+}
+
+model Payment {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  amount   Decimal @db.Decimal(10, 2)
+  currency String  @default("USD")
+
+  status PaymentStatus @default(PENDING)
+
+  stripePaymentId String? @unique
+  stripeInvoiceId String?
+
+  method PaymentMethod @default(STRIPE)
+
+  description String?
+  paidAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, status])
+  @@index([status, createdAt])
+  @@map("payments")
+}
+
+model Subscription {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  plan   SubscriptionPlan
+  status SubscriptionStatus @default(ACTIVE)
+
+  stripeSubId String? @unique
+
+  sessionsPerWeek Int     @default(2)
+  priceMonthly    Decimal @db.Decimal(10, 2)
+
+  startDate   DateTime  @default(now())
+  endDate     DateTime?
+  cancelledAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  payments Payment[]
+
+  @@index([userId, status])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Notification {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type    NotificationType
+  channel NotificationChannel @default(IN_APP)
+
+  title String
+  body  String
+
+  data Json?
+
+  read   Boolean   @default(false)
+  readAt DateTime?
+  sentAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@map("notifications")
+}
+
+model BlogPost {
+  id   String @id @default(uuid())
+  slug String @unique
+
+  titleEn String
+  titleAr String?
+
+  contentEn String @db.Text
+  contentAr String? @db.Text
+
+  excerptEn String?
+  excerptAr String?
+
+  coverImage String?
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  tags String[]
+
+  locale      Locale    @default(EN)
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([published, publishedAt])
+  @@index([authorId])
+  @@map("blog_posts")
+}
+
+model Testimonial {
+  id     String  @id @default(uuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  name    String
+  country String?
+  avatar  String?
+
+  textEn String @db.Text
+  textAr String? @db.Text
+
+  rating Int @default(5)
+
+  videoUrl String?
+
+  approved Boolean @default(false)
+  featured Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([approved, featured])
+  @@map("testimonials")
+}
+
+model Contact {
+  id      String  @id @default(uuid())
+  name    String
+  email   String
+  phone   String?
+  subject String?
+  message String  @db.Text
+
+  status ContactStatus @default(NEW)
+
+  repliedAt DateTime?
+  adminNote String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status, createdAt])
+  @@map("contacts")
+}
+
+model AnalyticsEvent {
+  id        String  @id @default(uuid())
+  event     String
+  page      String?
+  metadata  Json?
+  ip        String?
+  userAgent String?
+  locale    Locale?
+  sessionId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([event, createdAt])
+  @@index([sessionId])
+  @@map("analytics_events")
+}
+
+
+============================================
+AVAILABLE TEACHER ENDPOINTS
+============================================
+
+GET    /api/v1/teacher/dashboard
+GET    /api/v1/teacher/sessions?status=SCHEDULED&from=2024-01-01
+GET    /api/v1/teacher/earnings?month=2024-01
+PATCH  /api/v1/teacher/sessions/:id/complete
+GET    /api/v1/teacher (all teachers - admin)
+GET    /api/v1/teacher/:id (single teacher - admin)
+
+============================================
+END OF FILE
+============================================
+Total Files: 11

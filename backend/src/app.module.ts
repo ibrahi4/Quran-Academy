@@ -15,6 +15,9 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
 import { PaymentsModule } from './modules/payments/payments.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { TeacherModule } from './modules/teacher/teacher.module';
+import { RecurringModule } from './modules/recurring/recurring.module';
+import { WalletModule } from './modules/wallet/wallet.module';
 
 @Module({
   imports: [
@@ -22,13 +25,18 @@ import { AdminModule } from './modules/admin/admin.module';
       isGlobal: true,
       load: [appConfig],
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 60000,
-      limit: 30,
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 30,
+      },
+    ]),
     DatabaseModule,
     AuthModule,
     UsersModule,
+    TeacherModule,
+    RecurringModule,
+    WalletModule,
     BookingsModule,
     ContactModule,
     NotificationsModule,

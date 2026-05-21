@@ -61,19 +61,23 @@ export class UsersService {
     const allowedSort = ['createdAt', 'firstName', 'lastName', 'email', 'lastLoginAt'];
     const safeSortBy = allowedSort.includes(sortBy) ? sortBy : 'createdAt';
 
-    const [users, total] = await Promise.all([
-      this.prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        select: this.userSelect,
-        orderBy: { [safeSortBy]: sortOrder === 'asc' ? 'asc' : 'desc' },
-      }),
-      this.prisma.user.count({ where }),
-    ]);
+// Line ~30 تقريباً
+const [data, total] = await Promise.all([
+  this.prisma.user.findMany({
+    where,
+    skip,
+    take: limit,
+    include: {
+      student: true,  
+      teacher: true,  
+    },
+    orderBy: { createdAt: 'desc' },
+  }),
+  this.prisma.user.count({ where }),
+]);
 
     return {
-      data: users,
+      data,
       meta: {
         total,
         page,

@@ -15,6 +15,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { SetupPasswordDto, VerifySetupTokenDto } from './dto/setup-password.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
@@ -35,7 +36,6 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 12);
 
-    // Create User + Student record in a transaction
     const user = await this.prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
@@ -45,11 +45,10 @@ export class AuthService {
           lastName: dto.lastName.trim(),
           phone: dto.phone?.trim() || null,
           locale: dto.locale || 'EN',
-          role: Role.STUDENT, // Default role for self-registration
+          role: Role.STUDENT,
         },
       });
 
-      // Auto-create Student profile linked to this user
       await tx.student.create({
         data: {
           userId: newUser.id,
@@ -67,15 +66,7 @@ export class AuthService {
     this.logger.log(`New student registered: ${user.email}`);
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        locale: user.locale,
-        avatar: user.avatar,
-      },
+      user: this.serializeUser(user),
       ...tokens,
     };
   }
@@ -100,15 +91,7 @@ export class AuthService {
     this.logger.log(`User logged in: ${user.email}`);
 
     return {
-      user: {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        locale: user.locale,
-        avatar: user.avatar,
-      },
+      user: this.serializeUser(user),
       ...tokens,
     };
   }
@@ -140,23 +123,88 @@ export class AuthService {
 
   async logout(userId: string) {
     await this.prisma.refreshToken.deleteMany({ where: { userId } });
-    this.logger.log(`User logged out: ${userId}`);
     return { message: 'Logged out successfully' };
   }
 
-  // ========== FORGOT PASSWORD ==========
+  // ============================================
+  // ✅ NEW: SETUP PASSWORD (first-time login)
+  // ============================================
+  async verifySetupToken(dto: VerifySetupTokenDto) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        setupToken: dto.token,
+        setupTokenExpiresAt: { gt: new Date() },
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+      },
+    });
 
+    if (!user) {
+      throw new BadRequestException('Invalid or expired setup token');
+    }
+
+    return {
+      valid: true,
+      user,
+    };
+  }
+
+  async setupPassword(dto: SetupPasswordDto) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        setupToken: dto.token,
+        setupTokenExpiresAt: { gt: new Date() },
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired setup token');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.newPassword, 12);
+
+    const updated = await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        mustChangePassword: false,
+        setupToken: null,
+        setupTokenExpiresAt: null,
+        emailVerified: true,
+        lastLoginAt: new Date(),
+      },
+    });
+
+    // Generate login tokens immediately
+    const tokens = await this.generateTokens(updated.id, updated.email, updated.role);
+    await this.saveRefreshToken(updated.id, tokens.refreshToken);
+
+    this.logger.log(`Password setup completed for: ${updated.email}`);
+
+    return {
+      user: this.serializeUser(updated),
+      ...tokens,
+      message: 'Password set successfully. You are now logged in.',
+    };
+  }
+
+  // ============================================
+  // FORGOT PASSWORD
+  // ============================================
   async forgotPassword(dto: ForgotPasswordDto) {
     const email = dto.email.toLowerCase().trim();
     const user = await this.prisma.user.findUnique({ where: { email } });
 
-    // Always return success (don't reveal if email exists)
     if (!user || !user.isActive) {
-      this.logger.warn(`Forgot password attempt for non-existent email: ${email}`);
+      this.logger.warn(`Forgot password attempt for: ${email}`);
       return { message: 'If this email exists, a reset link has been sent' };
     }
 
-    // Generate reset token (expires in 1 hour)
     const resetToken = await this.jwtService.signAsync(
       { sub: user.id, email: user.email, purpose: 'password-reset' },
       {
@@ -165,18 +213,13 @@ export class AuthService {
       },
     );
 
-    // Build reset URL
-    const frontendUrl = this.configService.get('app.frontendUrl') || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const resetUrl = `${frontendUrl}/en/auth/reset-password?token=${resetToken}`;
 
-    // Send email
     await this.notifications.sendPasswordResetEmail(user.email, user.firstName, resetUrl);
 
-    this.logger.log(`Password reset email sent to: ${email}`);
     return { message: 'If this email exists, a reset link has been sent' };
   }
-
-  // ========== RESET PASSWORD ==========
 
   async resetPassword(dto: ResetPasswordDto) {
     let payload: any;
@@ -197,7 +240,6 @@ export class AuthService {
     });
     if (!user) throw new NotFoundException('User not found');
 
-    // Check if new password is same as old
     const isSame = await bcrypt.compare(dto.newPassword, user.password);
     if (isSame) {
       throw new BadRequestException('New password must be different from current password');
@@ -209,14 +251,26 @@ export class AuthService {
       data: { password: hashedPassword },
     });
 
-    // Invalidate all refresh tokens
     await this.prisma.refreshToken.deleteMany({ where: { userId: user.id } });
 
-    this.logger.log(`Password reset successful for: ${user.email}`);
     return { message: 'Password reset successfully. Please login with your new password.' };
   }
 
-  // ========== PRIVATE HELPERS ==========
+  // ============================================
+  // HELPERS
+  // ============================================
+  private serializeUser(user: any) {
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      locale: user.locale,
+      avatar: user.avatar,
+      mustChangePassword: user.mustChangePassword || false,
+    };
+  }
 
   private async generateTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
