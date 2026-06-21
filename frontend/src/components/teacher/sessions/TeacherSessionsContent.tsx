@@ -575,7 +575,7 @@ export default function TeacherSessionsContent() {
       <SubmitReportDialog
         open={reportOpen}
         onOpenChange={setReportOpen}
-        session={reportSession}
+        session={reportSession!}
         isTrial={reportSession ? isTrialSession(reportSession) : false}
         onSuccess={loadSessions}
       />
