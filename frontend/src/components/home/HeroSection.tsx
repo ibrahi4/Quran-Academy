@@ -71,14 +71,22 @@ export default function HeroSection() {
           />
         </div>
 
-        {/* Cream overlay on text side */}
-        <div className="absolute inset-0 lg:hidden bg-[#F8F3EA]/95" />
+        {/* ─── MOBILE OVERLAY: stronger at bottom for readability ─── */}
+        <div
+          className="absolute inset-0 lg:hidden"
+          style={{
+            background:
+              "linear-gradient(to bottom, rgba(248,243,234,0.4) 0%, rgba(248,243,234,0.75) 40%, rgba(248,243,234,0.92) 70%, rgba(248,243,234,0.98) 100%)",
+          }}
+        />
+
+        {/* ─── DESKTOP OVERLAY ─── */}
         {isRTL ? (
           <div
             className="absolute inset-0 hidden lg:block"
             style={{
               background:
-                "linear-gradient(to left, #F8F3EA 0%, #F8F3EA 45%, rgba(248,243,234,0.88) 40%, rgba(248,243,234,0) 80%)",
+                "linear-gradient(to left, #F8F3EA 0%, #F8F3EA 45%, rgba(248,243,234,0.88) 58%, rgba(248,243,234,0) 80%)",
             }}
           />
         ) : (
@@ -94,13 +102,13 @@ export default function HeroSection() {
 
       {/* Decorative glow */}
       <div
-        className={`absolute top-1/3 w-[300px] h-[300px] bg-gradient-to-br from-[#B8945F]/10 to-transparent rounded-full blur-3xl pointer-events-none ${
+        className={`absolute top-1/3 w-[300px] h-[300px] bg-gradient-to-br from-[#0D4F4F]/8 to-transparent rounded-full blur-3xl pointer-events-none ${
           isRTL ? "right-20" : "left-20"
         }`}
       />
 
       {/* ═══════════ MAIN CONTENT ═══════════ */}
-      <div className="relative z-10 w-full pt-40 pb-5 md:pt-30 md:pb-20 flex justify-start">
+      <div className="relative z-10 w-full pt-32 pb-12 md:pt-36 lg:pt-32 lg:pb-20 flex justify-start">
         <div
           className={`w-full max-w-[620px] px-6 sm:px-10 lg:px-16 xl:px-24 transition-all duration-1000 ${
             mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
@@ -108,16 +116,16 @@ export default function HeroSection() {
           style={{ fontFamily: bodyFont }}
         >
           {/* Premium Badge */}
-          <div className="inline-flex items-center gap-2.5 ps-2 pe-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-[#E8DFD0] shadow-[0_2px_12px_rgba(139,111,71,0.08)] mb-7">
+          <div className="inline-flex items-center gap-2.5 ps-2 pe-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-[#E8DFD0] shadow-[0_2px_12px_rgba(13,79,79,0.1)] mb-7">
             <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-[#C9A567] to-[#A67B5B] shadow-[0_2px_6px_rgba(166,123,91,0.35)]">
               <Sparkles className="w-3 h-3 text-white" />
             </span>
-            <span className="text-[#5C4A35] text-xs font-semibold tracking-wide">
+            <span className="text-[#0D4F4F] text-xs font-semibold tracking-wide">
               {content.badge}
             </span>
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6B7547] opacity-60" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6B7547]" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#0D4F4F] opacity-60" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#0D4F4F]" />
             </span>
           </div>
 
@@ -130,7 +138,7 @@ export default function HeroSection() {
             }`}
             style={{ fontFamily: headingFont }}
           >
-            <span className="block text-[#2C2418]">{content.titleLine1}</span>
+            <span className="block text-[#0D4F4F]">{content.titleLine1}</span>
             <span className="block">
               <span
                 className="relative inline-block"
@@ -146,7 +154,7 @@ export default function HeroSection() {
                 {content.titleHighlight}
               </span>
             </span>
-            <span className="block text-[#3D3122]">{content.titleLine3}</span>
+            <span className="block text-[#0D4F4F]">{content.titleLine3}</span>
           </h1>
 
           {/* Subtle gold divider */}
@@ -157,7 +165,7 @@ export default function HeroSection() {
 
           {/* Subtitle */}
           <p
-            className={`text-[#6B5840] leading-[1.7] mb-7 ${
+            className={`text-[#0D4F4F]/75 leading-[1.7] mb-7 ${
               isRTL ? "text-base md:text-[17px]" : "text-base md:text-[17px]"
             }`}
             style={{ fontFamily: bodyFont }}
@@ -169,8 +177,8 @@ export default function HeroSection() {
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-8">
             {[content.feature1, content.feature2, content.feature3].map((f, i) => (
               <div key={i} className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4 text-[#6B7547] shrink-0" />
-                <span className="text-sm text-[#5C4A35] font-medium">{f}</span>
+                <CheckCircle2 className="w-4 h-4 text-[#0D4F4F] shrink-0" />
+                <span className="text-sm text-[#0D4F4F] font-medium">{f}</span>
               </div>
             ))}
           </div>
@@ -180,7 +188,7 @@ export default function HeroSection() {
             <Link href="/auth/register">
               <Button
                 size="lg"
-                className="group relative overflow-hidden rounded-xl px-7 h-[54px] text-[15px] font-semibold bg-gradient-to-br from-[#A67B5B] to-[#8B6F47] hover:from-[#B8945F] hover:to-[#A67B5B] text-white shadow-[0_8px_24px_rgba(139,111,71,0.3)] hover:shadow-[0_12px_32px_rgba(139,111,71,0.4)] transition-all duration-300 hover:-translate-y-0.5 border-0 w-full sm:w-auto"
+                className="group relative overflow-hidden rounded-xl px-7 h-[54px] text-[15px] font-semibold bg-gradient-to-br from-[#0D4F4F] to-[#093838] hover:from-[#125e5e] hover:to-[#0D4F4F] text-white shadow-[0_8px_24px_rgba(13,79,79,0.3)] hover:shadow-[0_12px_32px_rgba(13,79,79,0.4)] transition-all duration-300 hover:-translate-y-0.5 border-0 w-full sm:w-auto"
               >
                 <span className="relative z-10 flex items-center justify-center">
                   {content.primaryCta}
@@ -195,9 +203,9 @@ export default function HeroSection() {
             </Link>
 
             <Link href="/book-trial">
-              <button className="group w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 h-[54px] rounded-xl text-[#3D3122] font-semibold text-[15px] bg-white/85 hover:bg-white border border-[#E8DFD0] hover:border-[#B8945F]/50 transition-all duration-300 backdrop-blur-sm shadow-[0_2px_8px_rgba(139,111,71,0.06)] hover:shadow-[0_6px_16px_rgba(139,111,71,0.12)]">
+              <button className="group w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 h-[54px] rounded-xl text-[#0D4F4F] font-semibold text-[15px] bg-white/85 hover:bg-white border border-[#E8DFD0] hover:border-[#0D4F4F]/40 transition-all duration-300 backdrop-blur-sm shadow-[0_2px_8px_rgba(13,79,79,0.06)] hover:shadow-[0_6px_16px_rgba(13,79,79,0.12)]">
                 <span className="flex items-center justify-center w-9 h-9 rounded-full bg-[#F4EBD9] border border-[#E8DFD0] group-hover:scale-110 group-hover:bg-[#EBDEC4] transition-all">
-                  <Play className="w-3 h-3 fill-[#8B6F47] text-[#8B6F47] ms-0.5" />
+                  <Play className="w-3 h-3 fill-[#0D4F4F] text-[#0D4F4F] ms-0.5" />
                 </span>
                 <span>{content.secondaryCta}</span>
               </button>
@@ -208,36 +216,36 @@ export default function HeroSection() {
           <div className="flex items-center gap-5 sm:gap-7 pt-7 border-t border-[#E8DFD0]">
             <div>
               <p
-                className="text-2xl sm:text-3xl font-bold text-[#8B6F47] leading-none mb-1.5"
+                className="text-2xl sm:text-3xl font-bold text-[#0D4F4F] leading-none mb-1.5"
                 style={{ fontFamily: headingFont }}
               >
                 500+
               </p>
-              <p className="text-[10px] sm:text-[11px] text-[#9C8A6E] font-semibold uppercase tracking-[0.12em]">
+              <p className="text-[10px] sm:text-[11px] text-[#0D4F4F]/60 font-semibold uppercase tracking-[0.12em]">
                 {content.students}
               </p>
             </div>
             <div className="w-px h-9 bg-[#E8DFD0]" />
             <div>
               <p
-                className="text-2xl sm:text-3xl font-bold text-[#8B6F47] leading-none mb-1.5"
+                className="text-2xl sm:text-3xl font-bold text-[#0D4F4F] leading-none mb-1.5"
                 style={{ fontFamily: headingFont }}
               >
                 10+
               </p>
-              <p className="text-[10px] sm:text-[11px] text-[#9C8A6E] font-semibold uppercase tracking-[0.12em]">
+              <p className="text-[10px] sm:text-[11px] text-[#0D4F4F]/60 font-semibold uppercase tracking-[0.12em]">
                 {content.years}
               </p>
             </div>
             <div className="w-px h-9 bg-[#E8DFD0]" />
             <div>
               <p
-                className="text-2xl sm:text-3xl font-bold text-[#8B6F47] leading-none mb-1.5"
+                className="text-2xl sm:text-3xl font-bold text-[#0D4F4F] leading-none mb-1.5"
                 style={{ fontFamily: headingFont }}
               >
                 15+
               </p>
-              <p className="text-[10px] sm:text-[11px] text-[#9C8A6E] font-semibold uppercase tracking-[0.12em]">
+              <p className="text-[10px] sm:text-[11px] text-[#0D4F4F]/60 font-semibold uppercase tracking-[0.12em]">
                 {content.countries}
               </p>
             </div>
@@ -248,7 +256,7 @@ export default function HeroSection() {
                   <Star key={i} className="w-3.5 h-3.5 fill-[#C9A567] text-[#C9A567]" />
                 ))}
               </div>
-              <span className="text-xs text-[#5C4A35] font-bold">4.9</span>
+              <span className="text-xs text-[#0D4F4F] font-bold">4.9</span>
             </div>
           </div>
         </div>
