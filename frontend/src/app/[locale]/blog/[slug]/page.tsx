@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: formatted,
-    description: `Read about ${formatted} - tips, guides, and insights from Ibrahim Abdelnasser.`,
+    description: `Read about ${formatted} - tips, guides, and insights from Quranic Academy.`,
   };
 }
 

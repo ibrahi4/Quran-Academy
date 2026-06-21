@@ -1,188 +1,266 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Play, ArrowRight, ArrowLeft, BookOpen, Users, Globe, Star, CheckCircle2, Sparkles } from "lucide-react";
+import { Play, ArrowRight, ArrowLeft, Sparkles, Star, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Container from "@/components/shared/Container";
-import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/hooks/useLocale";
 
 export default function HeroSection() {
-  const [currentWord, setCurrentWord] = useState(0);
-  const t = useTranslations("heroSection");
+  const [mounted, setMounted] = useState(false);
   const { isRTL } = useLocale();
 
-  const rotatingWords = [
-    t("rotatingWords.0"),
-    t("rotatingWords.1"),
-    t("rotatingWords.2"),
-    t("rotatingWords.3"),
-  ];
+  const headingFont = isRTL ? "var(--font-arabic)" : "var(--font-display)";
+  const bodyFont = isRTL ? "var(--font-arabic)" : "var(--font-body)";
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentWord((prev) => (prev + 1) % rotatingWords.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [rotatingWords.length]);
+    setMounted(true);
+  }, []);
+
+  const content = isRTL
+    ? {
+        badge: "نستقبل طلاب جدد لعام 2026",
+        titleLine1: "تعلّم",
+        titleHighlight: "اللغة العربية",
+        titleLine3: "مع معلّم موثوق",
+        subtitle:
+          "انضم إلى أكاديمية قرآنك لتعليم القرآن واللغة العربية مع معلّمين معتمدين من الأزهر الشريف.",
+        primaryCta: "ابدأ التعلّم",
+        secondaryCta: "حصة تجريبية مجانية",
+        students: "طالب",
+        years: "سنوات",
+        countries: "دولة",
+        feature1: "معلّمون معتمدون",
+        feature2: "جدول مرن",
+        feature3: "حصص مجانية",
+      }
+    : {
+        badge: "Now accepting students for 2026",
+        titleLine1: "Learn",
+        titleHighlight: "Arabic Language",
+        titleLine3: "with a Trusted Teacher",
+        subtitle:
+          "Join Quranic Academy for premium Quran and Arabic education with certified Al-Azhar teachers.",
+        primaryCta: "Start Learning",
+        secondaryCta: "Book Free Trial",
+        students: "Students",
+        years: "Years",
+        countries: "Countries",
+        feature1: "Certified Teachers",
+        feature2: "Flexible Schedule",
+        feature3: "Free Trial",
+      };
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden">
-      {/* Background */}
-      <div className="absolute inset-0 bg-hero-gradient" />
-      <div className="absolute top-1/4 -left-32 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-1/4 -right-32 w-80 h-80 bg-accent/5 rounded-full blur-3xl" />
+    <section
+      className="relative min-h-screen w-full flex items-center overflow-hidden bg-[#F8F3EA]"
+      aria-label="Hero"
+      dir={isRTL ? "rtl" : "ltr"}
+    >
+      {/* ═══════════ BACKGROUND IMAGE ═══════════ */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        <div
+          className={`w-full h-full ${isRTL ? "scale-x-[-1]" : ""}`}
+          style={{ transformOrigin: "center" }}
+        >
+          <img
+            src="/Quranic-Public-Assets/herosection.png"
+            alt=""
+            className="w-full h-full object-cover scale-105 animate-slow-zoom"
+            loading="eager"
+          />
+        </div>
 
-      {/* Islamic Pattern */}
-      <div className="absolute inset-0 opacity-[0.03]">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="hero-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
-              <polygon points="50,10 58,30 78,25 63,40 78,55 58,50 50,70 42,50 22,55 37,40 22,25 42,30" fill="none" stroke="white" strokeWidth="0.5" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#hero-pattern)" />
-        </svg>
+        {/* Cream overlay on text side */}
+        <div className="absolute inset-0 lg:hidden bg-[#F8F3EA]/95" />
+        {isRTL ? (
+          <div
+            className="absolute inset-0 hidden lg:block"
+            style={{
+              background:
+                "linear-gradient(to left, #F8F3EA 0%, #F8F3EA 45%, rgba(248,243,234,0.88) 40%, rgba(248,243,234,0) 80%)",
+            }}
+          />
+        ) : (
+          <div
+            className="absolute inset-0 hidden lg:block"
+            style={{
+              background:
+                "linear-gradient(to right, #F8F3EA 0%, #F8F3EA 45%, rgba(248,243,234,0.88) 58%, rgba(248,243,234,0) 80%)",
+            }}
+          />
+        )}
       </div>
 
-      {/* Bottom Fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-sand-50 to-transparent" />
+      {/* Decorative glow */}
+      <div
+        className={`absolute top-1/3 w-[300px] h-[300px] bg-gradient-to-br from-[#B8945F]/10 to-transparent rounded-full blur-3xl pointer-events-none ${
+          isRTL ? "right-20" : "left-20"
+        }`}
+      />
 
-      {/* Content */}
-      <Container className="relative z-10 pt-28 pb-20 md:pt-32 md:pb-28">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Column */}
-          <div>
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/10 backdrop-blur-sm mb-8">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
-              </span>
-              <span className="text-white/90 text-sm font-medium">
-                {t("badge")}
-              </span>
-            </div>
-
-            {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-[1.1] tracking-tight mb-6">
-              {t("headlinePrefix")}{" "}
-              <span className="text-accent">{rotatingWords[currentWord]}</span>
-              <br />
-              <span className="text-white/95">{t("headlineSuffix")}</span>
-            </h1>
-
-            {/* Subheadline */}
-            <p className="text-lg md:text-xl text-white/70 leading-relaxed max-w-xl mb-8">
-              {t("subtitle")}
-            </p>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
-              <Link href="/book-trial">
-                <Button
-                  size="lg"
-                  className="rounded-xl px-8 py-6 text-base font-bold shadow-2xl bg-accent hover:bg-accent/90 text-gray-900"
-                >
-                  {t("bookTrial")}
-                  {isRTL ? <ArrowLeft className="w-4 h-4 ms-2" /> : <ArrowRight className="w-4 h-4 ms-2" />}
-                </Button>
-              </Link>
-
-              <button className="group flex items-center justify-center gap-3 px-6 py-3.5 rounded-xl text-white/90 font-semibold border border-white/15 hover:bg-white/10 transition-all duration-300">
-                <span className="flex items-center justify-center w-10 h-10 rounded-full bg-white/10 group-hover:bg-white/20 transition-all">
-                  <Play className="w-4 h-4 fill-white text-white ms-0.5" />
-                </span>
-                {t("watchIntro")}
-              </button>
-            </div>
-
-            {/* Trust Badges */}
-            <div className="flex flex-wrap gap-4">
-              {[
-                { text: t("trustBadges.0"), icon: CheckCircle2 },
-                { text: t("trustBadges.1"), icon: Users },
-                { text: t("trustBadges.2"), icon: Sparkles },
-              ].map((badge, i) => (
-                <div key={i} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
-                  <badge.icon className="w-4 h-4 text-green-400/80" />
-                  <span className="text-sm text-white/60 font-medium">{badge.text}</span>
-                </div>
-              ))}
-            </div>
+      {/* ═══════════ MAIN CONTENT ═══════════ */}
+      <div className="relative z-10 w-full pt-40 pb-5 md:pt-30 md:pb-20 flex justify-start">
+        <div
+          className={`w-full max-w-[620px] px-6 sm:px-10 lg:px-16 xl:px-24 transition-all duration-1000 ${
+            mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+          style={{ fontFamily: bodyFont }}
+        >
+          {/* Premium Badge */}
+          <div className="inline-flex items-center gap-2.5 ps-2 pe-4 py-1.5 rounded-full bg-white/90 backdrop-blur-md border border-[#E8DFD0] shadow-[0_2px_12px_rgba(139,111,71,0.08)] mb-7">
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-br from-[#C9A567] to-[#A67B5B] shadow-[0_2px_6px_rgba(166,123,91,0.35)]">
+              <Sparkles className="w-3 h-3 text-white" />
+            </span>
+            <span className="text-[#5C4A35] text-xs font-semibold tracking-wide">
+              {content.badge}
+            </span>
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#6B7547] opacity-60" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-[#6B7547]" />
+            </span>
           </div>
 
-          {/* Right Column - Teacher Card */}
-          <div className="hidden lg:flex items-center justify-center">
-            <div className="relative">
-              {/* Main Card */}
-              <div className="relative w-[420px] h-[480px] rounded-3xl overflow-hidden shadow-2xl shadow-black/30 border border-white/10">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary-700 via-primary-600 to-secondary flex flex-col items-center justify-center">
-                  <div className="w-24 h-24 rounded-2xl bg-white/10 border border-white/10 flex items-center justify-center mb-6">
-                    <BookOpen className="w-12 h-12 text-white/80" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-1">{t("teacherName")}</h3>
-                  <p className="text-white/60 text-sm font-medium mb-6">{t("teacherSubtitle")}</p>
-                  <div className="flex items-center gap-6">
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-white">500+</p>
-                      <p className="text-xs text-white/50">{t("students")}</p>
-                    </div>
-                    <div className="w-px h-8 bg-white/10" />
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-white">10+</p>
-                      <p className="text-xs text-white/50">{t("years")}</p>
-                    </div>
-                    <div className="w-px h-8 bg-white/10" />
-                    <div className="text-center">
-                      <p className="text-xl font-bold text-white">15+</p>
-                      <p className="text-xs text-white/50">{t("countries")}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          {/* Headline */}
+          <h1
+            className={`font-bold leading-[1.08] tracking-[-0.02em] mb-6 ${
+              isRTL
+                ? "text-[2.5rem] sm:text-5xl md:text-[56px] lg:text-[64px]"
+                : "text-[2.75rem] sm:text-5xl md:text-6xl lg:text-[68px]"
+            }`}
+            style={{ fontFamily: headingFont }}
+          >
+            <span className="block text-[#2C2418]">{content.titleLine1}</span>
+            <span className="block">
+              <span
+                className="relative inline-block"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #C9A567 0%, #A67B5B 50%, #8B6F47 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                  color: "transparent",
+                }}
+              >
+                {content.titleHighlight}
+              </span>
+            </span>
+            <span className="block text-[#3D3122]">{content.titleLine3}</span>
+          </h1>
 
-              {/* Floating: Rating */}
-              <div className={`absolute -top-4 ${isRTL ? "-left-6" : "-right-6"} bg-white rounded-2xl shadow-xl p-4 border border-gray-100`}>
-                <div className="flex items-center gap-2">
-                  <div className="flex">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  <span className="text-sm font-bold text-gray-900">{t("rating")}</span>
-                </div>
-                <p className="text-xs text-gray-500 mt-1">{t("reviews")}</p>
-              </div>
+          {/* Subtle gold divider */}
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-10 h-px bg-gradient-to-r from-[#B8945F] to-transparent" />
+            <div className="w-1 h-1 rotate-45 bg-[#B8945F]" />
+          </div>
 
-              {/* Floating: Live */}
-              <div className={`absolute -bottom-4 ${isRTL ? "-right-6" : "-left-6"} bg-white rounded-2xl shadow-xl p-4 border border-gray-100`}>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
-                    <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-gray-900">{t("liveTitle")}</p>
-                    <p className="text-xs text-gray-500">{t("livePlatforms")}</p>
-                  </div>
-                </div>
-              </div>
+          {/* Subtitle */}
+          <p
+            className={`text-[#6B5840] leading-[1.7] mb-7 ${
+              isRTL ? "text-base md:text-[17px]" : "text-base md:text-[17px]"
+            }`}
+            style={{ fontFamily: bodyFont }}
+          >
+            {content.subtitle}
+          </p>
 
-              {/* Floating: Globe */}
-              <div className={`absolute top-1/2 ${isRTL ? "-right-16" : "-left-16"} bg-white rounded-2xl shadow-xl p-3 border border-gray-100`}>
-                <div className="flex items-center gap-2">
-                  <Globe className="w-5 h-5 text-primary" />
-                  <div>
-                    <p className="text-xs font-bold text-gray-900">{t("worldwide")}</p>
-                    <p className="text-[10px] text-gray-500">{t("worldwideDetail")}</p>
-                  </div>
-                </div>
+          {/* Features */}
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mb-8">
+            {[content.feature1, content.feature2, content.feature3].map((f, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-[#6B7547] shrink-0" />
+                <span className="text-sm text-[#5C4A35] font-medium">{f}</span>
               </div>
+            ))}
+          </div>
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-10">
+            <Link href="/auth/register">
+              <Button
+                size="lg"
+                className="group relative overflow-hidden rounded-xl px-7 h-[54px] text-[15px] font-semibold bg-gradient-to-br from-[#A67B5B] to-[#8B6F47] hover:from-[#B8945F] hover:to-[#A67B5B] text-white shadow-[0_8px_24px_rgba(139,111,71,0.3)] hover:shadow-[0_12px_32px_rgba(139,111,71,0.4)] transition-all duration-300 hover:-translate-y-0.5 border-0 w-full sm:w-auto"
+              >
+                <span className="relative z-10 flex items-center justify-center">
+                  {content.primaryCta}
+                  {isRTL ? (
+                    <ArrowLeft className="w-4 h-4 ms-2 group-hover:-translate-x-1 transition-transform" />
+                  ) : (
+                    <ArrowRight className="w-4 h-4 ms-2 group-hover:translate-x-1 transition-transform" />
+                  )}
+                </span>
+                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              </Button>
+            </Link>
+
+            <Link href="/book-trial">
+              <button className="group w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 h-[54px] rounded-xl text-[#3D3122] font-semibold text-[15px] bg-white/85 hover:bg-white border border-[#E8DFD0] hover:border-[#B8945F]/50 transition-all duration-300 backdrop-blur-sm shadow-[0_2px_8px_rgba(139,111,71,0.06)] hover:shadow-[0_6px_16px_rgba(139,111,71,0.12)]">
+                <span className="flex items-center justify-center w-9 h-9 rounded-full bg-[#F4EBD9] border border-[#E8DFD0] group-hover:scale-110 group-hover:bg-[#EBDEC4] transition-all">
+                  <Play className="w-3 h-3 fill-[#8B6F47] text-[#8B6F47] ms-0.5" />
+                </span>
+                <span>{content.secondaryCta}</span>
+              </button>
+            </Link>
+          </div>
+
+          {/* Stats */}
+          <div className="flex items-center gap-5 sm:gap-7 pt-7 border-t border-[#E8DFD0]">
+            <div>
+              <p
+                className="text-2xl sm:text-3xl font-bold text-[#8B6F47] leading-none mb-1.5"
+                style={{ fontFamily: headingFont }}
+              >
+                500+
+              </p>
+              <p className="text-[10px] sm:text-[11px] text-[#9C8A6E] font-semibold uppercase tracking-[0.12em]">
+                {content.students}
+              </p>
+            </div>
+            <div className="w-px h-9 bg-[#E8DFD0]" />
+            <div>
+              <p
+                className="text-2xl sm:text-3xl font-bold text-[#8B6F47] leading-none mb-1.5"
+                style={{ fontFamily: headingFont }}
+              >
+                10+
+              </p>
+              <p className="text-[10px] sm:text-[11px] text-[#9C8A6E] font-semibold uppercase tracking-[0.12em]">
+                {content.years}
+              </p>
+            </div>
+            <div className="w-px h-9 bg-[#E8DFD0]" />
+            <div>
+              <p
+                className="text-2xl sm:text-3xl font-bold text-[#8B6F47] leading-none mb-1.5"
+                style={{ fontFamily: headingFont }}
+              >
+                15+
+              </p>
+              <p className="text-[10px] sm:text-[11px] text-[#9C8A6E] font-semibold uppercase tracking-[0.12em]">
+                {content.countries}
+              </p>
+            </div>
+            <div className="hidden sm:block w-px h-9 bg-[#E8DFD0]" />
+            <div className="hidden sm:flex items-center gap-1.5">
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-3.5 h-3.5 fill-[#C9A567] text-[#C9A567]" />
+                ))}
+              </div>
+              <span className="text-xs text-[#5C4A35] font-bold">4.9</span>
             </div>
           </div>
         </div>
-      </Container>
+      </div>
+
+      <style jsx>{`
+        @keyframes slow-zoom {
+          0%, 100% { transform: scale(1.05); }
+          50% { transform: scale(1.1); }
+        }
+        .animate-slow-zoom { animation: slow-zoom 30s ease-in-out infinite; }
+      `}</style>
     </section>
   );
 }

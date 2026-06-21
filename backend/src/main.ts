@@ -35,8 +35,8 @@ async function bootstrap() {
 
   // Swagger
   const config = new DocumentBuilder()
-    .setTitle("Ibrahim Quran Academy API")
-    .setDescription("Enterprise API for Ibrahim Quran Academy")
+    .setTitle("Quranic Academy API")
+    .setDescription("Enterprise API for Quranic Academy")
     .setVersion("1.0")
     .addBearerAuth()
     .build();

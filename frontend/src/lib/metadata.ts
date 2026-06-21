@@ -21,7 +21,7 @@ export function createMetadata({
       title,
       description,
       url,
-      siteName: "Ibrahim Abdelnasser",
+      siteName: "Quranic Academy",
       images: [{ url: `${baseUrl}${ogImage}`, width: 1200, height: 630 }],
       locale: "en_US",
       type: "website",

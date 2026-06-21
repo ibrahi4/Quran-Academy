@@ -194,6 +194,9 @@ model Teacher {
   students  Student[]
   recurringSchedules RecurringSchedule[]
   wallet TeacherWallet?
+
+  sessionReports SessionReport[]
+  assignments    Assignment[]
   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -239,6 +242,10 @@ model Student {
   sessions Session[]
   progress Progress[]
   recurringSchedules RecurringSchedule[]
+
+  sessionReports SessionReport[]
+  assignments    Assignment[]
+  submissions    AssignmentSubmission[]
 
   @@map("students")
 }
@@ -330,6 +337,9 @@ model Session {
   recurringSchedule   RecurringSchedule? @relation(fields: [recurringScheduleId], references: [id], onDelete: SetNull)
 
   walletTransactions WalletTransaction[]
+
+  report      SessionReport?
+  assignments Assignment[]
 
   completedAt DateTime?
 
@@ -612,4 +622,156 @@ model AnalyticsEvent {
   @@index([event, createdAt])
   @@index([sessionId])
   @@map("analytics_events")
+}
+
+// ============================================================
+// SESSION REPORTS
+// ============================================================
+
+enum SessionReportStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+}
+
+model SessionReport {
+  id        String @id @default(uuid())
+
+  sessionId String @unique
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  status SessionReportStatus @default(DRAFT)
+
+  // Attendance
+  studentAttended Boolean @default(true)
+  teacherAttended Boolean @default(true)
+  studentLateMins Int     @default(0)
+  teacherLateMins Int     @default(0)
+
+  // Lesson content
+  lessonSummary    String? @db.Text
+  teacherNotes     String? @db.Text
+  nextLessonFocus  String? @db.Text
+  privateAdminNote String? @db.Text
+
+  // Student evaluation (1-5)
+  participationScore Int?
+  recitationScore    Int?
+  tajweedScore       Int?
+  memorizationScore  Int?
+  overallScore       Int?
+  evaluationNotes    String? @db.Text
+
+  // Trial assessment fields (only for trial sessions)
+  isTrialAssessment      Boolean @default(false)
+  recommendedLevel       StudentLevel?
+  recommendedPlanNotes   String? @db.Text
+
+  // Admin review
+  adminDecisionNote  String? @db.Text
+  reviewedByAdminId  String?
+  submittedAt        DateTime?
+  reviewedAt         DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignments Assignment[]
+
+  @@index([teacherId, status])
+  @@index([studentId, status])
+  @@index([status, createdAt])
+  @@map("session_reports")
+}
+
+// ============================================================
+// ASSIGNMENTS
+// ============================================================
+
+enum AssignmentStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  CANCELLED
+}
+
+enum AssignmentSubmissionStatus {
+  SUBMITTED
+  LATE
+  GRADED
+  RETURNED_FOR_REVISION
+}
+
+model Assignment {
+  id String @id @default(uuid())
+
+  reportId  String?
+  report    SessionReport? @relation(fields: [reportId], references: [id], onDelete: SetNull)
+
+  sessionId String?
+  session   Session? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  teacherId String
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  title        String
+  instructions String  @db.Text
+  dueDate      DateTime?
+  maxScore     Int     @default(100)
+
+  status AssignmentStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submissions AssignmentSubmission[]
+
+  @@index([studentId, status])
+  @@index([teacherId, status])
+  @@index([dueDate])
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id String @id @default(uuid())
+
+  assignmentId String
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  content String? @db.Text
+  fileUrl String?
+  linkUrl String?
+
+  status AssignmentSubmissionStatus @default(SUBMITTED)
+
+  submittedAt DateTime @default(now())
+
+  score              Int?
+  feedback           String? @db.Text
+  reviewedAt         DateTime?
+  reviewedByTeacherId String?
+
+  revisionRequested Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([assignmentId, studentId])
+  @@index([studentId, status])
+  @@index([assignmentId, status])
+  @@map("assignment_submissions")
 }

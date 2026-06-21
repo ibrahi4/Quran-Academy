@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getMessages } from "next-intl/server";
@@ -6,11 +6,8 @@ import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/config/site";
 import AuthProvider from "@/providers/AuthProvider";
 import { Toaster } from "react-hot-toast";
-import Navbar from "@/components/layout/Navbar";
-import Footer from "@/components/layout/Footer";
-import WhatsAppButton from "@/components/layout/WhatsAppButton";
-import ScrollToTop from "@/components/layout/ScrollToTop";
 import SetLocaleAttributes from "@/components/shared/SetLocaleAttributes";
+import LayoutShellClient from "@/components/layout/LayoutShellClient";
 
 export const metadata = {
   title: {
@@ -18,6 +15,27 @@ export const metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  icons: {
+    icon: [
+      { url: "/Quranic_Public_Assets/icon.png", type: "image/png" },
+      { url: "/Quranic_Public_Assets/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/Quranic_Public_Assets/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/Quranic_Public_Assets/apple-icon.png",
+    shortcut: "/Quranic_Public_Assets/favicon.ico",
+  },
+  openGraph: {
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: ["/Quranic_Public_Assets/og-image.jpg"],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.title,
+    description: siteConfig.description,
+    images: ["/Quranic_Public_Assets/og-image.jpg"],
+  },
 };
 
 export function generateStaticParams() {
@@ -55,14 +73,8 @@ export default async function LocaleLayout({ children, params }: Props) {
             },
           }}
         />
-        <LayoutShell>{children}</LayoutShell>
+        <LayoutShellClient>{children}</LayoutShellClient>
       </AuthProvider>
     </NextIntlClientProvider>
   );
 }
-
-function LayoutShell({ children }: { children: React.ReactNode }) {
-  return <LayoutShellClient>{children}</LayoutShellClient>;
-}
-
-import LayoutShellClient from "@/components/layout/LayoutShellClient";

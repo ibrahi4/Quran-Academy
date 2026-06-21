@@ -190,7 +190,7 @@ export default function PaymentsContent() {
     const num = typeof amount === "string" ? parseFloat(amount) : amount;
     return new Intl.NumberFormat(locale === "ar" ? "ar-EG" : "en-US", {
       style: "currency",
-      currency: currency || "USD",
+      currency: currency || "EGP",
     }).format(num);
   };
 

@@ -1,8 +1,19 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Menu, X, Phone, Globe, Gamepad2, User, LogOut, LayoutDashboard, Settings, ChevronDown, Calendar, GraduationCap } from "lucide-react";
+import {
+  Calendar,
+  ChevronDown,
+  Gamepad2,
+  Globe,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Settings,
+  User,
+  X,
+} from "lucide-react";
 import { useTranslations, useLocale as useNextIntlLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/hooks/useLocale";
@@ -11,10 +22,9 @@ import { logoutApi } from "@/lib/api/auth";
 import Logo from "@/components/shared/Logo";
 import Container from "@/components/shared/Container";
 import { Button } from "@/components/ui/button";
-import { siteConfig } from "@/config/site";
 import toast from "react-hot-toast";
 
-const navLinks = [
+const NAV_LINKS = [
   { key: "home", href: "/" },
   { key: "about", href: "/about" },
   { key: "services", href: "/services" },
@@ -23,129 +33,193 @@ const navLinks = [
   { key: "contact", href: "/contact" },
 ];
 
+function getDashboardHref(role: string) {
+  switch (role) {
+    case "ADMIN":
+      return "/admin";
+    case "TEACHER":
+      return "/teacher/dashboard";
+    case "STUDENT":
+    case "TRIAL_STUDENT":
+      return "/student/dashboard";
+    default:
+      return "/";
+  }
+}
+
+function getProfileHref(role: string) {
+  if (role === "ADMIN") return "/admin/settings";
+  if (role === "TEACHER") return "/teacher/profile";
+  return "/student/profile";
+}
+
+function getSessionsHref(role: string) {
+  return role === "TEACHER" ? "/teacher/sessions" : "/student/sessions";
+}
+
+function canViewSessions(role: string) {
+  return ["STUDENT", "TRIAL_STUDENT", "TEACHER"].includes(role);
+}
+
+function getRoleLabel(role: string, isRTL: boolean) {
+  const labels: Record<string, { en: string; ar: string }> = {
+    ADMIN: { en: "ADMIN", ar: "\u0645\u062F\u064A\u0631" },
+    TEACHER: { en: "TEACHER", ar: "\u0645\u0639\u0644\u0651\u0645" },
+    STUDENT: { en: "STUDENT", ar: "\u0637\u0627\u0644\u0628" },
+    TRIAL_STUDENT: { en: "TRIAL", ar: "\u062A\u062C\u0631\u064A\u0628\u064A" },
+  };
+
+  const label = labels[role];
+  if (!label) return "";
+  return isRTL ? label.ar : label.en;
+}
+
+function getRoleBadgeClass(role: string) {
+  switch (role) {
+    case "ADMIN":
+      return "text-primary bg-primary/10";
+    case "TEACHER":
+      return "text-purple-700 bg-purple-50";
+    case "TRIAL_STUDENT":
+      return "text-amber-700 bg-amber-50";
+    default:
+      return "text-emerald-700 bg-emerald-50";
+  }
+}
+
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const userMenuRef = useRef<HTMLDivElement>(null);
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("nav");
-  const { locale, switchLocale, isRTL } = useLocale();
   const intlLocale = useNextIntlLocale();
-
+  const { locale, switchLocale, isRTL } = useLocale();
   const { user, isAuthenticated, clearAuth } = useAuthStore();
 
+  const cleanPath = pathname.replace(/^\/(en|ar)/, "") || "/";
+  const isHomePage = cleanPath === "/";
+  const isSolidNavbar = true; // Always solid - professional light style
+
+  const role = user?.role ?? "";
+  const dashboardHref = getDashboardHref(role);
+  const profileHref = getProfileHref(role);
+  const sessionsHref = getSessionsHref(role);
+  const showSessions = canViewSessions(role);
+  const roleLabel = getRoleLabel(role, isRTL);
+  const roleBadgeClass = getRoleBadgeClass(role);
+
+  const userInitials = user
+    ? `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase()
+    : "";
+
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 16);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = isMobileOpen ? "hidden" : "unset";
-    return () => { document.body.style.overflow = "unset"; };
-  }, [isMobileOpen]);
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileOpen]);
 
-  // Close user menu on outside click
   useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setIsUserMenuOpen(false);
+    setMobileOpen(false);
+    setUserMenuOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    const onClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
       }
     };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMobileOpen(false);
+        setUserMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const isActive = (href: string) => {
-    const cleanPath = pathname.replace(/^\/(en|ar)/, "") || "/";
     if (href === "/") return cleanPath === "/";
     return cleanPath.startsWith(href);
-  };
-
-  const handleSwitchLocale = () => {
-    switchLocale(locale === "en" ? "ar" : "en");
   };
 
   const handleLogout = async () => {
     try {
       await logoutApi();
     } catch {}
+
     clearAuth();
-    setIsUserMenuOpen(false);
-    setIsMobileOpen(false);
-    toast.success(locale === "ar" ? "\u062A\u0645 \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C" : "Logged out successfully");
+    setUserMenuOpen(false);
+    setMobileOpen(false);
+
+    toast.success(
+      isRTL
+        ? "\u062A\u0645 \u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C"
+        : "Logged out successfully"
+    );
+
     router.push(`/${intlLocale}`);
   };
 
-  const userInitials = user
-    ? `${user.firstName?.charAt(0) || ""}${user.lastName?.charAt(0) || ""}`.toUpperCase()
-    : "";
+  const navLinkClass = (active: boolean) =>
+    `inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-all duration-200 ${
+      active
+        ? isSolidNavbar
+          ? "bg-primary/6 text-primary"
+          : "bg-white/14 text-white"
+        : isSolidNavbar
+        ? "text-gray-700 hover:bg-gray-100 hover:text-primary"
+        : "text-white/90 hover:bg-white/10 hover:text-white"
+    }`;
 
-  const isAdmin = user?.role === "ADMIN";
-  const isTeacher = user?.role === "TEACHER";
-  const isStudent = user?.role === "STUDENT";
+  const subtleButtonClass = isSolidNavbar
+    ? "text-gray-700 hover:bg-gray-100 hover:text-primary"
+    : "text-white/90 hover:bg-white/10 hover:text-white";
 
-  // Role-based routing
-  const dashboardHref = isAdmin
-    ? "/admin"
-    : isStudent || isTeacher
-    ? "/student/dashboard"
-    : "/";
+  const userTriggerClass = isSolidNavbar
+    ? "hover:bg-gray-100"
+    : "hover:bg-white/10";
 
-  const profileHref = isAdmin
-    ? "/admin/settings"
-    : "/student/profile";
-
-  const sessionsHref = "/student/sessions";
-
-  const roleLabel = (() => {
-    if (isAdmin) return locale === "ar" ? "\u0645\u062F\u064A\u0631" : "ADMIN";
-    if (isTeacher) return locale === "ar" ? "\u0645\u0639\u0644\u0651\u0645" : "TEACHER";
-    if (isStudent) return locale === "ar" ? "\u0637\u0627\u0644\u0628" : "STUDENT";
-    return "";
-  })();
-
-  const roleBadgeColor = isAdmin
-    ? "text-primary bg-primary/10"
-    : isTeacher
-    ? "text-purple-700 bg-purple-50"
-    : "text-emerald-700 bg-emerald-50";
+  const navShellClass = scrolled
+    ? "bg-white/95 backdrop-blur-xl border-b border-stone-200/80 shadow-[0_4px_20px_rgba(15,23,42,0.04)]"
+    : "bg-white/80 backdrop-blur-md border-b border-stone-100";
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          isScrolled
-            ? "bg-white/90 backdrop-blur-xl shadow-lg border-b border-gray-100"
-            : "bg-transparent"
-        }`}
-      >
+      <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${navShellClass}`}>
         <Container>
-          <div className="flex items-center justify-between h-16 md:h-20">
-            <Logo light={!isScrolled} />
+          <div className="flex h-16 items-center justify-between md:h-20">
+            <div className="shrink-0">
+              <Logo light={!isSolidNavbar} />
+            </div>
 
-            {/* Desktop Nav */}
-            <div className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300 flex items-center gap-1.5 ${
-                    isActive(link.href)
-                      ? isScrolled
-                        ? "text-primary bg-primary/5"
-                        : "text-white bg-white/10"
-                      : isScrolled
-                        ? "text-gray-700 hover:text-primary hover:bg-primary/5"
-                        : "text-white/90 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {link.key === "games" && <Gamepad2 className="w-4 h-4" />}
+            <div className="hidden lg:flex items-center gap-1 rounded-2xl px-2 py-1">
+              {NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className={navLinkClass(isActive(link.href))}>
+                  {link.key === "games" && <Gamepad2 className="h-4 w-4" />}
                   {t(link.key)}
                   {link.key === "games" && (
-                    <span className="bg-accent text-[10px] text-white px-1.5 py-0.5 rounded-full font-bold leading-none">
+                    <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
                       NEW
                     </span>
                   )}
@@ -153,182 +227,177 @@ export default function Navbar() {
               ))}
             </div>
 
-            {/* Right Side */}
             <div className="flex items-center gap-2">
-              {/* Language Switcher */}
               <button
-                onClick={handleSwitchLocale}
-                className={`hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  isScrolled
-                    ? "text-gray-600 hover:text-primary hover:bg-primary/5"
-                    : "text-white/80 hover:text-white hover:bg-white/10"
-                }`}
+                onClick={() => switchLocale(locale === "en" ? "ar" : "en")}
+                className={`hidden md:inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-all ${subtleButtonClass}`}
+                aria-label="Switch language"
               >
-                <Globe className="w-4 h-4" />
+                <Globe className="h-4 w-4" />
                 <span>{locale === "en" ? "Ar" : "EN"}</span>
               </button>
 
-              {/* Auth Section */}
               {isAuthenticated && user ? (
-                /* User Menu (Logged In) */
-                <div className="relative hidden md:block" ref={userMenuRef}>
+                <div className="relative hidden md:block" ref={menuRef}>
                   <button
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-xl transition-all ${
-                      isScrolled
-                        ? "hover:bg-gray-100"
-                        : "hover:bg-white/10"
-                    }`}
+                    onClick={() => setUserMenuOpen((prev) => !prev)}
+                    aria-expanded={userMenuOpen}
+                    className={`inline-flex items-center gap-2 rounded-2xl px-2 py-1.5 transition-all ${userTriggerClass}`}
                   >
-                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">{userInitials}</span>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary">
+                      <span className="text-xs font-bold text-white">{userInitials}</span>
                     </div>
-                    <span className={`text-sm font-medium max-w-[100px] truncate ${
-                      isScrolled ? "text-gray-700" : "text-white"
-                    }`}>
-                      {user.firstName}
-                    </span>
-                    <ChevronDown className={`w-3.5 h-3.5 transition-transform ${
-                      isUserMenuOpen ? "rotate-180" : ""
-                    } ${isScrolled ? "text-gray-500" : "text-white/70"}`} />
+
+                    <div className="max-w-[120px] text-start">
+                      <p className={`truncate text-sm font-semibold ${isSolidNavbar ? "text-gray-900" : "text-white"}`}>
+                        {user.firstName}
+                      </p>
+                    </div>
+
+                    <ChevronDown
+                      className={`h-4 w-4 transition-transform ${
+                        userMenuOpen ? "rotate-180" : ""
+                      } ${isSolidNavbar ? "text-gray-500" : "text-white/70"}`}
+                    />
                   </button>
 
-                  {/* Dropdown */}
-                  {isUserMenuOpen && (
-                    <div className="absolute top-full right-0 rtl:right-auto rtl:left-0 mt-2 w-60 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
-                      {/* User Info */}
-                      <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-                        <p className="text-sm font-semibold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  {userMenuOpen && (
+                    <div className="absolute top-full right-0 rtl:right-auto rtl:left-0 mt-3 w-64 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl">
+                      <div className="border-b border-gray-100 bg-gray-50/70 px-4 py-3">
+                        <p className="truncate text-sm font-semibold text-gray-900">
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className="truncate text-xs text-gray-500">{user.email}</p>
                         {roleLabel && (
-                          <span className={`inline-block mt-1.5 text-[10px] font-bold px-2 py-0.5 rounded-full ${roleBadgeColor}`}>
+                          <span className={`mt-2 inline-flex rounded-full px-2 py-1 text-[10px] font-bold ${roleBadgeClass}`}>
                             {roleLabel}
                           </span>
                         )}
                       </div>
 
-                      <div className="py-1">
+                      <div className="p-2">
                         <Link
                           href={dashboardHref}
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-primary/5 hover:text-primary"
                         >
-                          <LayoutDashboard className="w-4 h-4" />
-                          {locale === "ar" ? "\u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645" : "Dashboard"}
+                          <LayoutDashboard className="h-4 w-4" />
+                          {isRTL ? "\u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645" : "Dashboard"}
                         </Link>
 
-                        {(isStudent || isTeacher) && (
+                        {showSessions && (
                           <Link
                             href={sessionsHref}
-                            onClick={() => setIsUserMenuOpen(false)}
-                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+                            onClick={() => setUserMenuOpen(false)}
+                            className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-primary/5 hover:text-primary"
                           >
-                            <Calendar className="w-4 h-4" />
-                            {locale === "ar" ? "\u062C\u0644\u0633\u0627\u062A\u064A" : "My Sessions"}
+                            <Calendar className="h-4 w-4" />
+                            {isRTL ? "\u062C\u0644\u0633\u0627\u062A\u064A" : "My Sessions"}
                           </Link>
                         )}
 
                         <Link
                           href={profileHref}
-                          onClick={() => setIsUserMenuOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors"
+                          onClick={() => setUserMenuOpen(false)}
+                          className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-primary/5 hover:text-primary"
                         >
-                          <Settings className="w-4 h-4" />
-                          {isAdmin
-                            ? (locale === "ar" ? "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A" : "Settings")
-                            : (locale === "ar" ? "\u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062E\u0635\u064A" : "My Profile")}
+                          <Settings className="h-4 w-4" />
+                          {role === "ADMIN"
+                            ? isRTL
+                              ? "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A"
+                              : "Settings"
+                            : isRTL
+                            ? "\u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062E\u0635\u064A"
+                            : "My Profile"}
                         </Link>
 
-                        <div className="my-1 border-t border-gray-100" />
+                        <div className="my-2 border-t border-gray-100" />
 
                         <button
                           onClick={handleLogout}
-                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition-colors hover:bg-red-50"
                         >
-                          <LogOut className="w-4 h-4" />
-                          {locale === "ar" ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C" : "Sign Out"}
+                          <LogOut className="h-4 w-4" />
+                          {isRTL ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C" : "Sign Out"}
                         </button>
                       </div>
                     </div>
                   )}
                 </div>
               ) : (
-                /* Login Button (Not Logged In) */
-                <Link href="/auth/login" className="hidden md:block">
-                  <button
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                      isScrolled
-                        ? "text-gray-700 hover:text-primary hover:bg-primary/5"
-                        : "text-white/90 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <User className="w-4 h-4" />
-                    {t("signIn")}
-                  </button>
-                </Link>
+                <>
+                  <Link href="/auth/login" className="hidden md:block">
+                    <button
+                      className={`inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-all ${subtleButtonClass}`}
+                    >
+                      <User className="h-4 w-4" />
+                      {t("signIn")}
+                    </button>
+                  </Link>
+
+                  <Link href="/book-trial" className="hidden md:block">
+                    <Button
+                      className={`rounded-xl px-5 text-sm font-semibold transition-all duration-200 ${
+                        isSolidNavbar
+                          ? "bg-primary text-white shadow-lg shadow-primary/15 hover:bg-primary/90"
+                          : "bg-white text-primary shadow-lg shadow-black/10 hover:bg-white/90"
+                      }`}
+                    >
+                      {t("bookTrial")}
+                    </Button>
+                  </Link>
+                </>
               )}
 
-              {/* Book Trial CTA */}
-              <Link href="/book-trial" className="hidden md:block">
-                <Button
-                  className={`rounded-xl font-semibold text-sm px-5 transition-all duration-300 ${
-                    isScrolled
-                      ? "bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20"
-                      : "bg-white text-primary hover:bg-white/90 shadow-lg shadow-black/10"
-                  }`}
-                >
-                  {t("bookTrial")}
-                </Button>
-              </Link>
-
-              {/* Mobile Menu Toggle */}
               <button
-                onClick={() => setIsMobileOpen(!isMobileOpen)}
-                className={`lg:hidden p-2 rounded-xl transition-all ${
-                  isScrolled
-                    ? "text-gray-700 hover:bg-primary/5"
-                    : "text-white hover:bg-white/10"
-                }`}
+                onClick={() => setMobileOpen((prev) => !prev)}
+                className={`inline-flex items-center justify-center rounded-xl p-2 transition-all lg:hidden ${subtleButtonClass}`}
+                aria-expanded={mobileOpen}
+                aria-label="Open menu"
               >
-                {isMobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </button>
             </div>
           </div>
         </Container>
       </nav>
 
-      {/* Mobile Menu */}
-      {isMobileOpen && (
+      {mobileOpen && (
         <>
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => setIsMobileOpen(false)}
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+            onClick={() => setMobileOpen(false)}
           />
+
           <div
-            className={`fixed top-0 ${isRTL ? "left-0" : "right-0"} bottom-0 w-[85%] max-w-sm bg-white z-50 lg:hidden overflow-y-auto`}
+            className={`fixed top-0 bottom-0 z-50 w-[88%] max-w-sm overflow-y-auto bg-white shadow-2xl lg:hidden ${
+              isRTL ? "left-0" : "right-0"
+            }`}
           >
-            <div className="flex items-center justify-between p-5 border-b border-gray-100">
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-5">
               <Logo />
               <button
-                onClick={() => setIsMobileOpen(false)}
-                className="p-2 rounded-xl text-gray-500 hover:bg-gray-100 transition-all"
+                onClick={() => setMobileOpen(false)}
+                className="rounded-xl p-2 text-gray-500 transition-all hover:bg-gray-100"
+                aria-label="Close menu"
               >
-                <X className="w-5 h-5" />
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            {/* Mobile User Info */}
             {isAuthenticated && user && (
-              <div className="mx-5 mt-5 p-4 bg-primary/5 rounded-xl border border-primary/10">
+              <div className="mx-5 mt-5 rounded-2xl border border-primary/10 bg-primary/5 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">{userInitials}</span>
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary">
+                    <span className="text-sm font-bold text-white">{userInitials}</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
-                    <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-semibold text-gray-900">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="truncate text-xs text-gray-500">{user.email}</p>
                     {roleLabel && (
-                      <span className={`inline-block mt-1 text-[9px] font-bold px-2 py-0.5 rounded-full ${roleBadgeColor}`}>
+                      <span className={`mt-1 inline-flex rounded-full px-2 py-1 text-[10px] font-bold ${roleBadgeClass}`}>
                         {roleLabel}
                       </span>
                     )}
@@ -337,101 +406,107 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Nav Links */}
-            <div className="p-5 space-y-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setIsMobileOpen(false)}
-                  className={`flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium transition-all ${
-                    isActive(link.href)
-                      ? "text-primary bg-primary/5"
-                      : "text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {link.key === "games" && <Gamepad2 className="w-5 h-5" />}
-                  {t(link.key)}
-                  {link.key === "games" && (
-                    <span className="bg-accent text-[10px] text-white px-1.5 py-0.5 rounded-full font-bold">
-                      NEW
-                    </span>
-                  )}
-                </Link>
-              ))}
+            <div className="p-5">
+              <div className="space-y-1">
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-2 rounded-xl px-4 py-3 text-base font-medium transition-all ${
+                      isActive(link.href)
+                        ? "bg-primary/5 text-primary"
+                        : "text-gray-700 hover:bg-gray-50"
+                    }`}
+                  >
+                    {link.key === "games" && <Gamepad2 className="h-5 w-5" />}
+                    {t(link.key)}
+                    {link.key === "games" && (
+                      <span className="rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        NEW
+                      </span>
+                    )}
+                  </Link>
+                ))}
+              </div>
 
-              {/* Mobile Role-Based Links */}
               {isAuthenticated && user && (
                 <>
-                  <div className="h-px bg-gray-100 my-2" />
-                  <Link
-                    href={dashboardHref}
-                    onClick={() => setIsMobileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    <LayoutDashboard className="w-5 h-5" />
-                    {locale === "ar" ? "\u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645" : "Dashboard"}
-                  </Link>
+                  <div className="my-4 border-t border-gray-100" />
 
-                  {(isStudent || isTeacher) && (
+                  <div className="space-y-1">
                     <Link
-                      href={sessionsHref}
-                      onClick={() => setIsMobileOpen(false)}
-                      className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-50"
+                      href={dashboardHref}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 rounded-xl px-4 py-3 text-base font-medium text-gray-700 transition-all hover:bg-gray-50"
                     >
-                      <Calendar className="w-5 h-5" />
-                      {locale === "ar" ? "\u062C\u0644\u0633\u0627\u062A\u064A" : "My Sessions"}
+                      <LayoutDashboard className="h-5 w-5" />
+                      {isRTL ? "\u0644\u0648\u062D\u0629 \u0627\u0644\u062A\u062D\u0643\u0645" : "Dashboard"}
                     </Link>
-                  )}
 
-                  <Link
-                    href={profileHref}
-                    onClick={() => setIsMobileOpen(false)}
-                    className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:bg-gray-50"
-                  >
-                    <Settings className="w-5 h-5" />
-                    {isAdmin
-                      ? (locale === "ar" ? "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A" : "Settings")
-                      : (locale === "ar" ? "\u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062E\u0635\u064A" : "My Profile")}
-                  </Link>
+                    {showSessions && (
+                      <Link
+                        href={sessionsHref}
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-2 rounded-xl px-4 py-3 text-base font-medium text-gray-700 transition-all hover:bg-gray-50"
+                      >
+                        <Calendar className="h-5 w-5" />
+                        {isRTL ? "\u062C\u0644\u0633\u0627\u062A\u064A" : "My Sessions"}
+                      </Link>
+                    )}
+
+                    <Link
+                      href={profileHref}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-2 rounded-xl px-4 py-3 text-base font-medium text-gray-700 transition-all hover:bg-gray-50"
+                    >
+                      <Settings className="h-5 w-5" />
+                      {role === "ADMIN"
+                        ? isRTL
+                          ? "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A"
+                          : "Settings"
+                        : isRTL
+                        ? "\u0627\u0644\u0645\u0644\u0641 \u0627\u0644\u0634\u062E\u0635\u064A"
+                        : "My Profile"}
+                    </Link>
+                  </div>
                 </>
               )}
             </div>
 
-            {/* Mobile Bottom Actions */}
-            <div className="p-5 space-y-3 border-t border-gray-100 mt-4">
+            <div className="mt-auto border-t border-gray-100 p-5 space-y-3">
               <button
-                onClick={handleSwitchLocale}
-                className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-all"
+                onClick={() => switchLocale(locale === "en" ? "ar" : "en")}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-200"
               >
-                <Globe className="w-5 h-5" />
+                <Globe className="h-5 w-5" />
                 {locale === "en" ? "\u0639\u0631\u0628\u064A" : "English"}
               </button>
 
               {isAuthenticated && user ? (
                 <button
                   onClick={handleLogout}
-                  className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-red-50 text-red-600 font-semibold hover:bg-red-100 transition-all"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 px-4 py-3 font-semibold text-red-600 transition-all hover:bg-red-100"
                 >
-                  <LogOut className="w-5 h-5" />
-                  {locale === "ar" ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C" : "Sign Out"}
+                  <LogOut className="h-5 w-5" />
+                  {isRTL ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062E\u0631\u0648\u062C" : "Sign Out"}
                 </button>
               ) : (
-                <Link href="/auth/login" onClick={() => setIsMobileOpen(false)} className="block">
-                  <button className="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-gray-100 text-gray-700 font-semibold hover:bg-gray-200 transition-all">
-                    <User className="w-5 h-5" />
-                    {locale === "ar" ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644" : "Sign In"}
-                  </button>
-                </Link>
+                <>
+                  <Link href="/auth/login" onClick={() => setMobileOpen(false)} className="block">
+                    <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-gray-100 px-4 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-200">
+                      <User className="h-5 w-5" />
+                      {isRTL ? "\u062A\u0633\u062C\u064A\u0644 \u0627\u0644\u062F\u062E\u0648\u0644" : "Sign In"}
+                    </button>
+                  </Link>
+
+                  <Link href="/book-trial" onClick={() => setMobileOpen(false)} className="block">
+                    <Button className="w-full rounded-xl bg-primary py-6 text-base font-semibold text-white shadow-lg shadow-primary/20 hover:bg-primary/90">
+                      {t("bookTrial")}
+                    </Button>
+                  </Link>
+                </>
               )}
-
-            
-
-              <Link href="/book-trial" onClick={() => setIsMobileOpen(false)} className="block">
-                <Button className="w-full rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold py-6 text-base shadow-lg shadow-primary/20">
-                  {t("bookTrial")}
-                </Button>
-              </Link>
             </div>
           </div>
         </>

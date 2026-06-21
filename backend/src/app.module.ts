@@ -18,6 +18,8 @@ import { AdminModule } from './modules/admin/admin.module';
 import { TeacherModule } from './modules/teacher/teacher.module';
 import { RecurringModule } from './modules/recurring/recurring.module';
 import { WalletModule } from './modules/wallet/wallet.module';
+import { SessionReportsModule } from './modules/session-reports/session-reports.module';
+import { AssignmentsModule } from './modules/assignments/assignments.module';
 
 @Module({
   imports: [
@@ -47,6 +49,8 @@ import { WalletModule } from './modules/wallet/wallet.module';
     PaymentsModule,
     AnalyticsModule,
     AdminModule,
+    SessionReportsModule,
+    AssignmentsModule,
   ],
 })
 export class AppModule {}

@@ -23,6 +23,7 @@ import Container from "@/components/shared/Container";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/hooks/useLocale";
+import { getServiceImage } from "@/lib/service-images";
 
 const serviceIcons = [BookOpen, Mic, Languages, GraduationCap, Baby, Heart];
 const serviceSlugs = [
@@ -34,6 +35,7 @@ const serviceSlugs = [
   "new-muslims",
 ];
 const serviceColorKeys = ["primary", "secondary", "accent", "primary", "secondary", "accent"];
+
 
 const colorStyles: Record<string, { bg: string; border: string }> = {
   primary: { bg: "bg-primary/5", border: "border-primary/15" },
@@ -296,59 +298,104 @@ export default function ServicesPageContent() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-50px" }}
                   transition={{ duration: 0.5, delay: index * 0.05 }}
-                  className={`bg-white rounded-3xl p-6 md:p-10 border ${colors.border} hover:shadow-premium-hover transition-all duration-500`}
+                  className={`group bg-white rounded-3xl overflow-hidden border ${colors.border} hover:shadow-premium-hover transition-all duration-500`}
                 >
-                  <div className="grid lg:grid-cols-5 gap-8">
-                    <div className="lg:col-span-3">
-                      <div className="flex items-start gap-4 mb-5">
+                  <div className="grid lg:grid-cols-12 gap-0">
+                    {/* IMAGE COLUMN - alternates left/right based on index */}
+                    <div
+                      className={`lg:col-span-5 relative h-64 lg:h-auto min-h-[320px] overflow-hidden ${
+                        index % 2 === 1 ? "lg:order-2" : ""
+                      }`}
+                    >
+                      <img
+                        src={getServiceImage(index)}
+                        alt={t(`services.${index}.title`)}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        loading="lazy"
+                      />
+
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
+                      {/* Floating badge on image */}
+                      <div className="absolute top-4 left-4 rtl:left-auto rtl:right-4 flex items-center gap-2 bg-white/95 backdrop-blur-md rounded-full px-3 py-1.5 shadow-lg">
                         <div
-                          className={`w-14 h-14 rounded-2xl ${colors.bg} flex items-center justify-center flex-shrink-0`}
+                          className={`w-7 h-7 rounded-lg ${colors.bg} flex items-center justify-center`}
                         >
-                          <IconComp className="w-6 h-6 text-primary" />
+                          <IconComp className="w-4 h-4 text-primary" />
                         </div>
-                        <div>
-                          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                            {t(`services.${index}.title`)}
-                          </h2>
-                          <p className="text-gray-600 leading-relaxed">
-                            {t(`services.${index}.description`)}
-                          </p>
-                        </div>
+                        <span className="text-xs font-bold text-gray-800 pe-1">
+                          {t(`services.${index}.title`)}
+                        </span>
                       </div>
-                      <div className="mt-6 p-4 rounded-xl bg-sand-50 border border-sand-200/50">
-                        <p className="text-sm text-gray-500">
-                          <span className="font-semibold text-gray-700">
-                            {t("bestFor")}{" "}
+
+                      {/* Bottom label */}
+                      <div className="absolute bottom-4 left-4 right-4 rtl:left-4 rtl:right-4">
+                        <div className="flex items-center gap-2 text-white/90">
+                          <Sparkles className="w-4 h-4 text-accent" />
+                          <span className="text-xs font-semibold uppercase tracking-wider">
+                            {t("bestFor")}
                           </span>
+                        </div>
+                        <p className="text-white font-semibold text-sm mt-1 line-clamp-1">
                           {t(`services.${index}.bestFor`)}
                         </p>
                       </div>
                     </div>
-                    <div className="lg:col-span-2">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-                        {t("whatYouLearn")}
-                      </h3>
-                      <ul className="space-y-3">
-                        {[0, 1, 2, 3, 4, 5].map((fi) => (
-                          <li key={fi} className="flex items-start gap-3">
-                            <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                            <span className="text-sm text-gray-700">
-                              {t(`services.${index}.features.${fi}`)}
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                      <div className="mt-6">
-                        <Link href="/book-trial">
-                          <Button className="w-full rounded-xl bg-primary hover:bg-primary/90 text-white font-semibold shadow-lg shadow-primary/20">
-                            {t("bookTrial")}
-                            {isRTL ? (
-                              <ArrowLeft className="w-4 h-4 ms-2" />
-                            ) : (
-                              <ArrowRight className="w-4 h-4 ms-2" />
-                            )}
-                          </Button>
-                        </Link>
+
+                    {/* CONTENT COLUMN */}
+                    <div className="lg:col-span-7 p-6 md:p-8 lg:p-10">
+                      <div className="grid md:grid-cols-2 gap-6 h-full">
+                        {/* Description */}
+                        <div className="md:col-span-2">
+                          <div className="flex items-start gap-4 mb-5">
+                            <div
+                              className={`hidden md:flex w-14 h-14 rounded-2xl ${colors.bg} items-center justify-center flex-shrink-0`}
+                            >
+                              <IconComp className="w-6 h-6 text-primary" />
+                            </div>
+                            <div className="flex-1">
+                              <h2 className="text-2xl md:text-[26px] font-bold text-gray-900 mb-2 leading-tight">
+                                {t(`services.${index}.title`)}
+                              </h2>
+                              <p className="text-gray-600 leading-relaxed">
+                                {t(`services.${index}.description`)}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Features list */}
+                        <div className="md:col-span-2">
+                          <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4 flex items-center gap-2">
+                            <span className="w-6 h-px bg-primary/40" />
+                            {t("whatYouLearn")}
+                          </h3>
+                          <ul className="grid sm:grid-cols-2 gap-x-4 gap-y-2.5">
+                            {[0, 1, 2, 3, 4, 5].map((fi) => (
+                              <li key={fi} className="flex items-start gap-2.5">
+                                <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-700 leading-snug">
+                                  {t(`services.${index}.features.${fi}`)}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        {/* CTA */}
+                        <div className="md:col-span-2 pt-4 mt-auto">
+                          <Link href="/book-trial">
+                            <Button className="w-full sm:w-auto rounded-xl px-6 h-12 bg-primary hover:bg-primary/90 text-white font-semibold shadow-lg shadow-primary/20 group/btn">
+                              {t("bookTrial")}
+                              {isRTL ? (
+                                <ArrowLeft className="w-4 h-4 ms-2 group-hover/btn:-translate-x-1 transition-transform" />
+                              ) : (
+                                <ArrowRight className="w-4 h-4 ms-2 group-hover/btn:translate-x-1 transition-transform" />
+                              )}
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>

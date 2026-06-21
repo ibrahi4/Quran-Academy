@@ -10,26 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  User,
-  Mail,
-  Phone,
-  Globe,
-  Lock,
-  Save,
-  Loader2,
-  Sparkles,
-  Eye,
-  EyeOff,
-  CheckCircle2,
-  Calendar,
-  Award,
-  ShieldCheck,
+  User, Mail, Phone, Globe, Lock, Save, Loader2,
+  Eye, EyeOff, CheckCircle2, ShieldCheck,
 } from "lucide-react";
 
 export default function StudentProfileContent() {
   const { isRTL } = useLocale();
   const { user, setAuth, accessToken } = useAuthStore();
   const t = (en: string, ar: string) => (isRTL ? ar : en);
+  const isTrial = user?.role === "TRIAL_STUDENT";
 
   const [loading, setLoading] = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
@@ -42,153 +31,102 @@ export default function StudentProfileContent() {
     locale: user?.locale || "EN",
   });
 
-  const [pwForm, setPwForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-
+  const [pwForm, setPwForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [showPw, setShowPw] = useState({ current: false, next: false, confirm: false });
 
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  useEffect(() => { loadProfile(); }, []);
 
   const loadProfile = async () => {
     try {
       const me: any = await studentApi.getMe();
+      console.log("[StudentProfile] me:", me);
       setForm({
         firstName: me.firstName || "",
         lastName: me.lastName || "",
         phone: me.phone || "",
         locale: me.locale || "EN",
       });
-    } catch (e) {
-      console.error("Profile load error:", e);
-    }
+    } catch (e) { console.error("[StudentProfile] load error:", e); }
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.firstName.trim() || !form.lastName.trim()) {
-      toast.error(t("First and last name required", "\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0623\u0648\u0644 \u0648\u0627\u0644\u0623\u062E\u064A\u0631 \u0645\u0637\u0644\u0648\u0628\u0627\u0646"));
-      return;
+      toast.error(t("First and last name required", "\u0627\u0644\u0627\u0633\u0645 \u0645\u0637\u0644\u0648\u0628")); return;
     }
-
     try {
       setLoading(true);
       const updated: any = await studentApi.updateMe({
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        phone: form.phone.trim() || null,
-        locale: form.locale,
+        firstName: form.firstName.trim(), lastName: form.lastName.trim(),
+        phone: form.phone.trim() || null, locale: form.locale,
       });
-
-      // Update auth store with new user data
+      console.log("[StudentProfile] updated:", updated);
       if (user && accessToken) {
-        const refreshToken = typeof window !== "undefined" ? localStorage.getItem("refresh_token") || "" : "";
-        setAuth(
-          {
-            ...user,
-            firstName: updated.firstName,
-            lastName: updated.lastName,
-            locale: updated.locale,
-          },
-          accessToken,
-          refreshToken
-        );
+        const rt = typeof window !== "undefined" ? localStorage.getItem("refresh_token") || "" : "";
+        setAuth({ ...user, firstName: updated.firstName, lastName: updated.lastName, locale: updated.locale }, accessToken, rt);
       }
-
-      toast.success(t("Profile updated successfully", "\u062A\u0645 \u062A\u062D\u062F\u064A\u062B \u0627\u0644\u0645\u0644\u0641 \u0628\u0646\u062C\u0627\u062D"));
+      toast.success(t("Profile updated", "\u062a\u0645 \u0627\u0644\u062a\u062d\u062f\u064a\u062b"));
     } catch (e: any) {
-      toast.error(e?.message || t("Failed to update", "\u0641\u0634\u0644 \u0627\u0644\u062A\u062D\u062F\u064A\u062B"));
-    } finally {
-      setLoading(false);
-    }
+      toast.error(e?.message || t("Update failed", "\u0641\u0634\u0644 \u0627\u0644\u062a\u062d\u062f\u064a\u062b"));
+    } finally { setLoading(false); }
   };
 
-  const handleChangePassword = async (e: React.FormEvent) => {
+  const handleChangePw = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pwForm.currentPassword || !pwForm.newPassword) {
-      toast.error(t("All fields are required", "\u062C\u0645\u064A\u0639 \u0627\u0644\u062D\u0642\u0648\u0644 \u0645\u0637\u0644\u0648\u0628\u0629"));
-      return;
-    }
-    if (pwForm.newPassword.length < 8) {
-      toast.error(t("Password must be at least 8 characters", "\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u064A\u062C\u0628 \u0623\u0646 \u062A\u0643\u0648\u0646 8 \u0623\u062D\u0631\u0641 \u0639\u0644\u0649 \u0627\u0644\u0623\u0642\u0644"));
-      return;
-    }
-    if (pwForm.newPassword !== pwForm.confirmPassword) {
-      toast.error(t("Passwords do not match", "\u0643\u0644\u0645\u062A\u0627 \u0627\u0644\u0645\u0631\u0648\u0631 \u063A\u064A\u0631 \u0645\u062A\u0637\u0627\u0628\u0642\u062A\u064A\u0646"));
-      return;
-    }
-
+    if (!pwForm.currentPassword || !pwForm.newPassword) { toast.error(t("All fields required", "\u062c\u0645\u064a\u0639 \u0627\u0644\u062d\u0642\u0648\u0644 \u0645\u0637\u0644\u0648\u0628\u0629")); return; }
+    if (pwForm.newPassword.length < 8) { toast.error(t("Min 8 characters", "8 \u0623\u062d\u0631\u0641 \u0639\u0644\u0649 \u0627\u0644\u0623\u0642\u0644")); return; }
+    if (pwForm.newPassword !== pwForm.confirmPassword) { toast.error(t("Passwords don't match", "\u063a\u064a\u0631 \u0645\u062a\u0637\u0627\u0628\u0642\u062a\u064a\u0646")); return; }
     try {
       setPwLoading(true);
-      await studentApi.changePassword({
-        currentPassword: pwForm.currentPassword,
-        newPassword: pwForm.newPassword,
-      });
-      toast.success(t("Password changed successfully", "\u062A\u0645 \u062A\u063A\u064A\u064A\u0631 \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u0628\u0646\u062C\u0627\u062D"));
+      await studentApi.changePassword({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
+      console.log("[StudentProfile] password changed");
+      toast.success(t("Password changed", "\u062a\u0645 \u062a\u063a\u064a\u064a\u0631 \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631"));
       setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     } catch (e: any) {
-      toast.error(e?.message || t("Failed to change password", "\u0641\u0634\u0644 \u062A\u063A\u064A\u064A\u0631 \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631"));
-    } finally {
-      setPwLoading(false);
-    }
+      toast.error(e?.message || t("Failed", "\u0641\u0634\u0644"));
+    } finally { setPwLoading(false); }
   };
 
-  const initials = `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`.toUpperCase() || "S";
+  const initials = `${user?.firstName?.[0] || ""}${user?.lastName?.[0] || ""}`.toUpperCase();
+
+  const PwInput = ({ id, label, value, onChange, show, onToggle }: any) => (
+    <div className="space-y-2">
+      <Label htmlFor={id} className="text-xs font-bold text-gray-700 uppercase tracking-wider">{label}</Label>
+      <div className="relative">
+        <Lock className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400", isRTL ? "right-3" : "left-3")} />
+        <Input id={id} type={show ? "text" : "password"} value={value} onChange={onChange}
+          className={cn("h-11 rounded-xl", isRTL ? "pr-10 pl-10" : "pl-10 pr-10")} required minLength={8} />
+        <button type="button" onClick={onToggle}
+          className={cn("absolute top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600", isRTL ? "left-3" : "right-3")}>
+          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
-      {/* Hero Profile Card */}
-      <section className="relative overflow-hidden rounded-3xl bg-hero-gradient shadow-premium">
-        <div className="absolute inset-0 opacity-[0.06]">
-          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="profile-pattern" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse">
-                <polygon points="40,8 46,24 62,20 50,32 62,44 46,40 40,56 34,40 18,44 30,32 18,20 34,24" fill="none" stroke="white" strokeWidth="0.6" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#profile-pattern)" />
-          </svg>
-        </div>
-        <div className="absolute -top-16 -right-16 w-64 h-64 bg-accent/15 rounded-full blur-3xl" />
-        <div className="absolute -bottom-16 -left-16 w-64 h-64 bg-white/5 rounded-full blur-3xl" />
-
-        <div className="relative p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6">
-          {/* Avatar */}
-          <div className="relative">
-            <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-gradient-to-br from-accent to-accent-400 flex items-center justify-center shadow-2xl ring-4 ring-white/20">
-              <span className="text-4xl font-bold text-gray-900">{initials}</span>
-            </div>
-            <div className="absolute bottom-1 right-1 w-7 h-7 bg-emerald-500 rounded-full ring-4 ring-primary flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4 text-white" />
-            </div>
+    <div className="space-y-5 max-w-3xl mx-auto">
+      {/* Profile Card */}
+      <section className="bg-white rounded-2xl border border-gray-100 p-5">
+        <div className="flex items-center gap-4">
+          <div className={cn(
+            "w-16 h-16 rounded-2xl flex items-center justify-center ring-4 ring-white shadow-md",
+            isTrial ? "bg-gradient-to-br from-amber-400 to-orange-500" : "bg-hero-gradient"
+          )}>
+            <span className="text-xl font-bold text-white">{initials}</span>
           </div>
-
-          {/* Info */}
           <div className="flex-1 min-w-0">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm mb-3">
-              <Sparkles className="w-3 h-3 text-accent" />
-              <span className="text-[10px] font-bold text-white/90 uppercase tracking-[0.15em]">
-                {t("Student Account", "\u062D\u0633\u0627\u0628 \u0637\u0627\u0644\u0628")}
-              </span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1 truncate">
-              {user?.firstName} {user?.lastName}
-            </h2>
-            <p className="text-sm text-white/70 mb-3 truncate flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5 shrink-0" />
-              {user?.email}
+            <h2 className="text-lg font-bold text-gray-900 truncate">{user?.firstName} {user?.lastName}</h2>
+            <p className="text-sm text-gray-500 truncate flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5" />{user?.email}
             </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-400/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-bold">
-                <ShieldCheck className="w-3 h-3" />
-                {t("Verified", "\u0645\u0648\u062B\u0642")}
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold">
+                <ShieldCheck className="w-3 h-3" />{t("Active", "\u0646\u0634\u0637")}
               </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/10 border border-white/15 text-white/80 text-[10px] font-bold uppercase tracking-wider">
-                {user?.role}
+              <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-bold",
+                isTrial ? "bg-amber-50 text-amber-700" : "bg-primary/10 text-primary")}>
+                {isTrial ? t("Trial", "\u062a\u062c\u0631\u064a\u0628\u064a") : t("Student", "\u0637\u0627\u0644\u0628")}
               </span>
             </div>
           </div>
@@ -196,280 +134,95 @@ export default function StudentProfileContent() {
       </section>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 p-1 bg-white rounded-2xl border border-sand-200/70 w-fit">
-        <button
-          onClick={() => setActiveTab("info")}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all",
-            activeTab === "info"
-              ? "bg-primary text-white shadow-md"
-              : "text-gray-600 hover:bg-sand-50"
-          )}
-        >
-          <User className="w-4 h-4" />
-          {t("Personal Info", "\u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u0634\u062E\u0635\u064A\u0629")}
+      <div className="flex gap-2 p-1 bg-white rounded-xl border border-gray-100 w-fit">
+        <button onClick={() => setActiveTab("info")}
+          className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+            activeTab === "info" ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-50")}>
+          <User className="w-4 h-4" />{t("Personal Info", "\u0627\u0644\u0628\u064a\u0627\u0646\u0627\u062a")}
         </button>
-        <button
-          onClick={() => setActiveTab("security")}
-          className={cn(
-            "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all",
-            activeTab === "security"
-              ? "bg-primary text-white shadow-md"
-              : "text-gray-600 hover:bg-sand-50"
-          )}
-        >
-          <Lock className="w-4 h-4" />
-          {t("Security", "\u0627\u0644\u0623\u0645\u0627\u0646")}
+        <button onClick={() => setActiveTab("security")}
+          className={cn("flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+            activeTab === "security" ? "bg-primary text-white" : "text-gray-600 hover:bg-gray-50")}>
+          <Lock className="w-4 h-4" />{t("Security", "\u0627\u0644\u0623\u0645\u0627\u0646")}
         </button>
       </div>
 
-      {/* Tab Content */}
+      {/* Forms */}
       {activeTab === "info" ? (
-        <section className="bg-white rounded-2xl border border-sand-200/70 overflow-hidden">
-          <div className="px-6 py-5 border-b border-sand-200/70">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <User className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900 text-base">
-                  {t("Personal Information", "\u0627\u0644\u0628\u064A\u0627\u0646\u0627\u062A \u0627\u0644\u0634\u062E\u0635\u064A\u0629")}
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {t("Update your account details", "\u062A\u062D\u062F\u064A\u062B \u0628\u064A\u0627\u0646\u0627\u062A \u062D\u0633\u0627\u0628\u0643")}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <form onSubmit={handleUpdate} className="p-6 space-y-5">
-            <div className="grid sm:grid-cols-2 gap-5">
+        <section className="bg-white rounded-2xl border border-gray-100 p-5">
+          <form onSubmit={handleUpdate} className="space-y-5">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  {t("First Name", "\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0623\u0648\u0644")}
-                </Label>
+                <Label className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t("First Name", "\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0623\u0648\u0644")}</Label>
                 <div className="relative">
                   <User className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400", isRTL ? "right-3" : "left-3")} />
-                  <Input
-                    id="firstName"
-                    value={form.firstName}
-                    onChange={(e) => setForm({ ...form, firstName: e.target.value })}
-                    className={cn("h-11 rounded-xl", isRTL ? "pr-10" : "pl-10")}
-                    required
-                  />
+                  <Input value={form.firstName} onChange={e => setForm({...form, firstName: e.target.value})}
+                    className={cn("h-11 rounded-xl", isRTL ? "pr-10" : "pl-10")} required />
                 </div>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  {t("Last Name", "\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0623\u062E\u064A\u0631")}
-                </Label>
+                <Label className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t("Last Name", "\u0627\u0644\u0627\u0633\u0645 \u0627\u0644\u0623\u062e\u064a\u0631")}</Label>
                 <div className="relative">
                   <User className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400", isRTL ? "right-3" : "left-3")} />
-                  <Input
-                    id="lastName"
-                    value={form.lastName}
-                    onChange={(e) => setForm({ ...form, lastName: e.target.value })}
-                    className={cn("h-11 rounded-xl", isRTL ? "pr-10" : "pl-10")}
-                    required
-                  />
+                  <Input value={form.lastName} onChange={e => setForm({...form, lastName: e.target.value})}
+                    className={cn("h-11 rounded-xl", isRTL ? "pr-10" : "pl-10")} required />
                 </div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                {t("Email Address", "\u0627\u0644\u0628\u0631\u064A\u062F \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A")}
-              </Label>
+              <Label className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t("Email", "\u0627\u0644\u0628\u0631\u064a\u062f")}</Label>
               <div className="relative">
                 <Mail className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400", isRTL ? "right-3" : "left-3")} />
-                <Input
-                  id="email"
-                  type="email"
-                  value={user?.email || ""}
-                  disabled
-                  className={cn("h-11 rounded-xl bg-sand-50 cursor-not-allowed", isRTL ? "pr-10" : "pl-10")}
-                />
+                <Input value={user?.email || ""} disabled className={cn("h-11 rounded-xl bg-gray-50 cursor-not-allowed", isRTL ? "pr-10" : "pl-10")} />
               </div>
-              <p className="text-[11px] text-gray-500">
-                {t("Email cannot be changed. Contact support for assistance.", "\u0644\u0627 \u064A\u0645\u0643\u0646 \u062A\u063A\u064A\u064A\u0631 \u0627\u0644\u0628\u0631\u064A\u062F \u0627\u0644\u0625\u0644\u0643\u062A\u0631\u0648\u0646\u064A. \u062A\u0648\u0627\u0635\u0644 \u0645\u0639 \u0627\u0644\u062F\u0639\u0645.")}
-              </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-5">
+            <div className="grid sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  {t("Phone Number", "\u0631\u0642\u0645 \u0627\u0644\u0647\u0627\u062A\u0641")}
-                </Label>
+                <Label className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t("Phone", "\u0627\u0644\u0647\u0627\u062a\u0641")}</Label>
                 <div className="relative">
                   <Phone className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400", isRTL ? "right-3" : "left-3")} />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                    placeholder="+1 234 567 8900"
-                    className={cn("h-11 rounded-xl", isRTL ? "pr-10" : "pl-10")}
-                  />
+                  <Input value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
+                    placeholder="+1 234 567 8900" className={cn("h-11 rounded-xl", isRTL ? "pr-10" : "pl-10")} />
                 </div>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="locale" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                  {t("Preferred Language", "\u0627\u0644\u0644\u063A\u0629 \u0627\u0644\u0645\u0641\u0636\u0644\u0629")}
-                </Label>
+                <Label className="text-xs font-bold text-gray-700 uppercase tracking-wider">{t("Language", "\u0627\u0644\u0644\u063a\u0629")}</Label>
                 <div className="relative">
                   <Globe className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-10", isRTL ? "right-3" : "left-3")} />
-                  <select
-                    id="locale"
-                    value={form.locale}
-                    onChange={(e) => setForm({ ...form, locale: e.target.value })}
-                    className={cn(
-                      "w-full h-11 rounded-xl border border-input bg-transparent text-sm focus:outline-none focus:ring-2 focus:ring-primary",
-                      isRTL ? "pr-10 pl-3" : "pl-10 pr-3"
-                    )}
-                  >
+                  <select value={form.locale} onChange={e => setForm({...form, locale: e.target.value})}
+                    className={cn("w-full h-11 rounded-xl border border-input bg-transparent text-sm focus:ring-2 focus:ring-primary", isRTL ? "pr-10 pl-3" : "pl-10 pr-3")}>
                     <option value="EN">English</option>
-                    <option value="AR">{"\u0627\u0644\u0639\u0631\u0628\u064A\u0629"}</option>
+                    <option value="AR">{"\u0627\u0644\u0639\u0631\u0628\u064a\u0629"}</option>
                   </select>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-sand-200/70">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="h-11 px-6 rounded-xl bg-primary hover:bg-primary-700 text-white font-bold shadow-md"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {t("Saving...", "\u062C\u0627\u0631\u064D \u0627\u0644\u062D\u0641\u0638...")}
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    {t("Save Changes", "\u062D\u0641\u0638 \u0627\u0644\u062A\u063A\u064A\u064A\u0631\u0627\u062A")}
-                  </>
-                )}
+            <div className="flex justify-end pt-3 border-t border-gray-100">
+              <Button type="submit" disabled={loading} className="h-10 px-5 rounded-xl bg-primary text-white font-bold">
+                {loading ? <><Loader2 className="w-4 h-4 animate-spin" />{t("Saving...", "\u062c\u0627\u0631\u064d...")}</> : <><Save className="w-4 h-4" />{t("Save", "\u062d\u0641\u0638")}</>}
               </Button>
             </div>
           </form>
         </section>
       ) : (
-        <section className="bg-white rounded-2xl border border-sand-200/70 overflow-hidden">
-          <div className="px-6 py-5 border-b border-sand-200/70">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                <Lock className="w-5 h-5 text-amber-600" />
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900 text-base">
-                  {t("Change Password", "\u062A\u063A\u064A\u064A\u0631 \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631")}
-                </h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {t("Update your password regularly for security", "\u062D\u062F\u062B \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u0628\u0627\u0646\u062A\u0638\u0627\u0645 \u0644\u0644\u0623\u0645\u0627\u0646")}
-                </p>
-              </div>
-            </div>
-          </div>
+        <section className="bg-white rounded-2xl border border-gray-100 p-5">
+          <form onSubmit={handleChangePw} className="space-y-5 max-w-sm">
+            <PwInput id="curPw" label={t("Current Password", "\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u0627\u0644\u062d\u0627\u0644\u064a\u0629")}
+              value={pwForm.currentPassword} onChange={(e: any) => setPwForm({...pwForm, currentPassword: e.target.value})}
+              show={showPw.current} onToggle={() => setShowPw({...showPw, current: !showPw.current})} />
+            <PwInput id="newPw" label={t("New Password", "\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u0627\u0644\u062c\u062f\u064a\u062f\u0629")}
+              value={pwForm.newPassword} onChange={(e: any) => setPwForm({...pwForm, newPassword: e.target.value})}
+              show={showPw.next} onToggle={() => setShowPw({...showPw, next: !showPw.next})} />
+            <PwInput id="cfmPw" label={t("Confirm Password", "\u062a\u0623\u0643\u064a\u062f")}
+              value={pwForm.confirmPassword} onChange={(e: any) => setPwForm({...pwForm, confirmPassword: e.target.value})}
+              show={showPw.confirm} onToggle={() => setShowPw({...showPw, confirm: !showPw.confirm})} />
 
-          <form onSubmit={handleChangePassword} className="p-6 space-y-5 max-w-md">
-            <div className="space-y-2">
-              <Label htmlFor="currentPassword" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                {t("Current Password", "\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u0627\u0644\u062D\u0627\u0644\u064A\u0629")}
-              </Label>
-              <div className="relative">
-                <Lock className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400", isRTL ? "right-3" : "left-3")} />
-                <Input
-                  id="currentPassword"
-                  type={showPw.current ? "text" : "password"}
-                  value={pwForm.currentPassword}
-                  onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })}
-                  className={cn("h-11 rounded-xl", isRTL ? "pr-10 pl-10" : "pl-10 pr-10")}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw({ ...showPw, current: !showPw.current })}
-                  className={cn("absolute top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600", isRTL ? "left-3" : "right-3")}
-                >
-                  {showPw.current ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="newPassword" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                {t("New Password", "\u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631 \u0627\u0644\u062C\u062F\u064A\u062F\u0629")}
-              </Label>
-              <div className="relative">
-                <Lock className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400", isRTL ? "right-3" : "left-3")} />
-                <Input
-                  id="newPassword"
-                  type={showPw.next ? "text" : "password"}
-                  value={pwForm.newPassword}
-                  onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })}
-                  className={cn("h-11 rounded-xl", isRTL ? "pr-10 pl-10" : "pl-10 pr-10")}
-                  required
-                  minLength={8}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw({ ...showPw, next: !showPw.next })}
-                  className={cn("absolute top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600", isRTL ? "left-3" : "right-3")}
-                >
-                  {showPw.next ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              <p className="text-[11px] text-gray-500">
-                {t("Minimum 8 characters", "8 \u0623\u062D\u0631\u0641 \u0639\u0644\u0649 \u0627\u0644\u0623\u0642\u0644")}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                {t("Confirm New Password", "\u062A\u0623\u0643\u064A\u062F \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631")}
-              </Label>
-              <div className="relative">
-                <Lock className={cn("absolute top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400", isRTL ? "right-3" : "left-3")} />
-                <Input
-                  id="confirmPassword"
-                  type={showPw.confirm ? "text" : "password"}
-                  value={pwForm.confirmPassword}
-                  onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })}
-                  className={cn("h-11 rounded-xl", isRTL ? "pr-10 pl-10" : "pl-10 pr-10")}
-                  required
-                  minLength={8}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPw({ ...showPw, confirm: !showPw.confirm })}
-                  className={cn("absolute top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600", isRTL ? "left-3" : "right-3")}
-                >
-                  {showPw.confirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end pt-4 border-t border-sand-200/70">
-              <Button
-                type="submit"
-                disabled={pwLoading}
-                className="h-11 px-6 rounded-xl bg-primary hover:bg-primary-700 text-white font-bold shadow-md"
-              >
-                {pwLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {t("Updating...", "\u062C\u0627\u0631\u064D \u0627\u0644\u062A\u062D\u062F\u064A\u062B...")}
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4" />
-                    {t("Update Password", "\u062A\u062D\u062F\u064A\u062B \u0643\u0644\u0645\u0629 \u0627\u0644\u0645\u0631\u0648\u0631")}
-                  </>
-                )}
+            <div className="flex justify-end pt-3 border-t border-gray-100">
+              <Button type="submit" disabled={pwLoading} className="h-10 px-5 rounded-xl bg-primary text-white font-bold">
+                {pwLoading ? <><Loader2 className="w-4 h-4 animate-spin" />{t("Updating...", "\u062c\u0627\u0631\u064d...")}</> : <><Lock className="w-4 h-4" />{t("Update", "\u062a\u062d\u062f\u064a\u062b")}</>}
               </Button>
             </div>
           </form>

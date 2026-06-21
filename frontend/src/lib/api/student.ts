@@ -11,13 +11,23 @@ export const studentApi = {
   getMySessions: (params?: any) => api.get("/sessions/my", params),
   getSessionById: (id: string) => api.get(`/sessions/${id}`),
 
+  // Assignments
+  getMyAssignments: (status?: string) =>
+    api.get("/assignments/my", status ? { status } : {}),
+
+  submitAssignment: (assignmentId: string, data: {
+    content?: string;
+    linkUrl?: string;
+    fileUrl?: string;
+  }) => api.post(`/assignments/${assignmentId}/submit`, data),
+
   // Subscription
   getMySubscription: () => api.get("/subscriptions/my"),
 
   // Payments
   getMyPayments: (params?: any) => api.get("/payments/my", params),
 
-  // Plans (public)
+  // Plans
   getPlans: () => api.get("/subscriptions/plans"),
 };
 

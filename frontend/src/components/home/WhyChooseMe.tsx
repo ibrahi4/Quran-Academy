@@ -70,7 +70,7 @@ export default function WhyChooseMe() {
               style={{ transitionDelay: `${index * 80}ms` }}
             >
               <div className="w-12 h-12 rounded-xl bg-primary/5 group-hover:bg-primary/10 flex items-center justify-center mb-4 transition-all duration-300 group-hover:scale-110">
-                <Icon className="w-5 h-5 text-primary" />
+                <Icon className="w-5 h-5 " />
               </div>
 
               <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">

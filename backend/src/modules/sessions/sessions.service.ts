@@ -192,7 +192,24 @@ export class SessionsService {
     if (!session.teacherId || !session.teacher) {
       throw new BadRequestException('No teacher assigned to this session');
     }
+// Check if a teacher report exists
+    const existingReport = await this.prisma.sessionReport.findUnique({
+      where: { sessionId },
+    });
 
+    if (existingReport) {
+      // APPROVED reports allow confirmation (this is the new flow)
+      if (existingReport.status === 'APPROVED') {
+        this.logger.log(`Session ${sessionId} being confirmed after report approval`);
+        // Continue to confirm — this is the expected flow
+      } else if (existingReport.status === 'SUBMITTED' || existingReport.status === 'CHANGES_REQUESTED') {
+        // Pending review — block confirmation
+        throw new BadRequestException(
+          `Cannot confirm session: report status is ${existingReport.status}. Please approve the report first at /admin/reports.`,
+        );
+      }
+      // REJECTED or DRAFT → allow manual confirm as fallback
+    }
     // Update session
     const updated = await this.prisma.session.update({
       where: { id: sessionId },
