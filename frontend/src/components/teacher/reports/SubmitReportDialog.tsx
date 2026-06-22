@@ -16,16 +16,9 @@ import {
   CheckCircle2, Loader2, Star, BookOpen, ClipboardList,
   User, GraduationCap, AlertTriangle,
 } from "lucide-react";
+import type { Session } from "@/types/session";
 
-// ── Types ─────────────────────────────────────────────────────
-interface Session {
-  id: string;
-  title: string;
-  date: string;
-  duration: number;
-  student: { id: string; user: { firstName: string; lastName: string } };
-  booking?: { type?: string } | null;
-}
+// ── Types imported from @/types/session ──
 
 interface ReportForm {
   studentAttended: boolean;
