@@ -3,7 +3,7 @@
 import React from "react";
 import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
-import Container from "@/components/shared/Container";
+import Container from "@/components/shared/Container";gi
 import StepsSection from "./StepsSection";
 import PlatformsSection from "./PlatformsSection";
 import HowItWorksCTA from "./HowItWorksCTA";
