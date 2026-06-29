@@ -23,7 +23,7 @@ export default function Logo({ className = "", light = false }: LogoProps) {
     <Link href="/" className={`flex items-center gap-3 group ${className}`}>
       {/* Logo Icon */}
       <div className="relative">
-        <div className="relative w-17 h-17 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden">
+        <div className="relative w-15 h-15 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden">
           <Image
             src="/Tajwedo-Public-Assets/logo.png"
             alt="Tajwedo Academy"
@@ -48,7 +48,7 @@ export default function Logo({ className = "", light = false }: LogoProps) {
         </h1>
  
         <span
-          className={`mt-1 text-[11px] font-semibold tracking-[0.28em] ${
+          className={`mt-1 pl-1 text-[11px] font-semibold tracking-[0.55em] ${
             light ? "text-white/70" : "text-[#B78A2A]"
           }`}
         >
