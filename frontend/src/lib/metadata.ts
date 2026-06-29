@@ -1,4 +1,4 @@
-﻿import { Metadata } from "next";
+import { Metadata } from "next";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ibrahimabdelnasser.com";
 
@@ -21,7 +21,7 @@ export function createMetadata({
       title,
       description,
       url,
-      siteName: "Quranic Academy",
+      siteName: "Tajwedo Academy",
       images: [{ url: `${baseUrl}${ogImage}`, width: 1200, height: 630 }],
       locale: "en_US",
       type: "website",

@@ -1,12 +1,12 @@
 /**
  * Centralized service images (LOCAL)
- * Path: /public/Quranic-Public-Assets/Services/
+ * Path: /public/Tajwedo-Public-Assets/Services/
  *
  * To change an image: just replace the file in the public folder
  * with the same name (or update the path here).
  */
 
-const BASE_PATH = "/Quranic-Public-Assets/Services";
+const BASE_PATH = "/Tajwedo-Public-Assets/Services";
 
 export const SERVICE_IMAGES: Record<string, string> = {
   "quran-recitation": `${BASE_PATH}/Quran Recitation.jpeg`,

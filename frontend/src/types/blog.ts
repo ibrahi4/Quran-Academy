@@ -61,7 +61,7 @@ export function formatBlogPost(
 
   const authorName = post.author
     ? `${post.author.firstName} ${post.author.lastName}`
-    : 'Quranic Academy';
+    : 'Tajwedo Academy';
 
   const category = post.tags?.[0] || 'general';
 

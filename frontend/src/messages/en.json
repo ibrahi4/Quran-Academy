@@ -45,7 +45,7 @@
                                 "count":  "4",
                                 "items":  {
                                               "0":  {
-                                                        "q":  "Who is Quranic Academy?",
+                                                        "q":  "Who is Tajwedo Academy?",
                                                         "a":  "A certified Quran and Arabic teacher with over 10 years of experience."
                                                     },
                                               "1":  {
@@ -297,7 +297,7 @@
                                                               "country":  "USA",
                                                               "category":  "parents",
                                                               "rating":  "5",
-                                                              "text":  "My children have been learning with Quranic Academy for over a year. His patience is unmatched!",
+                                                              "text":  "My children have been learning with Tajwedo Academy for over a year. His patience is unmatched!",
                                                               "course":  "Quran \u0026 Tajweed"
                                                           },
                                                     "1":  {
@@ -689,7 +689,7 @@
                                                                        },
                                                                  "3":  {
                                                                            "value":  "MSA",
-                                                                           "label":  "\u0026 Quranic"
+                                                                           "label":  "\u0026 Tajwedo"
                                                                        }
                                                              },
                                                    "features":  {
@@ -712,14 +712,14 @@
                                                                                         },
                                                                                   "3":  {
                                                                                             "title":  "Vocabulary",
-                                                                                            "description":  "Practical and Quranic terms."
+                                                                                            "description":  "Practical and Tajwedo terms."
                                                                                         },
                                                                                   "4":  {
                                                                                             "title":  "Conversation",
                                                                                             "description":  "Real-life speaking practice."
                                                                                         },
                                                                                   "5":  {
-                                                                                            "title":  "Quranic Arabic",
+                                                                                            "title":  "Tajwedo Arabic",
                                                                                             "description":  "Understand the Quran in Arabic."
                                                                                         }
                                                                               }
@@ -759,7 +759,7 @@
                                                                                                "topics":  {
                                                                                                               "0":  "Advanced Nahw \u0026 Sarf",
                                                                                                               "1":  "Literature and rhetoric",
-                                                                                                              "2":  "Quranic Arabic analysis",
+                                                                                                              "2":  "Tajwedo Arabic analysis",
                                                                                                               "3":  "Formal writing"
                                                                                                           }
                                                                                            }
@@ -1210,7 +1210,7 @@
                                                        "category":  "quran",
                                                        "date":  "Jan 15, 2025",
                                                        "readTime":  "8 min read",
-                                                       "author":  "Quranic Academr"
+                                                       "author":  "Tajwedo Academr"
                                                    },
                                              "1":  {
                                                        "slug":  "tajweed-tips-for-beginners",
@@ -1219,7 +1219,7 @@
                                                        "category":  "tajweed",
                                                        "date":  "Feb 3, 2025",
                                                        "readTime":  "6 min read",
-                                                       "author":  "Ibrahim Abdelnasser"
+                                                       "author":  "Tajwedo Academy"
                                                    },
                                              "2":  {
                                                        "slug":  "benefits-of-memorizing-quran",
@@ -1228,7 +1228,7 @@
                                                        "category":  "quran",
                                                        "date":  "Feb 20, 2025",
                                                        "readTime":  "7 min read",
-                                                       "author":  "Ibrahim Abdelnasser"
+                                                       "author":  "Tajwedo Academy"
                                                    },
                                              "3":  {
                                                        "slug":  "arabic-language-learning-guide",
@@ -1237,7 +1237,7 @@
                                                        "category":  "arabic",
                                                        "date":  "Mar 8, 2025",
                                                        "readTime":  "10 min read",
-                                                       "author":  "Ibrahim Abdelnasser"
+                                                       "author":  "Tajwedo Academy"
                                                    },
                                              "4":  {
                                                        "slug":  "new-muslim-first-steps",
@@ -1246,7 +1246,7 @@
                                                        "category":  "islamic",
                                                        "date":  "Mar 25, 2025",
                                                        "readTime":  "9 min read",
-                                                       "author":  "Ibrahim Abdelnasser"
+                                                       "author":  "Tajwedo Academy"
                                                    },
                                              "5":  {
                                                        "slug":  "teaching-quran-to-kids",
@@ -1255,7 +1255,7 @@
                                                        "category":  "tips",
                                                        "date":  "Apr 10, 2025",
                                                        "readTime":  "7 min read",
-                                                       "author":  "Ibrahim Abdelnasser"
+                                                       "author":  "Tajwedo Academy"
                                                    }
                                          }
                            },
@@ -1269,7 +1269,7 @@
                       "how-to-start-learning-quran":  {
                                                           "title":  "How to Start Learning Quran as a Complete Beginner",
                                                           "category":  "Quran",
-                                                          "author":  "Ibrahim Abdelnasser",
+                                                          "author":  "Tajwedo Academy",
                                                           "date":  "January 15, 2025",
                                                           "readTime":  "8 min read",
                                                           "introduction":  "Learning the Quran is one of the most rewarding journeys a Muslim can embark on. This guide walks you through everything you need to get started.",
@@ -1281,7 +1281,7 @@
                                                                                  },
                                                                            "1":  {
                                                                                      "heading":  "Learn Basic Vowels and Pronunciation",
-                                                                                     "content":  "Master Fatha, Kasra, Damma, Sukoon, and Shaddah. Practice daily with simple words before moving to Quranic text."
+                                                                                     "content":  "Master Fatha, Kasra, Damma, Sukoon, and Shaddah. Practice daily with simple words before moving to Tajwedo text."
                                                                                  },
                                                                            "2":  {
                                                                                      "heading":  "Find a Qualified Teacher",
@@ -1302,7 +1302,7 @@
                       "tajweed-tips-for-beginners":  {
                                                          "title":  "10 Essential Tajweed Tips Every Beginner Should Know",
                                                          "category":  "Tajweed",
-                                                         "author":  "Ibrahim Abdelnasser",
+                                                         "author":  "Tajwedo Academy",
                                                          "date":  "February 3, 2025",
                                                          "readTime":  "6 min read",
                                                          "introduction":  "Tajweed is the science of reciting the Quran correctly. With the right approach, it becomes natural and enjoyable.",
@@ -1335,7 +1335,7 @@
                       "benefits-of-memorizing-quran":  {
                                                            "title":  "The Incredible Benefits of Memorizing the Quran",
                                                            "category":  "Quran",
-                                                           "author":  "Ibrahim Abdelnasser",
+                                                           "author":  "Tajwedo Academy",
                                                            "date":  "February 20, 2025",
                                                            "readTime":  "7 min read",
                                                            "introduction":  "Hifz offers incredible benefits for your mind, heart, and daily life beyond spiritual rewards.",
@@ -1368,7 +1368,7 @@
                       "arabic-language-learning-guide":  {
                                                              "title":  "The Ultimate Guide to Learning Arabic",
                                                              "category":  "Arabic",
-                                                             "author":  "Ibrahim Abdelnasser",
+                                                             "author":  "Tajwedo Academy",
                                                              "date":  "March 8, 2025",
                                                              "readTime":  "10 min read",
                                                              "introduction":  "Arabic opens incredible doors ??? understanding the Quran, communication, and Islamic studies.",
@@ -1376,7 +1376,7 @@
                                                              "sections":  {
                                                                               "0":  {
                                                                                         "heading":  "Choose the Right Type",
-                                                                                        "content":  "MSA for formal, Quranic for religious texts, Colloquial for conversation. Choose based on your goals."
+                                                                                        "content":  "MSA for formal, Tajwedo for religious texts, Colloquial for conversation. Choose based on your goals."
                                                                                     },
                                                                               "1":  {
                                                                                         "heading":  "Master the Script",
@@ -1401,7 +1401,7 @@
                       "new-muslim-first-steps":  {
                                                      "title":  "First Steps After Accepting Islam",
                                                      "category":  "Islamic Studies",
-                                                     "author":  "Ibrahim Abdelnasser",
+                                                     "author":  "Tajwedo Academy",
                                                      "date":  "March 25, 2025",
                                                      "readTime":  "9 min read",
                                                      "introduction":  "Congratulations on accepting Islam! This guide helps you navigate your first days with confidence.",
@@ -1434,7 +1434,7 @@
                       "teaching-quran-to-kids":  {
                                                      "title":  "How to Make Quran Learning Fun for Kids",
                                                      "category":  "Tips \u0026 Guides",
-                                                     "author":  "Ibrahim Abdelnasser",
+                                                     "author":  "Tajwedo Academy",
                                                      "date":  "April 10, 2025",
                                                      "readTime":  "7 min read",
                                                      "introduction":  "Teaching Quran to children requires creativity, patience, and the right approach.",
@@ -1492,7 +1492,7 @@
                                    },
                   "word-pronunciation":  {
                                              "title":  "Word Pronunciation",
-                                             "description":  "Listen, learn, and practice pronouncing Arabic and Quranic words!"
+                                             "description":  "Listen, learn, and practice pronouncing Arabic and Tajwedo words!"
                                          },
                   "word-writing":  {
                                        "title":  "Word Writing",
@@ -1551,7 +1551,7 @@
                    "location":  "Online ??? Worldwide from Egypt",
                    "verse":  "And say: My Lord, increase me in knowledge",
                    "verseRef":  "Quran 20:114",
-                   "copyright":  "Ibrahim Abdelnasser. All rights reserved.",
+                   "copyright":  "Tajwedo Academy. All rights reserved.",
                    "builtWith":  "Built with",
                    "forUmmah":  "for the Ummah",
                    "links":  {
@@ -1576,7 +1576,7 @@
     "about":  {
                   "sectionTitle":  "Meet Your Teacher",
                   "sectionSubtitle":  "Dedicated to making Quran and Arabic accessible to everyone, everywhere.",
-                  "story1":  "Assalamu Alaikum! I am Ibrahim Abdelnasser, a passionate Quran, Arabic, and Islamic Studies teacher with over a decade of experience helping non-Arabic speakers connect with the beauty of the Quran.",
+                  "story1":  "Assalamu Alaikum! I am Tajwedo Academy, a passionate Quran, Arabic, and Islamic Studies teacher with over a decade of experience helping non-Arabic speakers connect with the beauty of the Quran.",
                   "story2":  "I believe every Muslim deserves access to quality Quran education, regardless of their language or background. My approach combines traditional Islamic scholarship with modern teaching methods, creating an experience that is both authentic and engaging.",
                   "credentials":  {
                                       "0":  "Al-Azhar Educated",
@@ -1590,7 +1590,7 @@
                   "bookTrial":  "Book a Free Trial",
                   "yearsOfExcellence":  "Years of Excellence",
                   "hadithQuote":  "The best of you are those who learn the Quran and teach it",
-                  "teacherName":  "Ibrahim Abdelnasser",
+                  "teacherName":  "Tajwedo Academy",
                   "teacherRole":  "Quran \u0026 Arabic Teacher",
                   "photoPlaceholder":  "Replace with professional photo"
               },
@@ -1659,7 +1659,7 @@
                                             "1":  "1-on-1 Lessons",
                                             "2":  "All Levels Welcome"
                                         },
-                        "teacherName":  "Ibrahim Abdelnasser",
+                        "teacherName":  "Tajwedo Academy",
                         "teacherSubtitle":  "Quran, Arabic \u0026 Islamic Studies",
                         "students":  "Students",
                         "years":  "Years",
@@ -1728,7 +1728,7 @@
                                                         "features":  {
                                                                          "0":  "Alphabet to fluency",
                                                                          "1":  "Grammar fundamentals",
-                                                                         "2":  "Quranic Arabic"
+                                                                         "2":  "Tajwedo Arabic"
                                                                      }
                                                     },
                                               "3":  {
@@ -1818,7 +1818,7 @@
                                                      "flag":  "????????",
                                                      "role":  "University Student",
                                                      "rating":  "5",
-                                                     "text":  "Learning Arabic with Ibrahim has been an amazing experience. He makes the language accessible and fun. I went from knowing zero Arabic to being able to read and understand basic Quranic verses in just a few months.",
+                                                     "text":  "Learning Arabic with Ibrahim has been an amazing experience. He makes the language accessible and fun. I went from knowing zero Arabic to being able to read and understand basic Tajwedo verses in just a few months.",
                                                      "highlight":  "Zero to reading in months"
                                                  }
                                        }
@@ -1844,7 +1844,7 @@
                                }
                  },
     "whyChooseMe":  {
-                        "title":  "Why Learn with Ibrahim?",
+                        "title":  "Why Learn with Tajwedo?",
                         "subtitle":  "What sets my teaching apart and why hundreds of students worldwide choose to learn with me.",
                         "reasons":  {
                                         "0":  {
@@ -1895,13 +1895,13 @@
     },
     "story": {
         "title": "My Story",
-        "teacherName": "Ibrahim Abdelnasser",
+        "teacherName": "Tajwedo Academy",
         "teacherTitle": "Quran & Arabic Teacher",
         "photoPlaceholder": "Replace with professional photo",
         "yearsTeaching": "Years Teaching",
         "paragraphs": {
-            "0": "Assalamu Alaikum! I am Ibrahim Abdelnasser, a passionate Quran, Arabic, and Islamic Studies teacher with over a decade of experience helping non-Arabic speakers connect with the beauty of the Quran.",
-            "1": "I graduated from Al-Azhar University, one of the oldest and most respected Islamic institutions in the world, where I studied Quranic sciences, Tajweed, and Arabic linguistics under the guidance of distinguished scholars.",
+            "0": "Assalamu Alaikum! I am Tajwedo Academy, a passionate Quran, Arabic, and Islamic Studies teacher with over a decade of experience helping non-Arabic speakers connect with the beauty of the Quran.",
+            "1": "I graduated from Al-Azhar University, one of the oldest and most respected Islamic institutions in the world, where I studied Tajwedo sciences, Tajweed, and Arabic linguistics under the guidance of distinguished scholars.",
             "2": "I believe every Muslim deserves access to quality Quran education, regardless of their language or background. My approach combines traditional Islamic scholarship with modern teaching methods, creating an experience that is both authentic and engaging.",
             "3": "Over the years, I have had the honor of teaching hundreds of students from over 25 countries, watching them grow from struggling beginners to confident reciters of the Book of Allah."
         },
@@ -1914,7 +1914,7 @@
         "items": {
             "0": {
                 "title": "Al-Azhar University",
-                "description": "Graduated from the prestigious Al-Azhar University with specialization in Quranic Sciences and Arabic Linguistics."
+                "description": "Graduated from the prestigious Al-Azhar University with specialization in Tajwedo Sciences and Arabic Linguistics."
             },
             "1": {
                 "title": "Ijazah Certified",
@@ -1977,7 +1977,7 @@
             "2": {
                 "year": "2014",
                 "title": "Joined Al-Azhar",
-                "description": "Started formal studies at Al-Azhar University in Quranic Sciences and Arabic."
+                "description": "Started formal studies at Al-Azhar University in Tajwedo Sciences and Arabic."
             },
             "3": {
                 "year": "2016",
@@ -2046,14 +2046,14 @@
                                                 },
                                           "2":  {
                                                     "title":  "Arabic Language",
-                                                    "description":  "From alphabet to fluency. Learn Arabic reading, writing, grammar, and Quranic understanding in a structured way.",
+                                                    "description":  "From alphabet to fluency. Learn Arabic reading, writing, grammar, and Tajwedo understanding in a structured way.",
                                                     "bestFor":  "Complete beginners to intermediate learners",
                                                     "features":  {
                                                                      "0":  "Arabic alphabet and reading skills",
                                                                      "1":  "Grammar (Nahw) fundamentals",
                                                                      "2":  "Morphology (Sarf) basics",
                                                                      "3":  "Vocabulary building",
-                                                                     "4":  "Quranic Arabic understanding",
+                                                                     "4":  "Tajwedo Arabic understanding",
                                                                      "5":  "Conversational Arabic basics"
                                                                  }
                                                 },
@@ -2107,7 +2107,7 @@
                  "loginTitle":  "Welcome Back",
                  "loginSubtitle":  "Sign in to your account",
                  "registerTitle":  "Create Account",
-                 "registerSubtitle":  "Join Ibrahim Quran Academy",
+                 "registerSubtitle":  "Join Tajwedo Academy",
                  "email":  "Email Address",
                  "emailPlaceholder":  "your@email.com",
                  "password":  "Password",

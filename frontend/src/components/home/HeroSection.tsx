@@ -8,7 +8,20 @@ import { useLocale } from "@/hooks/useLocale";
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
+  const [currentWord, setCurrentWord] = useState(0);
   const { isRTL } = useLocale();
+
+  // Rotating services that the academy offers
+  const rotatingWords = isRTL
+    ? ["القرآن الكريم", "اللغة العربية", "قواعد التجويد", "الدراسات الإسلامية"]
+    : ["The Holy Quran", "Arabic Language", "Tajweed Rules", "Islamic Studies"];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWord((prev) => (prev + 1) % rotatingWords.length);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [rotatingWords.length]);
 
   const headingFont = isRTL ? "var(--font-arabic)" : "var(--font-display)";
   const bodyFont = isRTL ? "var(--font-arabic)" : "var(--font-body)";
@@ -21,10 +34,10 @@ export default function HeroSection() {
     ? {
         badge: "نستقبل طلاب جدد لعام 2026",
         titleLine1: "تعلّم",
-        titleHighlight: "اللغة العربية",
+        titleHighlight: rotatingWords[currentWord],
         titleLine3: "مع معلّم موثوق",
         subtitle:
-          "انضم إلى أكاديمية قرآنك لتعليم القرآن واللغة العربية مع معلّمين معتمدين من الأزهر الشريف.",
+          "انضم إلى أكاديمية تجويدو لتعليم القرآن واللغة العربية مع معلّمين معتمدين من الأزهر الشريف.",
         primaryCta: "ابدأ التعلّم",
         secondaryCta: "حصة تجريبية مجانية",
         students: "طالب",
@@ -37,10 +50,10 @@ export default function HeroSection() {
     : {
         badge: "Now accepting students for 2026",
         titleLine1: "Learn",
-        titleHighlight: "Arabic Language",
+        titleHighlight: rotatingWords[currentWord],
         titleLine3: "with a Trusted Teacher",
         subtitle:
-          "Join Quranic Academy for premium Quran and Arabic education with certified Al-Azhar teachers.",
+          "Join Tajwedo Academy for premium Quran and Arabic education with certified Al-Azhar teachers.",
         primaryCta: "Start Learning",
         secondaryCta: "Book Free Trial",
         students: "Students",
@@ -64,7 +77,7 @@ export default function HeroSection() {
           style={{ transformOrigin: "center" }}
         >
           <img
-            src="/Quranic-Public-Assets/herosection.png"
+            src="/Tajwedo-Public-Assets/herosection.png"
             alt=""
             className="w-full h-full object-cover scale-105 animate-slow-zoom"
             loading="eager"
@@ -141,7 +154,8 @@ export default function HeroSection() {
             <span className="block text-[#0D4F4F]">{content.titleLine1}</span>
             <span className="block">
               <span
-                className="relative inline-block"
+                key={currentWord}
+                className="relative inline-block animate-word-fade"
                 style={{
                   background:
                     "linear-gradient(135deg, #C9A567 0%, #A67B5B 50%, #8B6F47 100%)",
@@ -267,7 +281,18 @@ export default function HeroSection() {
           0%, 100% { transform: scale(1.05); }
           50% { transform: scale(1.1); }
         }
+        @keyframes word-fade {
+          0% {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
         .animate-slow-zoom { animation: slow-zoom 30s ease-in-out infinite; }
+        .animate-word-fade { animation: word-fade 0.6s ease-out; }
       `}</style>
     </section>
   );

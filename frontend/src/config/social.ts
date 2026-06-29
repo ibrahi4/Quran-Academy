@@ -1,17 +1,17 @@
-﻿export const socialLinks = [
+export const socialLinks = [
   {
     name: "YouTube",
-    href: "https://youtube.com/@Quranic Academy",
+    href: "https://youtube.com/@Tajwedo Academy",
     icon: "Youtube",
   },
   {
     name: "Instagram",
-    href: "https://instagram.com/Quranic Academy",
+    href: "https://instagram.com/Tajwedo Academy",
     icon: "Instagram",
   },
   {
     name: "Facebook",
-    href: "https://facebook.com/Quranic Academy",
+    href: "https://facebook.com/Tajwedo Academy",
     icon: "Facebook",
   },
 ];

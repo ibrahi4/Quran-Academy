@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { motion } from "framer-motion";
 import Container from "@/components/shared/Container";
 import StepsSection from "./StepsSection";
-import WhatYouNeed from "./WhatYouNeed";
 import PlatformsSection from "./PlatformsSection";
 import HowItWorksCTA from "./HowItWorksCTA";
 
@@ -42,7 +41,6 @@ export default function HowItWorksPageContent() {
       </section>
 
       <StepsSection />
-      <WhatYouNeed />
       <PlatformsSection />
       <HowItWorksCTA />
     </main>

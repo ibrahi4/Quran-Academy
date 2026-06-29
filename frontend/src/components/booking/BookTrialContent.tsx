@@ -4,8 +4,8 @@ import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import {
   CheckCircle2, Clock, Video, MessageCircle, Star, Users,
-  Send, Loader2, Sparkles, BookOpen, Heart, Award, Moon,
-  User, Mail, Phone, Globe, Calendar, ChevronRight, ChevronLeft,
+  Send, Loader2, Sparkles, BookOpen, Award,
+  User, Mail, Phone, Globe, Calendar, ChevronRight, ChevronLeft, Cake,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/shared/Container";
@@ -15,6 +15,130 @@ import { useLocale } from "@/hooks/useLocale";
 import { cn } from "@/lib/utils";
 import toast from "react-hot-toast";
 import { Link } from "@/i18n/navigation";
+
+// ── Countries List (with flags + phone codes) ─────────────────
+const countries = [
+  { code: "US", name: "United States",    flag: "🇺🇸", phone: "+1"   },
+  { code: "GB", name: "United Kingdom",   flag: "🇬🇧", phone: "+44"  },
+  { code: "CA", name: "Canada",           flag: "🇨🇦", phone: "+1"   },
+  { code: "AU", name: "Australia",        flag: "🇦🇺", phone: "+61"  },
+  { code: "DE", name: "Germany",          flag: "🇩🇪", phone: "+49"  },
+  { code: "FR", name: "France",           flag: "🇫🇷", phone: "+33"  },
+  { code: "ES", name: "Spain",            flag: "🇪🇸", phone: "+34"  },
+  { code: "IT", name: "Italy",            flag: "🇮🇹", phone: "+39"  },
+  { code: "NL", name: "Netherlands",      flag: "🇳🇱", phone: "+31"  },
+  { code: "BE", name: "Belgium",          flag: "🇧🇪", phone: "+32"  },
+  { code: "SE", name: "Sweden",           flag: "🇸🇪", phone: "+46"  },
+  { code: "NO", name: "Norway",           flag: "🇳🇴", phone: "+47"  },
+  { code: "DK", name: "Denmark",          flag: "🇩🇰", phone: "+45"  },
+  { code: "CH", name: "Switzerland",      flag: "🇨🇭", phone: "+41"  },
+  { code: "AT", name: "Austria",          flag: "🇦🇹", phone: "+43"  },
+  { code: "IE", name: "Ireland",          flag: "🇮🇪", phone: "+353" },
+  { code: "PT", name: "Portugal",         flag: "🇵🇹", phone: "+351" },
+  { code: "PL", name: "Poland",           flag: "🇵🇱", phone: "+48"  },
+  { code: "RU", name: "Russia",           flag: "🇷🇺", phone: "+7"   },
+  { code: "TR", name: "Turkey",           flag: "🇹🇷", phone: "+90"  },
+  // Middle East
+  { code: "SA", name: "Saudi Arabia",     flag: "🇸🇦", phone: "+966" },
+  { code: "AE", name: "UAE",              flag: "🇦🇪", phone: "+971" },
+  { code: "QA", name: "Qatar",            flag: "🇶🇦", phone: "+974" },
+  { code: "KW", name: "Kuwait",           flag: "🇰🇼", phone: "+965" },
+  { code: "BH", name: "Bahrain",          flag: "🇧🇭", phone: "+973" },
+  { code: "OM", name: "Oman",             flag: "🇴🇲", phone: "+968" },
+  { code: "YE", name: "Yemen",            flag: "🇾🇪", phone: "+967" },
+  { code: "IQ", name: "Iraq",             flag: "🇮🇶", phone: "+964" },
+  { code: "JO", name: "Jordan",           flag: "🇯🇴", phone: "+962" },
+  { code: "LB", name: "Lebanon",          flag: "🇱🇧", phone: "+961" },
+  { code: "SY", name: "Syria",            flag: "🇸🇾", phone: "+963" },
+  { code: "PS", name: "Palestine",        flag: "🇵🇸", phone: "+970" },
+  // North Africa
+  { code: "EG", name: "Egypt",            flag: "🇪🇬", phone: "+20"  },
+  { code: "MA", name: "Morocco",          flag: "🇲🇦", phone: "+212" },
+  { code: "DZ", name: "Algeria",          flag: "🇩🇿", phone: "+213" },
+  { code: "TN", name: "Tunisia",          flag: "🇹🇳", phone: "+216" },
+  { code: "LY", name: "Libya",            flag: "🇱🇾", phone: "+218" },
+  { code: "SD", name: "Sudan",            flag: "🇸🇩", phone: "+249" },
+  // Africa
+  { code: "NG", name: "Nigeria",          flag: "🇳🇬", phone: "+234" },
+  { code: "KE", name: "Kenya",            flag: "🇰🇪", phone: "+254" },
+  { code: "ZA", name: "South Africa",     flag: "🇿🇦", phone: "+27"  },
+  { code: "ET", name: "Ethiopia",         flag: "🇪🇹", phone: "+251" },
+  { code: "GH", name: "Ghana",            flag: "🇬🇭", phone: "+233" },
+  { code: "SN", name: "Senegal",          flag: "🇸🇳", phone: "+221" },
+  // Asia
+  { code: "PK", name: "Pakistan",         flag: "🇵🇰", phone: "+92"  },
+  { code: "IN", name: "India",            flag: "🇮🇳", phone: "+91"  },
+  { code: "BD", name: "Bangladesh",       flag: "🇧🇩", phone: "+880" },
+  { code: "ID", name: "Indonesia",        flag: "🇮🇩", phone: "+62"  },
+  { code: "MY", name: "Malaysia",         flag: "🇲🇾", phone: "+60"  },
+  { code: "SG", name: "Singapore",        flag: "🇸🇬", phone: "+65"  },
+  { code: "PH", name: "Philippines",      flag: "🇵🇭", phone: "+63"  },
+  { code: "TH", name: "Thailand",         flag: "🇹🇭", phone: "+66"  },
+  { code: "VN", name: "Vietnam",          flag: "🇻🇳", phone: "+84"  },
+  { code: "JP", name: "Japan",            flag: "🇯🇵", phone: "+81"  },
+  { code: "KR", name: "South Korea",      flag: "🇰🇷", phone: "+82"  },
+  { code: "CN", name: "China",            flag: "🇨🇳", phone: "+86"  },
+  { code: "IR", name: "Iran",             flag: "🇮🇷", phone: "+98"  },
+  { code: "AF", name: "Afghanistan",      flag: "🇦🇫", phone: "+93"  },
+  // Latin America
+  { code: "BR", name: "Brazil",           flag: "🇧🇷", phone: "+55"  },
+  { code: "MX", name: "Mexico",           flag: "🇲🇽", phone: "+52"  },
+  { code: "AR", name: "Argentina",        flag: "🇦🇷", phone: "+54"  },
+  { code: "CL", name: "Chile",            flag: "🇨🇱", phone: "+56"  },
+  { code: "CO", name: "Colombia",         flag: "🇨🇴", phone: "+57"  },
+].sort((a, b) => a.name.localeCompare(b.name));
+
+// ── Grouped Timezones (by region) ─────────────────────────────
+const groupedTimezones = [
+  {
+    region: "🌍 Africa",
+    zones: [
+      "Africa/Cairo", "Africa/Casablanca", "Africa/Algiers", "Africa/Tunis",
+      "Africa/Lagos", "Africa/Nairobi", "Africa/Johannesburg", "Africa/Khartoum",
+    ],
+  },
+  {
+    region: "🕌 Middle East",
+    zones: [
+      "Asia/Riyadh", "Asia/Dubai", "Asia/Qatar", "Asia/Kuwait",
+      "Asia/Baghdad", "Asia/Amman", "Asia/Beirut", "Asia/Damascus",
+      "Asia/Jerusalem", "Asia/Tehran",
+    ],
+  },
+  {
+    region: "🌏 Asia",
+    zones: [
+      "Asia/Karachi", "Asia/Kolkata", "Asia/Dhaka", "Asia/Bangkok",
+      "Asia/Jakarta", "Asia/Singapore", "Asia/Kuala_Lumpur", "Asia/Manila",
+      "Asia/Hong_Kong", "Asia/Shanghai", "Asia/Tokyo", "Asia/Seoul",
+    ],
+  },
+  {
+    region: "🌍 Europe",
+    zones: [
+      "Europe/London", "Europe/Dublin", "Europe/Paris", "Europe/Berlin",
+      "Europe/Madrid", "Europe/Rome", "Europe/Amsterdam", "Europe/Brussels",
+      "Europe/Vienna", "Europe/Zurich", "Europe/Stockholm", "Europe/Oslo",
+      "Europe/Copenhagen", "Europe/Helsinki", "Europe/Warsaw", "Europe/Moscow",
+      "Europe/Istanbul",
+    ],
+  },
+  {
+    region: "🌎 Americas",
+    zones: [
+      "America/New_York", "America/Chicago", "America/Denver", "America/Los_Angeles",
+      "America/Toronto", "America/Vancouver", "America/Mexico_City",
+      "America/Sao_Paulo", "America/Buenos_Aires", "America/Bogota",
+    ],
+  },
+  {
+    region: "🌏 Oceania",
+    zones: [
+      "Australia/Sydney", "Australia/Melbourne", "Australia/Perth",
+      "Pacific/Auckland",
+    ],
+  },
+];
 
 const serviceValues = [
   { value: "quran-recitation", label: "Quran Recitation" },
@@ -31,11 +155,7 @@ const studentTypeValues = [
   { value: "family", label: "For My Family"   },
 ];
 
-const timezones = Intl.supportedValuesOf
-  ? Intl.supportedValuesOf("timeZone")
-  : ["UTC","America/New_York","Europe/London","Asia/Dubai","Africa/Cairo","Asia/Karachi"];
-
-// ── Decorative background (kept from original) ──────────────
+// ── Decorative background ──────────────────────────────────────
 function seededRandom(seed: number) {
   const x = Math.sin(seed + 1) * 10000;
   return x - Math.floor(x);
@@ -100,7 +220,7 @@ function StepBar({ step }: { step: number }) {
   );
 }
 
-// ── Input wrapper ────────────────────────────────────────────
+// ── Field wrapper ────────────────────────────────────────────
 function Field({ label, icon: Icon, required, children }: {
   label: string; icon: any; required?: boolean; children: React.ReactNode;
 }) {
@@ -110,7 +230,7 @@ function Field({ label, icon: Icon, required, children }: {
         {label}{required && <span className="text-red-400 ml-1">*</span>}
       </label>
       <div className="relative">
-        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-10" />
         <div className="[&>*]:pl-10 [&>input]:w-full [&>select]:w-full [&>textarea]:w-full">
           {children}
         </div>
@@ -121,7 +241,7 @@ function Field({ label, icon: Icon, required, children }: {
 
 const inputCls = "w-full px-4 py-3.5 rounded-xl border border-sand-200 bg-sand-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all text-sm";
 
-// ── Success screen ───────────────────────────────────────────
+// ── Success Screen ───────────────────────────────────────────
 function SuccessScreen({ name }: { name: string }) {
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">
@@ -171,6 +291,7 @@ export default function BookTrialContent() {
 
   const [form, setForm] = useState({
     name: "", email: "", phone: "", country: "",
+    dateOfBirth: "",
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     preferredDate: "", preferredTime: "",
     service: "", studentType: "", message: "",
@@ -179,16 +300,34 @@ export default function BookTrialContent() {
   const set = (field: string, value: string) =>
     setForm(prev => ({ ...prev, [field]: value }));
 
+  // Auto-fill phone code when country changes
+  const handleCountryChange = (countryCode: string) => {
+    const country = countries.find(c => c.code === countryCode);
+    if (country) {
+      setForm(prev => ({
+        ...prev,
+        country: country.name,
+        // Only update phone if it's empty or just a phone code
+        phone: prev.phone && !prev.phone.match(/^\+\d{1,4}\s*$/) ? prev.phone : `${country.phone} `,
+      }));
+    }
+  };
+
   const validateStep = () => {
     if (step === 1) {
-      if (!form.name.trim())   { toast.error("Full name is required");     return false; }
-      if (!form.email.trim())  { toast.error("Email is required");          return false; }
-      if (!form.phone.trim())  { toast.error("WhatsApp number is required"); return false; }
-      if (!form.country.trim()){ toast.error("Country is required");        return false; }
+      if (!form.name.trim())        { toast.error("Full name is required");       return false; }
+      if (!form.email.trim())       { toast.error("Email is required");            return false; }
+      if (!form.phone.trim())       { toast.error("WhatsApp number is required");  return false; }
+      if (!form.country.trim())     { toast.error("Country is required");          return false; }
+      if (!form.dateOfBirth)        { toast.error("Date of birth is required");    return false; }
+      // Age validation: must be at least 5 years old
+      const age = (Date.now() - new Date(form.dateOfBirth).getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+      if (age < 5)  { toast.error("Student must be at least 5 years old");        return false; }
+      if (age > 100){ toast.error("Please enter a valid date of birth");          return false; }
     }
     if (step === 2) {
-      if (!form.service)      { toast.error("Please select a service");     return false; }
-      if (!form.studentType)  { toast.error("Please select student type");  return false; }
+      if (!form.service)     { toast.error("Please select a service");    return false; }
+      if (!form.studentType) { toast.error("Please select student type"); return false; }
     }
     return true;
   };
@@ -205,6 +344,7 @@ export default function BookTrialContent() {
         email:         form.email.trim().toLowerCase(),
         phone:         form.phone.trim(),
         country:       form.country.trim(),
+        dateOfBirth:   form.dateOfBirth || undefined,
         timezone:      form.timezone,
         preferredDate: form.preferredDate || undefined,
         preferredTime: form.preferredTime || undefined,
@@ -212,6 +352,7 @@ export default function BookTrialContent() {
         type:          "TRIAL",
         notes: [
           form.studentType ? `Student type: ${form.studentType}` : "",
+          form.dateOfBirth ? `Date of birth: ${form.dateOfBirth}` : "",
           form.message.trim(),
         ].filter(Boolean).join("\n") || undefined,
       });
@@ -224,6 +365,16 @@ export default function BookTrialContent() {
   };
 
   if (success) return <SuccessScreen name={form.name} />;
+
+  // Get max date for DOB (5 years ago)
+  const maxDob = new Date();
+  maxDob.setFullYear(maxDob.getFullYear() - 5);
+  const maxDobStr = maxDob.toISOString().split("T")[0];
+
+  // Min date for DOB (100 years ago)
+  const minDob = new Date();
+  minDob.setFullYear(minDob.getFullYear() - 100);
+  const minDobStr = minDob.toISOString().split("T")[0];
 
   return (
     <main dir={isRTL ? "rtl" : "ltr"}>
@@ -362,21 +513,57 @@ export default function BookTrialContent() {
                             value={form.email} onChange={e => set("email", e.target.value)} />
                         </Field>
                       </div>
+
                       <div className="grid sm:grid-cols-2 gap-4">
+                        <Field label="Country" icon={Globe} required>
+                          <select
+                            className={inputCls}
+                            value={countries.find(c => c.name === form.country)?.code || ""}
+                            onChange={e => handleCountryChange(e.target.value)}
+                          >
+                            <option value="">Select your country...</option>
+                            {countries.map(c => (
+                              <option key={c.code} value={c.code}>
+                                {c.flag} {c.name}
+                              </option>
+                            ))}
+                          </select>
+                        </Field>
                         <Field label="WhatsApp Number" icon={Phone} required>
                           <input type="tel" className={inputCls} placeholder="+1 234 567 8900"
                             value={form.phone} onChange={e => set("phone", e.target.value)} />
                         </Field>
-                        <Field label="Country" icon={Globe} required>
-                          <input className={inputCls} placeholder="United States"
-                            value={form.country} onChange={e => set("country", e.target.value)} />
+                      </div>
+
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <Field label="Date of Birth" icon={Cake} required>
+                          <input
+                            type="date"
+                            className={inputCls}
+                            min={minDobStr}
+                            max={maxDobStr}
+                            value={form.dateOfBirth}
+                            onChange={e => set("dateOfBirth", e.target.value)}
+                          />
+                        </Field>
+                        <Field label="Your Timezone" icon={Clock}>
+                          <select
+                            className={inputCls}
+                            value={form.timezone}
+                            onChange={e => set("timezone", e.target.value)}
+                          >
+                            {groupedTimezones.map(group => (
+                              <optgroup key={group.region} label={group.region}>
+                                {group.zones.map(tz => (
+                                  <option key={tz} value={tz}>
+                                    {tz.split("/")[1].replace(/_/g, " ")}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
+                          </select>
                         </Field>
                       </div>
-                      <Field label="Your Timezone" icon={Globe}>
-                        <select className={inputCls} value={form.timezone} onChange={e => set("timezone", e.target.value)}>
-                          {timezones.map(tz => <option key={tz} value={tz}>{tz.replace(/_/g, " ")}</option>)}
-                        </select>
-                      </Field>
                     </motion.div>
                   )}
 
@@ -420,14 +607,16 @@ export default function BookTrialContent() {
                       <div className="bg-sand-50 rounded-2xl p-5 border border-sand-200 space-y-3">
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Review Your Details</p>
                         {[
-                          { label: "Full Name",  value: form.name            },
-                          { label: "Email",      value: form.email           },
-                          { label: "WhatsApp",   value: form.phone           },
-                          { label: "Country",    value: form.country         },
-                          { label: "Service",    value: serviceValues.find(s => s.value === form.service)?.label      || "—" },
-                          { label: "Student",    value: studentTypeValues.find(s => s.value === form.studentType)?.label || "—" },
-                          { label: "Date",       value: form.preferredDate   || "Flexible" },
-                          { label: "Time",       value: form.preferredTime   || "Flexible" },
+                          { label: "Full Name",      value: form.name            },
+                          { label: "Email",          value: form.email           },
+                          { label: "WhatsApp",       value: form.phone           },
+                          { label: "Country",        value: form.country         },
+                          { label: "Date of Birth",  value: form.dateOfBirth     },
+                          { label: "Timezone",       value: form.timezone.split("/")[1]?.replace(/_/g, " ") || form.timezone },
+                          { label: "Service",        value: serviceValues.find(s => s.value === form.service)?.label || "—" },
+                          { label: "Student",        value: studentTypeValues.find(s => s.value === form.studentType)?.label || "—" },
+                          { label: "Date",           value: form.preferredDate   || "Flexible" },
+                          { label: "Time",           value: form.preferredTime   || "Flexible" },
                         ].map(({ label, value }) => (
                           <div key={label} className="flex items-center justify-between py-1.5 border-b border-sand-200/60 last:border-0">
                             <span className="text-xs text-gray-500 font-medium">{label}</span>
