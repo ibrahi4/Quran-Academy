@@ -1,4 +1,4 @@
-import BookTrialContent from '@/components/booking/BookTrialContent';
+import BookTrialContent from '@/components/book-trial/BookTrialContent';
 
 export default function BookTrialPage() {
   return <BookTrialContent />;

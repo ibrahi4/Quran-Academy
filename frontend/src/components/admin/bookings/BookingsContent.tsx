@@ -9,7 +9,7 @@ import {
   Loader2, Search, Eye, ChevronLeft, ChevronRight,
   CalendarCheck, Clock, CheckCircle2, XCircle, AlertCircle,
   Globe, Phone, Mail, User, Link as LinkIcon, UserCheck,
-  Calendar, Timer,
+  Calendar, Timer, Cake, UserCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,11 +35,20 @@ interface Booking {
   phone?: string;
   country?: string;
   timezone?: string;
+  dateOfBirth?: string;
+  age?: number | null;
+  gender?: "MALE" | "FEMALE";
+  studentType?: string;
+  nativeLanguage?: string;
+  currentLevel?: string;
+  parentName?: string;
+  parentPhone?: string;
+  parentRelation?: string;
   preferredDate?: string;
   preferredTime?: string;
   serviceSlug?: string;
   type: "TRIAL" | "REGULAR" | "MAKEUP";
-  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "NO_SHOW";
+  status: "PENDING" | "CONFIRMED" | "COMPLETED" | "CANCELLED" | "MISSED" | "NO_SHOW";
   notes?: string;
   adminNotes?: string;
   meetingLink?: string;
@@ -293,6 +302,7 @@ export default function BookingsContent() {
                 <thead>
                   <tr className="border-b bg-gray-50/80">
                     <th className="px-4 py-3 font-medium text-muted-foreground text-left">Client</th>
+                    <th className="px-4 py-3 font-medium text-muted-foreground text-center">Age</th>
                     <th className="px-4 py-3 font-medium text-muted-foreground text-left">Service</th>
                     <th className="px-4 py-3 font-medium text-muted-foreground text-center">Type</th>
                     <th className="px-4 py-3 font-medium text-muted-foreground text-center">Status</th>
@@ -307,6 +317,20 @@ export default function BookingsContent() {
                       <td className="px-4 py-3">
                         <p className="font-medium text-gray-900">{b.name}</p>
                         <p className="text-xs text-muted-foreground">{b.email}</p>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        {b.age != null ? (
+                          <Badge variant="outline" className={cn(
+                            "text-xs font-bold",
+                            b.age < 13 ? "bg-blue-50 text-blue-700 border-blue-200" :
+                            b.age < 18 ? "bg-purple-50 text-purple-700 border-purple-200" :
+                            "bg-gray-50 text-gray-700 border-gray-200"
+                          )}>
+                            {b.age} {b.age < 13 ? "🧒" : b.age < 18 ? "🧑" : "👤"}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground text-xs">{b.serviceSlug || "—"}</td>
                       <td className="px-4 py-3 text-center"><TypeBadge type={b.type} /></td>
@@ -383,12 +407,17 @@ export default function BookingsContent() {
               <Separator />
               <div className="grid grid-cols-2 gap-4 text-sm">
                 {[
-                  { icon: User,         label: "Name",     value: selected.name           },
-                  { icon: Mail,         label: "Email",    value: selected.email          },
-                  { icon: Phone,        label: "Phone",    value: selected.phone || "—"   },
-                  { icon: Globe,        label: "Country",  value: selected.country || "—" },
-                  { icon: Clock,        label: "Timezone", value: selected.timezone || "—"},
-                  { icon: CalendarCheck,label: "Preferred",value: `${selected.preferredDate ? formatDate(selected.preferredDate) : "—"} ${selected.preferredTime || ""}` },
+                  { icon: User,         label: "Name",         value: selected.name           },
+                  { icon: Mail,         label: "Email",        value: selected.email          },
+                  { icon: Phone,        label: "Phone",        value: selected.phone || "—"   },
+                  { icon: Globe,        label: "Country",      value: selected.country || "—" },
+                  { icon: Cake,         label: "Date of Birth",value: selected.dateOfBirth ? `${formatDate(selected.dateOfBirth)} (Age: ${selected.age ?? "?"})` : "—" },
+                  { icon: UserCircle,   label: "Gender",       value: selected.gender || "—" },
+                  { icon: UserCircle,   label: "Type",         value: selected.studentType || "—" },
+                  { icon: Globe,        label: "Language",     value: selected.nativeLanguage || "—" },
+                  { icon: User,         label: "Level",        value: selected.currentLevel || "—" },
+                  { icon: Clock,        label: "Timezone",     value: selected.timezone || "—"},
+                  { icon: CalendarCheck,label: "Preferred",    value: `${selected.preferredDate ? formatDate(selected.preferredDate) : "—"} ${selected.preferredTime || ""}` },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-start gap-2">
                     <Icon className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
