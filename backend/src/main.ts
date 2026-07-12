@@ -35,8 +35,8 @@ async function bootstrap() {
 
   // Swagger
   const config = new DocumentBuilder()
-    .setTitle("Quranic Academy API")
-    .setDescription("Enterprise API for Quranic Academy")
+    .setTitle("Tajwedo Academy API")
+    .setDescription("Enterprise API for Tajwedo Academy")
     .setVersion("1.0")
     .addBearerAuth()
     .build();

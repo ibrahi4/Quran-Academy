@@ -20,10 +20,10 @@ export default function Logo({ className = "", light = false }: LogoProps) {
   const { isRTL } = useLocale();
 
   return (
-    <Link href="/" className={`flex items-center gap-3 group ${className}`}>
+    <Link href="/" className={`flex items-center gap-2 group ${className}`}>
       {/* Logo Icon */}
       <div className="relative">
-        <div className="relative w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden">
+        <div className="relative w-18 h-18 pb-2 rounded- flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden">
           <Image
             src="/Tajwedo-Public-Assets/logo.png"
             alt="Tajwedo Academy"
@@ -39,7 +39,7 @@ export default function Logo({ className = "", light = false }: LogoProps) {
       {/* Brand Text */}
       <div className={`flex flex-col leading-none ${manrope.className}`}>
         <h1
-          className={`text-[27px] font-extrabold tracking-[-0.05em] ${
+          className={`text-[25px] font-extrabold tracking-[-0.05em] ${
             light ? "text-white" : "text-[#163A32]"
           }`}
         >

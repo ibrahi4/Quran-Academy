@@ -1,80 +1,70 @@
 import React from "react";
+import type { Metadata } from "next";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import { NextIntlClientProvider, hasLocale } from "next-intl";
-import { getMessages } from "next-intl/server";
-import { routing } from "@/i18n/routing";
-import { siteConfig } from "@/config/site";
-import AuthProvider from "@/providers/AuthProvider";
-import { Toaster } from "react-hot-toast";
-import SetLocaleAttributes from "@/components/shared/SetLocaleAttributes";
 import LayoutShellClient from "@/components/layout/LayoutShellClient";
 
-export const metadata = {
-  title: {
-    default: siteConfig.title,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  icons: {
-    icon: [
-      { url: "/Quranic_Public_Assets/icon.png", type: "image/png" },
-      { url: "/Quranic_Public_Assets/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/Quranic_Public_Assets/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: "/Quranic_Public_Assets/apple-icon.png",
-    shortcut: "/Quranic_Public_Assets/favicon.ico",
-  },
-  openGraph: {
-    title: siteConfig.title,
-    description: siteConfig.description,
-    images: ["/Quranic_Public_Assets/og-image.jpg"],
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: siteConfig.title,
-    description: siteConfig.description,
-    images: ["/Quranic_Public_Assets/og-image.jpg"],
-  },
-};
+const locales = ["en", "ar"] as const;
+type Locale = (typeof locales)[number];
 
-export function generateStaticParams() {
-  return routing.locales.map((locale) => ({ locale }));
+export async function generateStaticParams() {
+  return locales.map((locale) => ({ locale }));
 }
 
-type Props = {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const isArabic = locale === "ar";
+
+  const title = isArabic
+    ? "\u0623\u0643\u0627\u062F\u064A\u0645\u064A\u0629 \u062A\u062C\u0648\u064A\u062F\u0648"
+    : "Tajwedo Academy";
+
+  const description = isArabic
+    ? "\u0623\u0643\u0627\u062F\u064A\u0645\u064A\u0629 \u062A\u0639\u0644\u064A\u0645 \u0627\u0644\u0642\u0631\u0622\u0646 \u0623\u0648\u0646\u0644\u0627\u064A\u0646 \u0644\u0644\u062A\u0644\u0627\u0648\u0629 \u0648\u0627\u0644\u062A\u062C\u0648\u064A\u062F \u0648\u0627\u0644\u062D\u0641\u0638 \u0648\u0627\u0644\u062F\u0631\u0627\u0633\u0627\u062A \u0627\u0644\u0625\u0633\u0644\u0627\u0645\u064A\u0629."
+    : "Online Quran academy for recitation, Tajweed, memorization, and Islamic studies.";
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: ["/Tajwedo-Public-Assets/herosection.png"],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/Tajwedo-Public-Assets/herosection.png"],
+    },
+  };
+}
+
+export default async function LocaleLayout({
+  children,
+  params,
+}: {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
-};
-
-export default async function LocaleLayout({ children, params }: Props) {
+}) {
   const { locale } = await params;
 
-  if (!hasLocale(routing.locales, locale)) {
+  if (!locales.includes(locale as Locale)) {
     notFound();
   }
 
-  const messages = await getMessages();
-  const isRTL = locale === "ar";
+  setRequestLocale(locale);
+
+  const messages = await getMessages({ locale });
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <AuthProvider>
-        <SetLocaleAttributes locale={locale} isRTL={isRTL} />
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            duration: 4000,
-            style: {
-              background: '#0D4F4F',
-              color: '#fff',
-              borderRadius: '12px',
-              padding: '16px',
-            },
-          }}
-        />
-        <LayoutShellClient>{children}</LayoutShellClient>
-      </AuthProvider>
+      <LayoutShellClient>{children}</LayoutShellClient>
     </NextIntlClientProvider>
   );
 }

@@ -54,7 +54,7 @@ export default function LoginForm() {
             <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
-            <span className="text-2xl font-bold text-primary">IQA</span>
+            <span className="text-2xl font-bold text-primary">Tajwedo</span>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('loginTitle')}</h1>
           <p className="text-gray-500">{t('loginSubtitle')}</p>
@@ -139,8 +139,8 @@ export default function LoginForm() {
           {/* Register Link */}
           <p className="text-center text-sm text-gray-600">
             {t('noAccount')}{' '}
-            <Link href="/auth/register" className="text-primary font-semibold hover:underline">
-              {t('registerLink')}
+            <Link href="/book-trial" className="text-primary font-semibold hover:underline">
+              {t('bookTrialLink') || 'Book a Free Trial'}
             </Link>
           </p>
         </div>

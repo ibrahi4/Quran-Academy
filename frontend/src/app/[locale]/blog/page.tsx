@@ -5,7 +5,7 @@ import BlogPageContent from "@/components/blog/BlogPageContent";
 export const metadata: Metadata = {
   title: "Blog",
   description:
-    "Read articles about Quran learning, Tajweed tips, Arabic language guides, and Islamic knowledge from Quranic Academy.",
+    "Read articles about Quran learning, Tajweed tips, Arabic language guides, and Islamic knowledge from Tajwedo Academy.",
 };
 
 export default function BlogPage() {

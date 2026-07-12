@@ -199,22 +199,22 @@ export default function HeroSection() {
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-3 mb-10">
-            <Link href="/auth/register">
-              <Button
-                size="lg"
-                className="group relative overflow-hidden rounded-xl px-7 h-[54px] text-[15px] font-semibold bg-gradient-to-br from-[#0D4F4F] to-[#093838] hover:from-[#125e5e] hover:to-[#0D4F4F] text-white shadow-[0_8px_24px_rgba(13,79,79,0.3)] hover:shadow-[0_12px_32px_rgba(13,79,79,0.4)] transition-all duration-300 hover:-translate-y-0.5 border-0 w-full sm:w-auto"
-              >
-                <span className="relative z-10 flex items-center justify-center">
-                  {content.primaryCta}
-                  {isRTL ? (
-                    <ArrowLeft className="w-4 h-4 ms-2 group-hover:-translate-x-1 transition-transform" />
-                  ) : (
-                    <ArrowRight className="w-4 h-4 ms-2 group-hover:translate-x-1 transition-transform" />
-                  )}
-                </span>
-                <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-              </Button>
-            </Link>
+         <Link href="/services">
+  <Button
+    size="lg"
+    className="group relative overflow-hidden rounded-xl px-7 h-[54px] text-[15px] font-semibold bg-gradient-to-br from-[#0D4F4F] to-[#093838] hover:from-[#125e5e] hover:to-[#0D4F4F] text-white shadow-[0_8px_24px_rgba(13,79,79,0.3)] hover:shadow-[0_12px_32px_rgba(13,79,79,0.4)] transition-all duration-300 hover:-translate-y-0.5 border-0 w-full sm:w-auto"
+  >
+    <span className="relative z-10 flex items-center justify-center">
+      {isRTL ? "\u0627\u0633\u062A\u0643\u0634\u0641 \u0627\u0644\u062E\u062F\u0645\u0627\u062A" : "Explore Services"}
+      {isRTL ? (
+        <ArrowLeft className="w-4 h-4 ms-2 group-hover:-translate-x-1 transition-transform" />
+      ) : (
+        <ArrowRight className="w-4 h-4 ms-2 group-hover:translate-x-1 transition-transform" />
+      )}
+    </span>
+    <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+  </Button>
+</Link>
 
             <Link href="/book-trial">
               <button className="group w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 h-[54px] rounded-xl text-[#0D4F4F] font-semibold text-[15px] bg-white/85 hover:bg-white border border-[#E8DFD0] hover:border-[#0D4F4F]/40 transition-all duration-300 backdrop-blur-sm shadow-[0_2px_8px_rgba(13,79,79,0.06)] hover:shadow-[0_6px_16px_rgba(13,79,79,0.12)]">

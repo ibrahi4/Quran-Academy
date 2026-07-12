@@ -23,7 +23,7 @@ export class NotificationsService {
     const user = process.env.SMTP_USER;
     const pass = process.env.SMTP_PASS;
 
-    this.fromName = process.env.SMTP_FROM_NAME || 'Quranic Academy';
+    this.fromName = process.env.SMTP_FROM_NAME || 'Tajwedo Academy';
     this.fromEmail = process.env.SMTP_FROM_EMAIL || user || 'noreply@example.com';
     this.adminEmail = process.env.ADMIN_EMAIL || this.fromEmail;
     this.frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
@@ -72,7 +72,7 @@ export class NotificationsService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Quranic Academy</title>
+  <title>Tajwedo Academy</title>
 </head>
 <body style="margin:0;padding:0;background-color:#FAFAF7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;">
   <span style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">${preheader}</span>
@@ -86,7 +86,7 @@ export class NotificationsService {
           <tr>
             <td style="background:linear-gradient(135deg,#0D4F4F 0%,#0a3d3d 100%);padding:32px 40px;text-align:center;">
               <div style="display:inline-block;width:56px;height:56px;background:rgba(200,169,110,0.2);border:2px solid #C8A96E;border-radius:14px;line-height:56px;text-align:center;font-size:24px;margin-bottom:12px;">📖</div>
-              <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">Quranic Academy</h1>
+              <h1 style="margin:0;color:#fff;font-size:22px;font-weight:700;letter-spacing:-0.3px;">Tajwedo Academy</h1>
               <p style="margin:6px 0 0;color:rgba(255,255,255,0.7);font-size:13px;">Learn Quran with Excellence</p>
             </td>
           </tr>
@@ -105,7 +105,7 @@ export class NotificationsService {
                 Need help? Email us at <a href="mailto:${this.adminEmail}" style="color:#0D4F4F;text-decoration:none;font-weight:600;">${this.adminEmail}</a>
               </p>
               <p style="margin:0;color:#aaa;font-size:11px;">
-                © ${new Date().getFullYear()} Quranic Academy. All rights reserved.
+                © ${new Date().getFullYear()} Tajwedo Academy. All rights reserved.
               </p>
             </td>
           </tr>
@@ -178,7 +178,7 @@ export class NotificationsService {
 
     return this.send({
       to: data.email,
-      subject: `Welcome to Quranic Academy! 🎉 Your trial is being scheduled`,
+      subject: `Welcome to Tajwedo Academy! 🎉 Your trial is being scheduled`,
       html: this.wrapEmail(content, `Welcome ${data.name}! Your trial booking has been received.`),
     });
   }
@@ -278,7 +278,7 @@ export class NotificationsService {
 
     return this.send({
       to: email,
-      subject: 'Reset Your Password - Quranic Academy',
+      subject: 'Reset Your Password - Tajwedo Academy',
       html: this.wrapEmail(content, 'Reset your password link inside'),
     });
   }

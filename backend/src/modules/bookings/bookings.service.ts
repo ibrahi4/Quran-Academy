@@ -1,4 +1,6 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable, Logger, NotFoundException, BadRequestException, ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { BookingStatus, Role } from '@prisma/client';
@@ -15,33 +17,96 @@ export class BookingsService {
     private notifications: NotificationsService,
   ) {}
 
+  private calculateAge(dob: Date | string): number {
+    const birthDate = typeof dob === 'string' ? new Date(dob) : dob;
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+    return age;
+  }
+
+  private validateDateOfBirth(dob: string): Date {
+    const birthDate = new Date(dob);
+    if (isNaN(birthDate.getTime())) {
+      throw new BadRequestException('Invalid date of birth format');
+    }
+    const age = this.calculateAge(birthDate);
+    if (age < 5) throw new BadRequestException('Student must be at least 5 years old');
+    if (age > 100) throw new BadRequestException('Please enter a valid date of birth');
+    return birthDate;
+  }
+
   // ============================================
-  // CREATE BOOKING (auto-create user + email)
+  // CHECK EMAIL AVAILABILITY
+  // ============================================
+  async checkEmailAvailability(email: string) {
+    const normalized = email.toLowerCase().trim();
+    const user = await this.prisma.user.findUnique({
+      where: { email: normalized },
+      select: { id: true, role: true, firstName: true },
+    });
+
+    if (!user) {
+      return { available: true, exists: false };
+    }
+
+    // TRIAL_STUDENT with no completed bookings → still can rebook
+    if (user.role === 'TRIAL_STUDENT') {
+      return {
+        available: true,
+        exists: true,
+        isTrial: true,
+        message: 'Welcome back! Your existing trial account will be used.',
+      };
+    }
+
+    return {
+      available: false,
+      exists: true,
+      role: user.role,
+      message: 'This email is already registered. Please login to book a session.',
+    };
+  }
+
+  // ============================================
+  // CREATE BOOKING
   // ============================================
   async create(dto: CreateBookingDto) {
     const email = dto.email.toLowerCase().trim();
 
-    // Check if user already exists
+    // Validate DOB
+    let dobDate: Date | null = null;
+    let calculatedAge: number | null = null;
+    if (dto.dateOfBirth) {
+      dobDate = this.validateDateOfBirth(dto.dateOfBirth);
+      calculatedAge = this.calculateAge(dobDate);
+    }
+
+    // Check email uniqueness with smart logic
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
       include: { student: true },
     });
 
-    // Generate temp password and setup token
+    if (existingUser && existingUser.role !== 'TRIAL_STUDENT') {
+      throw new ConflictException(
+        'This email is already registered. Please login to your account to book a session.',
+      );
+    }
+
     const tempPassword = this.generateTempPassword();
     const hashedPassword = await bcrypt.hash(tempPassword, 12);
     const setupToken = crypto.randomBytes(32).toString('hex');
-    const setupTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    const setupTokenExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
     const [firstName, ...lastParts] = dto.name.trim().split(' ');
     const lastName = lastParts.join(' ') || firstName;
 
-    // Use transaction to ensure atomicity
     const result = await this.prisma.$transaction(async (tx) => {
       let user = existingUser;
       let isNewUser = false;
 
-      // Create user if doesn't exist
       if (!user) {
         user = await tx.user.create({
           data: {
@@ -60,36 +125,49 @@ export class BookingsService {
           include: { student: true },
         });
         isNewUser = true;
-        this.logger.log(`Auto-created TRIAL_STUDENT account: ${email}`);
-      } else if (existingUser && !existingUser.student) {
-        // Update setup token if no student profile yet
+        this.logger.log(`Auto-created TRIAL_STUDENT: ${email}`);
+      } else {
+        // Refresh setup token for returning trial user
         user = await tx.user.update({
-          where: { id: existingUser.id },
+          where: { id: existingUser!.id },
           data: {
             setupToken,
             setupTokenExpiresAt,
             mustChangePassword: true,
+            phone: dto.phone?.trim() || existingUser!.phone,
           },
           include: { student: true },
         });
       }
 
-      // Create student profile if doesn't exist
+      // Create or update student with all new fields
       let student = user.student;
+      const studentData: any = {
+        country: dto.country,
+        timezone: dto.timezone,
+        dateOfBirth: dobDate,
+        age: calculatedAge,
+        gender: dto.gender,
+        nativeLanguage: dto.nativeLanguage,
+        level: dto.currentLevel || 'BEGINNER',
+        source: dto.serviceSlug,
+        parentName: dto.parentName,
+        parentPhone: dto.parentPhone,
+        parentRelation: dto.parentRelation,
+      };
+
       if (!student) {
         student = await tx.student.create({
-          data: {
-            userId: user.id,
-            country: dto.country,
-            timezone: dto.timezone,
-            level: 'BEGINNER',
-            goals: [],
-            source: dto.serviceSlug,
-          },
+          data: { userId: user.id, ...studentData, goals: [] },
+        });
+      } else {
+        student = await tx.student.update({
+          where: { id: student.id },
+          data: studentData,
         });
       }
 
-      // Create the booking linked to the student
+      // Create booking with all new fields
       const booking = await tx.booking.create({
         data: {
           studentId: student.id,
@@ -98,6 +176,14 @@ export class BookingsService {
           phone: dto.phone,
           country: dto.country,
           timezone: dto.timezone,
+          dateOfBirth: dobDate,
+          gender: dto.gender,
+          studentType: dto.studentType,
+          nativeLanguage: dto.nativeLanguage,
+          currentLevel: dto.currentLevel,
+          parentName: dto.parentName,
+          parentPhone: dto.parentPhone,
+          parentRelation: dto.parentRelation,
           preferredDate: dto.preferredDate ? new Date(dto.preferredDate) : null,
           preferredTime: dto.preferredTime,
           serviceSlug: dto.serviceSlug,
@@ -109,32 +195,26 @@ export class BookingsService {
       return { booking, user, isNewUser };
     });
 
-    // Send emails AFTER transaction (don't block response)
+    // Send emails async
     Promise.all([
-      // Welcome email to new user
-      result.isNewUser
-        ? this.notifications.sendTrialWelcomeEmail({
-            email,
-            name: dto.name,
-            tempPassword,
-            setupToken,
-            bookingDate: dto.preferredDate || undefined,
-          })
-        : Promise.resolve(),
-
-      // Admin notification
+      this.notifications.sendTrialWelcomeEmail({
+        email,
+        name: dto.name,
+        tempPassword,
+        setupToken,
+        bookingDate: dto.preferredDate || undefined,
+      }),
       this.notifications.sendBookingConfirmation(email, dto.name, dto.preferredDate),
-    ]).catch((err) => {
-      this.logger.error('Failed to send booking emails', err);
-    });
+    ]).catch((err) => this.logger.error('Failed to send emails', err));
 
     this.logger.log(`Booking created: ${result.booking.id} - ${email}`);
 
     return {
       ...result.booking,
+      age: calculatedAge,
       message: result.isNewUser
         ? 'Booking created! Check your email to set up your account.'
-        : 'Booking created successfully!',
+        : 'Booking updated! Check your email for the new setup link.',
     };
   }
 
@@ -158,15 +238,22 @@ export class BookingsService {
         where, skip, take: limit,
         orderBy: { createdAt: 'desc' },
         include: {
-          student: { include: { user: { select: { firstName: true, lastName: true, email: true, role: true } } } },
+          student: {
+            include: { user: { select: { firstName: true, lastName: true, email: true, role: true } } },
+          },
           session: true,
         },
       }),
       this.prisma.booking.count({ where }),
     ]);
 
+    const enriched = data.map((b: any) => ({
+      ...b,
+      age: b.dateOfBirth ? this.calculateAge(b.dateOfBirth) : null,
+    }));
+
     return {
-      data,
+      data: enriched,
       meta: {
         total, page, limit,
         totalPages: Math.ceil(total / limit),
@@ -185,59 +272,40 @@ export class BookingsService {
       },
     });
     if (!booking) throw new NotFoundException('Booking not found');
-    return booking;
+    return {
+      ...booking,
+      age: booking.dateOfBirth ? this.calculateAge(booking.dateOfBirth) : null,
+    };
   }
 
   // ============================================
-  // CONFIRM BOOKING (Admin assigns teacher + time)
+  // CONFIRM BOOKING
   // ============================================
-  async confirmBooking(
-    id: string,
-    data: {
-      teacherId: string;
-      date: string;
-      time: string;
-      duration?: number;
-      meetingLink: string;
-      adminNotes?: string;
-    },
-  ) {
+  async confirmBooking(id: string, data: {
+    teacherId: string; date: string; time: string;
+    duration?: number; meetingLink: string; adminNotes?: string;
+  }) {
     const booking = await this.findOne(id);
+    if (booking.status === 'CONFIRMED') throw new BadRequestException('Already confirmed');
+    if (!booking.studentId) throw new BadRequestException('No student linked');
 
-    if (booking.status === 'CONFIRMED') {
-      throw new BadRequestException('Booking already confirmed');
-    }
-    if (!booking.studentId) {
-      throw new BadRequestException('Booking has no student linked');
-    }
-
-    // Verify teacher exists
     const teacher = await this.prisma.teacher.findUnique({
       where: { id: data.teacherId },
       include: { user: true },
     });
     if (!teacher) throw new NotFoundException('Teacher not found');
 
-    // Build session date from date + time
     const sessionDate = new Date(data.date);
     const [hours, minutes] = data.time.split(':').map(Number);
     sessionDate.setHours(hours, minutes || 0, 0, 0);
-
     const duration = data.duration || 30;
 
-    // Transaction: update booking + create session + link student to teacher
     const result = await this.prisma.$transaction(async (tx) => {
-      // Update booking
       const updatedBooking = await tx.booking.update({
         where: { id },
-        data: {
-          status: 'CONFIRMED',
-          adminNotes: data.adminNotes,
-          meetingLink: data.meetingLink,
-        },
+        data: { status: 'CONFIRMED', adminNotes: data.adminNotes, meetingLink: data.meetingLink },
       });
 
-      // Create session
       const session = await tx.session.create({
         data: {
           studentId: booking.studentId!,
@@ -253,7 +321,6 @@ export class BookingsService {
         },
       });
 
-      // Link student to this teacher
       await tx.student.update({
         where: { id: booking.studentId! },
         data: { teacherId: data.teacherId },
@@ -262,16 +329,11 @@ export class BookingsService {
       return { booking: updatedBooking, session, teacher };
     });
 
-    // Send confirmation email
     const sessionDateStr = sessionDate.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     });
     const sessionTimeStr = sessionDate.toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
+      hour: '2-digit', minute: '2-digit',
     });
 
     this.notifications.sendTrialConfirmedEmail({
@@ -282,40 +344,20 @@ export class BookingsService {
       teacherName: `${teacher.user.firstName} ${teacher.user.lastName}`,
       meetingLink: data.meetingLink,
       duration,
-    }).catch((err) => this.logger.error('Failed to send confirmation email', err));
+    }).catch((err) => this.logger.error('Email failed', err));
 
-    this.logger.log(`Booking ${id} confirmed with teacher ${data.teacherId}`);
     return result;
   }
 
-  // ============================================
-  // UPDATE STATUS (basic - for other status changes)
-  // ============================================
-  async updateStatus(
-    id: string,
-    status: BookingStatus,
-    adminNotes?: string,
-    meetingLink?: string,
-  ) {
+  async updateStatus(id: string, status: BookingStatus, adminNotes?: string, meetingLink?: string) {
     const booking = await this.findOne(id);
-
-    // If confirming, use the dedicated method
     if (status === 'CONFIRMED' && booking.status !== 'CONFIRMED') {
-      throw new BadRequestException(
-        'Use /confirm endpoint to confirm booking with teacher + time',
-      );
+      throw new BadRequestException('Use /confirm endpoint');
     }
-
-    const updated = await this.prisma.booking.update({
+    return this.prisma.booking.update({
       where: { id },
-      data: {
-        status,
-        adminNotes,
-        ...(meetingLink && { meetingLink }),
-      },
+      data: { status, adminNotes, ...(meetingLink && { meetingLink }) },
     });
-
-    return updated;
   }
 
   async remove(id: string) {
@@ -324,9 +366,6 @@ export class BookingsService {
     return { message: 'Booking deleted successfully' };
   }
 
-  // ============================================
-  // HELPERS
-  // ============================================
   private generateTempPassword(): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
     let password = '';

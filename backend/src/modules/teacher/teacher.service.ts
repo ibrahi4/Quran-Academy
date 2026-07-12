@@ -13,9 +13,7 @@ export class TeacherService {
   // ============================================
 
   async create(dto: CreateTeacherDto) {
-    const user = await this.prisma.user.findUnique({
-      where: { id: dto.userId },
-    });
+    const user = await this.prisma.user.findUnique({ where: { id: dto.userId } });
     if (!user) throw new NotFoundException('User not found');
 
     if (user.role !== Role.TEACHER) {
@@ -35,10 +33,7 @@ export class TeacherService {
       },
       include: {
         user: {
-          select: {
-            id: true, email: true, firstName: true,
-            lastName: true, avatar: true, isActive: true,
-          },
+          select: { id: true, email: true, firstName: true, lastName: true, avatar: true, isActive: true },
         },
       },
     });
@@ -47,12 +42,7 @@ export class TeacherService {
   async findAll() {
     return this.prisma.teacher.findMany({
       include: {
-        user: {
-          select: {
-            id: true, email: true, firstName: true,
-            lastName: true, avatar: true, isActive: true,
-          },
-        },
+        user: { select: { id: true, email: true, firstName: true, lastName: true, avatar: true, isActive: true } },
         _count: { select: { students: true, sessions: true } },
       },
       orderBy: { createdAt: 'desc' },
@@ -63,12 +53,7 @@ export class TeacherService {
     const teacher = await this.prisma.teacher.findUnique({
       where: { id },
       include: {
-        user: {
-          select: {
-            id: true, email: true, firstName: true,
-            lastName: true, avatar: true, isActive: true,
-          },
-        },
+        user: { select: { id: true, email: true, firstName: true, lastName: true, avatar: true, isActive: true } },
         students: {
           select: {
             id: true,
@@ -87,12 +72,7 @@ export class TeacherService {
     const teacher = await this.prisma.teacher.findUnique({
       where: { userId },
       include: {
-        user: {
-          select: {
-            id: true, email: true, firstName: true,
-            lastName: true, avatar: true,
-          },
-        },
+        user: { select: { id: true, email: true, firstName: true, lastName: true, avatar: true } },
       },
     });
     if (!teacher) throw new NotFoundException('Teacher not found');
@@ -110,9 +90,7 @@ export class TeacherService {
         isActive: dto.isActive,
       },
       include: {
-        user: {
-          select: { id: true, email: true, firstName: true, lastName: true },
-        },
+        user: { select: { id: true, email: true, firstName: true, lastName: true } },
       },
     });
   }
@@ -121,6 +99,26 @@ export class TeacherService {
     await this.findOne(id);
     return this.prisma.teacher.delete({ where: { id } });
   }
+
+  // ============================================
+  // SHARED: Full student include (with all fields)
+  // ============================================
+  private fullStudentInclude = {
+    student: {
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            avatar: true,
+          },
+        },
+      },
+    },
+  } as const;
 
   // ============================================
   // DASHBOARD
@@ -134,52 +132,33 @@ export class TeacherService {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    const [
-      todaySessions,
-      upcomingSessions,
-      totalStudents,
-      monthlyStats,
-      todaySessionsList,
-    ] = await Promise.all([
-      this.prisma.session.count({
-        where: {
-          teacherId: teacher.id,
-          date: { gte: today, lt: tomorrow },
-          status: { in: ['SCHEDULED', 'IN_PROGRESS'] },
-        },
-      }),
-      this.prisma.session.count({
-        where: {
-          teacherId: teacher.id,
-          date: { gte: today },
-          status: 'SCHEDULED',
-        },
-      }),
-      this.prisma.student.count({
-        where: { teacherId: teacher.id },
-      }),
-      this.getMonthlyStats(teacher.id),
-      // Fetch today's actual sessions with student info
-      this.prisma.session.findMany({
-        where: {
-          teacherId: teacher.id,
-          date: { gte: today, lt: tomorrow },
-        },
-        include: {
-          student: {
-            include: {
-              user: {
-                select: {
-                  firstName: true, lastName: true,
-                  email: true, avatar: true,
-                },
-              },
-            },
+    const [todaySessions, upcomingSessions, totalStudents, monthlyStats, todaySessionsList] =
+      await Promise.all([
+        this.prisma.session.count({
+          where: {
+            teacherId: teacher.id,
+            date: { gte: today, lt: tomorrow },
+            status: { in: ['SCHEDULED', 'IN_PROGRESS'] },
           },
-        },
-        orderBy: { date: 'asc' },
-      }),
-    ]);
+        }),
+        this.prisma.session.count({
+          where: {
+            teacherId: teacher.id,
+            date: { gte: today },
+            status: 'SCHEDULED',
+          },
+        }),
+        this.prisma.student.count({ where: { teacherId: teacher.id } }),
+        this.getMonthlyStats(teacher.id),
+        this.prisma.session.findMany({
+          where: {
+            teacherId: teacher.id,
+            date: { gte: today, lt: tomorrow },
+          },
+          include: this.fullStudentInclude,
+          orderBy: { date: 'asc' },
+        }),
+      ]);
 
     return {
       teacher,
@@ -192,7 +171,7 @@ export class TeacherService {
   }
 
   // ============================================
-  // SESSIONS
+  // SESSIONS (with full student data)
   // ============================================
 
   async getSessions(
@@ -211,18 +190,7 @@ export class TeacherService {
 
     return this.prisma.session.findMany({
       where,
-      include: {
-        student: {
-          include: {
-            user: {
-              select: {
-                firstName: true, lastName: true,
-                email: true, avatar: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.fullStudentInclude,
       orderBy: { date: 'asc' },
     });
   }
@@ -246,11 +214,7 @@ export class TeacherService {
       },
       select: {
         id: true, date: true, duration: true, completedAt: true, title: true,
-        student: {
-          include: {
-            user: { select: { firstName: true, lastName: true } },
-          },
-        },
+        student: { include: { user: { select: { firstName: true, lastName: true } } } },
       },
       orderBy: { date: 'desc' },
     });
@@ -304,18 +268,12 @@ export class TeacherService {
         studentLateMins: data.studentLateMins ?? 0,
         teacherLateMins: data.teacherLateMins ?? 0,
       },
-      include: {
-        student: {
-          include: {
-            user: { select: { firstName: true, lastName: true } },
-          },
-        },
-      },
+      include: this.fullStudentInclude,
     });
   }
 
   // ============================================
-  // MY STUDENTS
+  // MY STUDENTS (with ALL fields)
   // ============================================
 
   async getMyStudents(userId: string) {
@@ -326,8 +284,12 @@ export class TeacherService {
       include: {
         user: {
           select: {
-            id: true, firstName: true, lastName: true,
-            email: true, avatar: true,
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            phone: true,
+            avatar: true,
           },
         },
         sessions: {
@@ -341,6 +303,17 @@ export class TeacherService {
       orderBy: { createdAt: 'desc' },
     });
 
+    // Calculate age from DOB on the fly
+    const calcAge = (dob: Date | null): number | null => {
+      if (!dob) return null;
+      const birthDate = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) age--;
+      return age;
+    };
+
     return students.map((s) => ({
       id: s.id,
       userId: s.userId,
@@ -348,8 +321,15 @@ export class TeacherService {
       goals: s.goals,
       timezone: s.timezone,
       country: s.country,
-      age: s.age,
+      city: s.city,
+      dateOfBirth: s.dateOfBirth,
+      age: s.dateOfBirth ? calcAge(s.dateOfBirth) : s.age,
       gender: s.gender,
+      nativeLanguage: s.nativeLanguage,
+      parentName: s.parentName,
+      parentPhone: s.parentPhone,
+      parentRelation: s.parentRelation,
+      notes: s.notes,
       user: s.user,
       lastSession: s.sessions[0] || null,
       totalSessions: s._count.sessions,
@@ -378,18 +358,7 @@ export class TeacherService {
         teacherId: teacher.id,
         date: { gte: weekStart, lte: weekEnd },
       },
-      include: {
-        student: {
-          include: {
-            user: {
-              select: {
-                firstName: true, lastName: true,
-                email: true, avatar: true,
-              },
-            },
-          },
-        },
-      },
+      include: this.fullStudentInclude,
       orderBy: { date: 'asc' },
     });
 
@@ -433,11 +402,7 @@ export class TeacherService {
       },
       select: {
         id: true, date: true, duration: true, title: true,
-        student: {
-          include: {
-            user: { select: { firstName: true, lastName: true } },
-          },
-        },
+        student: { include: { user: { select: { firstName: true, lastName: true } } } },
       },
     });
 

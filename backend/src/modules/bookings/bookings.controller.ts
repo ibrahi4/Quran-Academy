@@ -12,8 +12,15 @@ import { BookingStatus, Role } from '@prisma/client';
 export class BookingsController {
   constructor(private bookingsService: BookingsService) {}
 
+  // PUBLIC: Check if email is available
+  @Get('check-email')
+  @ApiOperation({ summary: 'Check email availability (public)' })
+  checkEmail(@Query('email') email: string) {
+    return this.bookingsService.checkEmailAvailability(email);
+  }
+
   @Post()
-  @ApiOperation({ summary: 'Create trial booking (public, auto-creates account)' })
+  @ApiOperation({ summary: 'Create trial booking (public)' })
   create(@Body() dto: CreateBookingDto) {
     return this.bookingsService.create(dto);
   }
@@ -28,12 +35,7 @@ export class BookingsController {
     @Query('status') status?: string,
     @Query('search') search?: string,
   ) {
-    return this.bookingsService.findAll(
-      Number(page) || 1,
-      Number(limit) || 20,
-      status,
-      search,
-    );
+    return this.bookingsService.findAll(Number(page) || 1, Number(limit) || 20, status, search);
   }
 
   @Get(':id')
@@ -44,23 +46,12 @@ export class BookingsController {
     return this.bookingsService.findOne(id);
   }
 
-  // ✅ NEW: Dedicated confirm endpoint with teacher assignment
   @Patch(':id/confirm')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Confirm booking + assign teacher + create session' })
-  confirmBooking(
-    @Param('id') id: string,
-    @Body() data: {
-      teacherId: string;
-      date: string;
-      time: string;
-      duration?: number;
-      meetingLink: string;
-      adminNotes?: string;
-    },
-  ) {
+  confirmBooking(@Param('id') id: string, @Body() data: any) {
     return this.bookingsService.confirmBooking(id, data);
   }
 

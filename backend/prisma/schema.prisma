@@ -223,9 +223,13 @@ model Student {
   teacherId String?
   teacher   Teacher? @relation(fields: [teacherId], references: [id], onDelete: SetNull)
 
-  parentName String?
-  age        Int?
-  gender     Gender?
+  parentName     String?
+  parentPhone    String?
+  parentRelation String?
+  dateOfBirth    DateTime?
+  age            Int?
+  gender         Gender?
+  nativeLanguage String?
   country    String?
   city       String?
   timezone   String?
@@ -279,6 +283,15 @@ model Booking {
 
   country  String?
   timezone String?
+
+  dateOfBirth     DateTime?
+  gender          Gender?
+  studentType     String?
+  nativeLanguage  String?
+  currentLevel    StudentLevel?
+  parentName      String?
+  parentPhone     String?
+  parentRelation  String?
 
   preferredDate DateTime?
   preferredTime String?

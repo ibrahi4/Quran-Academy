@@ -1,0 +1,22 @@
+{
+  "name": "Tajwedo Academy",
+  "short_name": "Tajwedo",
+  "description": "Online Quran academy for Quran recitation, Tajweed, memorization, and Islamic studies.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FAFAF7",
+  "theme_color": "#0D4F4F",
+  "icons": [
+    {
+      "src": "/Tajwedo-Public-Assets/favicon-for-public/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/Tajwedo-Public-Assets/favicon-for-public/web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
