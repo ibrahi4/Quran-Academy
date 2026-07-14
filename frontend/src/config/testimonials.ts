@@ -16,7 +16,7 @@
     countryCode: "GB",
     role: "Revert",
     rating: 5,
-    text: "As a new Muslim, I was nervous about learning. Ibrahim made me feel completely at ease and guided me beautifully.",
+    text: "As a new Muslim, I was nervous about learning. Tajwedo made me feel completely at ease and guided me beautifully.",
     image: "/images/testimonials/student-2.webp",
   },
   {
@@ -26,7 +26,7 @@
     countryCode: "NL",
     role: "Adult Student",
     rating: 5,
-    text: "The Tajweed lessons transformed my recitation completely. Ibrahim explains complex rules in such a simple way.",
+    text: "The Tajweed lessons transformed my recitation completely. Tajwedo explains complex rules in such a simple way.",
     image: "/images/testimonials/student-3.webp",
   },
   {

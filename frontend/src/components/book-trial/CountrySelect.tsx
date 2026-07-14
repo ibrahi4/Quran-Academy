@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { Search, Check, X, ChevronDown, Globe, MapPin } from "lucide-react";
+import {
+  Search, Check, X, ChevronDown, Globe, MapPin,
+  ArrowUp, ArrowDown, CornerDownLeft,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  COUNTRIES_PRIORITIZED,
   searchCountries,
   findCountryByName,
   type CountryItem,
@@ -18,6 +20,11 @@ interface CountrySelectProps {
   disabled?: boolean;
   error?: string;
 }
+
+const PRIORITY_CODES = [
+  "EG", "SA", "AE", "QA", "KW", "BH", "OM", "JO", "LB",
+  "PS", "SY", "IQ", "YE", "MA", "DZ", "TN", "LY", "SD",
+];
 
 export default function CountrySelect({
   value,
@@ -37,7 +44,6 @@ export default function CountrySelect({
   const selectedCountry = useMemo(() => findCountryByName(value), [value]);
   const results = useMemo(() => searchCountries(query), [query]);
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       const target = e.target as Node;
@@ -55,7 +61,6 @@ export default function CountrySelect({
     return () => document.removeEventListener("mousedown", handler);
   }, [open]);
 
-  // Focus input on open + reset highlight
   useEffect(() => {
     if (open) {
       setTimeout(() => inputRef.current?.focus(), 30);
@@ -63,12 +68,10 @@ export default function CountrySelect({
     }
   }, [open]);
 
-  // Reset highlight when query changes
   useEffect(() => {
     setHighlightedIdx(0);
   }, [query]);
 
-  // Scroll highlighted item into view
   useEffect(() => {
     if (!open || !listRef.current) return;
     const el = listRef.current.querySelector(
@@ -121,7 +124,7 @@ export default function CountrySelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         className={cn(
-          "w-full px-4 py-3.5 rounded-xl border bg-sand-50 text-left flex items-center gap-3 transition-all",
+          "w-full px-4 py-3 rounded-xl border bg-sand-50 text-left flex items-center gap-3 transition-all font-sans",
           "focus:outline-none focus:ring-2 focus:ring-primary/20",
           disabled && "opacity-60 cursor-not-allowed",
           error
@@ -133,9 +136,11 @@ export default function CountrySelect({
       >
         {selectedCountry ? (
           <>
-            <span className="text-2xl leading-none shrink-0">
-              {selectedCountry.flag}
-            </span>
+            <div className="flex items-center justify-center w-9 h-6 rounded bg-white border border-sand-200 shrink-0">
+              <span className="text-[10px] font-bold tracking-wider text-gray-700 font-mono">
+                {selectedCountry.code}
+              </span>
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 truncate">
                 {selectedCountry.name}
@@ -146,7 +151,7 @@ export default function CountrySelect({
                 </p>
               )}
             </div>
-            <span className="text-xs text-gray-500 font-mono shrink-0">
+            <span className="text-xs text-gray-600 font-mono font-semibold shrink-0">
               {selectedCountry.dialCode}
             </span>
           </>
@@ -192,7 +197,7 @@ export default function CountrySelect({
         <div
           ref={listRef}
           className={cn(
-            "absolute z-50 mt-2 w-full bg-white rounded-2xl border border-sand-200 shadow-2xl overflow-hidden",
+            "absolute z-50 mt-2 w-full bg-white rounded-2xl border border-sand-200 shadow-2xl overflow-hidden font-sans",
             "animate-in fade-in-0 slide-in-from-top-2 duration-150",
           )}
           role="listbox"
@@ -215,10 +220,10 @@ export default function CountrySelect({
                 placeholder={
                   isRTL
                     ? "\u0627\u0628\u062d\u062b \u0628\u0627\u0644\u0627\u0633\u0645 \u0623\u0648 \u0627\u0644\u0643\u0648\u062f..."
-                    : "Search by name, code, or dial code..."
+                    : "Search by name or country code..."
                 }
                 className={cn(
-                  "w-full py-2.5 rounded-lg border border-sand-200 bg-white text-sm",
+                  "w-full py-2.5 rounded-lg border border-sand-200 bg-white text-sm font-sans",
                   "focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40",
                   isRTL ? "pr-9 pl-3" : "pl-9 pr-3",
                 )}
@@ -243,8 +248,10 @@ export default function CountrySelect({
               <p className="text-[11px] text-gray-500 mt-2">
                 {results.length}{" "}
                 {isRTL
-                  ? `\u0646\u062a\u064a\u062c\u0629 \u0644\u0640 "${query}"`
-                  : `result${results.length !== 1 ? "s" : ""} for "${query}"`}
+                  ? "\u0646\u062a\u064a\u062c\u0629"
+                  : `result${results.length !== 1 ? "s" : ""}`}
+                {" "}
+                {isRTL ? "\u0644\u0640" : "for"} &quot;{query}&quot;
               </p>
             )}
           </div>
@@ -259,17 +266,16 @@ export default function CountrySelect({
                 </p>
                 <p className="text-xs text-gray-500">
                   {isRTL
-                    ? "\u062c\u0631\u0628 \u0628\u062d\u062b \u0623\u062e\u0631 \u0623\u0648 \u0627\u0644\u0643\u0648\u062f \u0627\u0644\u062f\u0648\u0644\u064a"
+                    ? "\u062c\u0631\u0628 \u0628\u062d\u062b \u0622\u062e\u0631 \u0623\u0648 \u0627\u0644\u0643\u0648\u062f \u0627\u0644\u062f\u0648\u0644\u064a"
                     : "Try a different search or country code"}
                 </p>
               </div>
             ) : (
               <>
-                {/* Priority section header */}
                 {!query && (
-                  <div className="px-4 py-2 bg-amber-50/50 border-b border-amber-100">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1.5">
-                      <span>\u2728</span>
+                  <div className="px-4 py-2 bg-amber-50/60 border-b border-amber-100">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-amber-800 flex items-center gap-1.5">
+                      <MapPin className="w-3 h-3" />
                       {isRTL ? "\u0627\u0644\u062f\u0648\u0644 \u0627\u0644\u0639\u0631\u0628\u064a\u0629" : "Middle East & North Africa"}
                     </p>
                   </div>
@@ -282,14 +288,15 @@ export default function CountrySelect({
                     !query &&
                     idx > 0 &&
                     idx === results.findIndex(
-                      (c) => !["EG", "SA", "AE", "QA", "KW", "BH", "OM", "JO", "LB", "PS", "SY", "IQ", "YE", "MA", "DZ", "TN", "LY", "SD"].includes(c.code),
+                      (c) => !PRIORITY_CODES.includes(c.code),
                     );
 
                   return (
                     <div key={country.code}>
                       {isFirstNonPriority && (
                         <div className="px-4 py-2 bg-gray-50 border-y border-gray-100">
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+                          <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 flex items-center gap-1.5">
+                            <Globe className="w-3 h-3" />
                             {isRTL ? "\u0628\u0627\u0642\u064a \u0627\u0644\u062f\u0648\u0644" : "All countries"}
                           </p>
                         </div>
@@ -307,13 +314,23 @@ export default function CountrySelect({
                           isSelected && "bg-primary/10",
                         )}
                       >
-                        <span className="text-2xl leading-none shrink-0">
-                          {country.flag}
-                        </span>
+                        <div className={cn(
+                          "flex items-center justify-center w-9 h-6 rounded border shrink-0",
+                          isSelected
+                            ? "bg-primary/10 border-primary/30"
+                            : "bg-white border-sand-200"
+                        )}>
+                          <span className={cn(
+                            "text-[10px] font-bold tracking-wider font-mono",
+                            isSelected ? "text-primary" : "text-gray-700"
+                          )}>
+                            {country.code}
+                          </span>
+                        </div>
                         <div className="flex-1 min-w-0">
                           <p
                             className={cn(
-                              "text-sm truncate",
+                              "text-sm truncate font-sans",
                               isSelected
                                 ? "font-bold text-primary"
                                 : "font-medium text-gray-900",
@@ -329,10 +346,10 @@ export default function CountrySelect({
                         </div>
                         <span
                           className={cn(
-                            "text-xs font-mono shrink-0",
+                            "text-xs font-mono shrink-0 font-semibold",
                             isSelected
-                              ? "text-primary font-bold"
-                              : "text-gray-500",
+                              ? "text-primary"
+                              : "text-gray-600",
                           )}
                         >
                           {country.dialCode}
@@ -351,16 +368,23 @@ export default function CountrySelect({
           {/* Footer */}
           <div className="px-3 py-2 bg-sand-50 border-t border-sand-100 flex items-center justify-between text-[10px] text-gray-500">
             <span className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 bg-white border border-sand-200 rounded font-mono">\u2191\u2193</kbd>
-              <span>Navigate</span>
+              <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white border border-sand-200 rounded">
+                <ArrowUp className="w-2.5 h-2.5" />
+                <ArrowDown className="w-2.5 h-2.5" />
+              </kbd>
+              <span className="font-medium">Navigate</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 bg-white border border-sand-200 rounded font-mono">\u21b5</kbd>
-              <span>Select</span>
+              <kbd className="inline-flex items-center px-1.5 py-0.5 bg-white border border-sand-200 rounded">
+                <CornerDownLeft className="w-2.5 h-2.5" />
+              </kbd>
+              <span className="font-medium">Select</span>
             </span>
             <span className="flex items-center gap-1.5">
-              <kbd className="px-1.5 py-0.5 bg-white border border-sand-200 rounded font-mono">Esc</kbd>
-              <span>Close</span>
+              <kbd className="inline-flex items-center px-1.5 py-0.5 bg-white border border-sand-200 rounded font-mono font-semibold text-[9px]">
+                ESC
+              </kbd>
+              <span className="font-medium">Close</span>
             </span>
           </div>
         </div>

@@ -5,7 +5,7 @@ import TestimonialsPageContent from "@/components/testimonials/TestimonialsPageC
 export const metadata: Metadata = {
   title: "Testimonials",
   description:
-    "Read what students and parents say about their Quran, Arabic, and Islamic Studies learning experience with Ibrahim Abdelnasser.",
+    "Read what students and parents say about their Quran, Arabic, and Islamic Studies learning experience with Tajwedo Academy.",
 };
 
 export default function TestimonialsPage() {

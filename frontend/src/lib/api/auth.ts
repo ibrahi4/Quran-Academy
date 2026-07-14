@@ -134,7 +134,7 @@ export async function resetPasswordApi(
   const res = await fetch(`${API_BASE}/auth/reset-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token, password }),
+    body: JSON.stringify({ token, newPassword: password }),
   });
   const json = await res.json().catch(() => null);
   if (!res.ok) throw new Error(json?.message || 'Reset failed');
@@ -147,7 +147,7 @@ export async function setupPasswordApi(
   const res = await fetch(`${API_BASE}/auth/setup-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token, password }),
+    body: JSON.stringify({ token, newPassword: password }),
   });
   const json = await res.json().catch(() => null);
   if (!res.ok) throw new Error(json?.message || 'Setup failed');

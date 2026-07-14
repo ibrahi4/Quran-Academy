@@ -10,7 +10,7 @@ const PROTECTED: Record<string, string[]> = {
   "/admin":   ["ADMIN"],
 };
 
-const AUTH_PREFIXES = ["/auth/login", "/auth/register"];
+const AUTH_PREFIXES = ["/auth/login"];
 
 function decodeTokenRole(token: string): string | null {
   try {

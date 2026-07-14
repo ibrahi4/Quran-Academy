@@ -1,10 +1,11 @@
 'use client';
+import Image from 'next/image';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Link } from '@/i18n/navigation';
-import { Eye, EyeOff, Mail, Lock, Loader2, BookOpen } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { loginApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/stores/useAuthStore';
 import toast from 'react-hot-toast';
@@ -46,15 +47,27 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-sand-50 via-white to-primary-50 px-4">
+    <div className="min-h-screen pt-5 flex items-center justify-center bg-gradient-to-br from-sand-50 via-white to-primary-50 px-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-3 mb-6">
-            <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-white" />
+          <Link href="/" className="inline-flex flex-col items-center gap-3 mb-6 group">
+            <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center p-3 shadow-md border border-sand-200 group-hover:shadow-lg transition-all">
+              <Image
+                src="/Tajwedo-Public-Assets/logo.png"
+                alt="Tajwedo Academy"
+                width={64}
+                height={64}
+                className="object-contain"
+                priority
+              />
             </div>
-            <span className="text-2xl font-bold text-primary">Tajwedo</span>
+            <div className="text-center">
+              <span className="text-xl font-bold text-primary tracking-tight">Tajwedo Academy</span>
+              <p className="text-[11px] font-semibold text-accent uppercase tracking-[2px] mt-0.5">
+                Learn Quran with Excellence
+              </p>
+            </div>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{t('loginTitle')}</h1>
           <p className="text-gray-500">{t('loginSubtitle')}</p>

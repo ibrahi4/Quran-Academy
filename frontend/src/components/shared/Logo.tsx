@@ -4,26 +4,26 @@ import React from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "@/hooks/useLocale";
-import { Manrope } from "next/font/google";
-
+import { DM_Serif_Display } from "next/font/google";
 
 interface LogoProps {
   className?: string;
   light?: boolean;
 }
-const manrope = Manrope({
+
+const dmSerif = DM_Serif_Display({
   subsets: ["latin"],
-  weight: ["600", "700", "800"],
+  weight: ["400"],
+  display: "swap",
 });
 
 export default function Logo({ className = "", light = false }: LogoProps) {
   const { isRTL } = useLocale();
 
   return (
-    <Link href="/" className={`flex items-center gap-2 group ${className}`}>
-      {/* Logo Icon */}
+    <Link href="/" className={`flex items-center gap-3 group ${className}`}>
       <div className="relative">
-        <div className="relative w-18 h-18 pb-2 rounded- flex items-center justify-center transition-all duration-300 group-hover:scale-105 overflow-hidden">
+        <div className="relative w-16 h-16  pb-2 flex items-center justify-center transition-all duration-500 group-hover:scale-105 overflow-hidden">
           <Image
             src="/Tajwedo-Public-Assets/logo.png"
             alt="Tajwedo Academy"
@@ -33,26 +33,26 @@ export default function Logo({ className = "", light = false }: LogoProps) {
             priority
           />
         </div>
-        {/* Accent dot */}
       </div>
 
-      {/* Brand Text */}
-      <div className={`flex flex-col leading-none ${manrope.className}`}>
+      <div className={`flex flex-col leading-none ${dmSerif.className}`}>
         <h1
-          className={`text-[25px] font-extrabold tracking-[-0.05em] ${
-            light ? "text-white" : "text-[#163A32]"
+          className={`text-[25px] font-normal tracking-[-0.01em] leading-[0.95] ${
+            light ? "text-white" : "text-[#0D4F4F]"
           }`}
         >
-          <span className={light ? "text-[#E8C56A]" : "text-[#C89B3C]"}>T</span>
-          ajwed<span className={light ? "text-[#E8C56A]" : "text-[#C89B3C]"}>o</span>
+          <span className={light ? "text-[#E8C56A]" : "text-[#C8A96E]"}>T</span>
+          ajwed
+          <span className={light ? "text-[#E8C56A]" : "text-[#C8A96E]"}>o</span>
         </h1>
- 
+
         <span
-          className={`mt-1 pl-1 text-[11px] font-semibold tracking-[0.55em] ${
-            light ? "text-white/70" : "text-[#B78A2A]"
+          className={`mt-2 pl-0.5 text-[10px] font-medium tracking-[0.5em] uppercase ${
+            light ? "text-white/50" : "text-[#0D4F4F]/50"
           }`}
+          style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
         >
-          ACADEMY
+          Academy
         </span>
       </div>
     </Link>

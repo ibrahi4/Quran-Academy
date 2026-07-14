@@ -54,10 +54,10 @@ export class BookingsService {
     // TRIAL_STUDENT with no completed bookings → still can rebook
     if (user.role === 'TRIAL_STUDENT') {
       return {
-        available: true,
+        available: false,
         exists: true,
         isTrial: true,
-        message: 'Welcome back! Your existing trial account will be used.',
+        message: 'You have already booked a free trial with this email. Please check your inbox for the setup link, or contact our support team for assistance.',
       };
     }
 
@@ -89,7 +89,12 @@ export class BookingsService {
       include: { student: true },
     });
 
-    if (existingUser && existingUser.role !== 'TRIAL_STUDENT') {
+    if (existingUser) {
+      if (existingUser.role === 'TRIAL_STUDENT') {
+        throw new ConflictException(
+          'You have already booked a free trial with this email. Please check your inbox for the setup link, or contact our support team for assistance.',
+        );
+      }
       throw new ConflictException(
         'This email is already registered. Please login to your account to book a session.',
       );
@@ -104,68 +109,43 @@ export class BookingsService {
     const lastName = lastParts.join(' ') || firstName;
 
     const result = await this.prisma.$transaction(async (tx) => {
-      let user = existingUser;
-      let isNewUser = false;
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          firstName,
+          lastName,
+          phone: dto.phone?.trim() || null,
+          role: Role.TRIAL_STUDENT,
+          mustChangePassword: true,
+          setupToken,
+          setupTokenExpiresAt,
+          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+          isActive: true,
+        },
+      });
 
-      if (!user) {
-        user = await tx.user.create({
-          data: {
-            email,
-            password: hashedPassword,
-            firstName,
-            lastName,
-            phone: dto.phone?.trim() || null,
-            role: Role.TRIAL_STUDENT,
-            mustChangePassword: true,
-            setupToken,
-            setupTokenExpiresAt,
-            trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            isActive: true,
-          },
-          include: { student: true },
-        });
-        isNewUser = true;
-        this.logger.log(`Auto-created TRIAL_STUDENT: ${email}`);
-      } else {
-        // Refresh setup token for returning trial user
-        user = await tx.user.update({
-          where: { id: existingUser!.id },
-          data: {
-            setupToken,
-            setupTokenExpiresAt,
-            mustChangePassword: true,
-            phone: dto.phone?.trim() || existingUser!.phone,
-          },
-          include: { student: true },
-        });
-      }
+      this.logger.log(`Auto-created TRIAL_STUDENT: ${email}`);
 
-      // Create or update student with all new fields
-      let student = user.student;
-      const studentData: any = {
-        country: dto.country,
-        timezone: dto.timezone,
-        dateOfBirth: dobDate,
-        age: calculatedAge,
-        gender: dto.gender,
-        nativeLanguage: dto.nativeLanguage,
-        level: dto.currentLevel || 'BEGINNER',
-        source: dto.serviceSlug,
-        parentName: dto.parentName,
-        parentPhone: dto.parentPhone,
-        parentRelation: dto.parentRelation,
-      };
+      // Create student profile
+      const student = await tx.student.create({
+        data: {
+          userId: user.id,
+          country: dto.country,
+          timezone: dto.timezone,
+          dateOfBirth: dobDate,
+          age: calculatedAge,
+          gender: dto.gender,
+          nativeLanguage: dto.nativeLanguage,
+          level: dto.currentLevel || 'BEGINNER',
+          source: dto.serviceSlug,
+          parentName: dto.parentName,
+          parentPhone: dto.parentPhone,
+          parentRelation: dto.parentRelation,
+          goals: [],
+        },
+      });
 
-      if (!student) {
-        student = await tx.student.create({
-          data: { userId: user.id, ...studentData, goals: [] },
-        });
-      } else {
-        student = await tx.student.update({
-          where: { id: student.id },
-          data: studentData,
-        });
-      }
 
       // Create booking with all new fields
       const booking = await tx.booking.create({
@@ -192,7 +172,7 @@ export class BookingsService {
         },
       });
 
-      return { booking, user, isNewUser };
+      return { booking, user };
     });
 
     // Send emails async
@@ -212,9 +192,7 @@ export class BookingsService {
     return {
       ...result.booking,
       age: calculatedAge,
-      message: result.isNewUser
-        ? 'Booking created! Check your email to set up your account.'
-        : 'Booking updated! Check your email for the new setup link.',
+      message: 'Booking created! Check your email to set up your account.',
     };
   }
 

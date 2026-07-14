@@ -1,4 +1,4 @@
-# Ibrahim Quran Academy - Project Context
+# Tajwedo Academy - Project Context
 ## Monorepo: frontend/ (Next.js 15) + backend/ (NestJS) + packages/shared-types/
 ## Frontend: localhost:3000 | Next.js + next-intl (en/ar) + Tailwind v4 + shadcn/ui
 ## Backend: localhost:4000 | NestJS + Prisma + PostgreSQL 18 + JWT Auth
